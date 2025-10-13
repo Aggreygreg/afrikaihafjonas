@@ -1,0 +1,16 @@
+# Core Dependencies
+django
+psycopg2-binary
+python-dotenv
+gunicorn
+
+# Tools
+pip-tools
+
+# Frontend
+django-tailwind
+django-htmx
+
+# Testing
+pytest
+pytest-django
