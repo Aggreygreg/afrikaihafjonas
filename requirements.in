@@ -3,6 +3,7 @@ django
 psycopg2-binary
 python-dotenv
 gunicorn
+dj-database-url
 
 # Tools
 pip-tools
