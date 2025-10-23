@@ -3,11 +3,11 @@
 {% block content %}
 <div 
     class="relative h-[60vh] bg-cover bg-center flex items-center justify-center text-white" 
-    style="background-image: url('https://images.unsplash.com/photo-1521590832167-7ce63300f797?q=80&w=2070');">
+    style="{% if config.hero_image %}background-image: url('{{ config.hero_image.url }}');{% else %}background-color: #333;{% endif %}">
     
     <div class="absolute inset-0 bg-black opacity-50"></div> <div class="relative z-10 text-center px-4">
-        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">Authentic African Braiding in the Heart of Budapest</h1>
-        <p class="mt-4 text-lg md:text-xl max-w-2xl mx-auto">Experience timeless beauty and intricate designs, handcrafted with passion and tradition.</p>
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">{{ config.hero_title }}</h1>
+        <p class="mt-4 text-lg md:text-xl max-w-2xl mx-auto">{{ config.hero_subtitle }}</p>
         <a href="#services" class="mt-8 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">
             Book Now
         </a>
@@ -25,7 +25,7 @@
                         <div class="h-48 bg-gray-200"></div>
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-800">{{ service.title }}</h3>
-                            <p class="text-gray-600 mt-2">Starting at €{{ service.base_price }}</p>
+                            <p class="text-gray-600 mt-2">Starting at {{ service.base_price|floatformat:0 }} Ft</p>
                         </div>
                     </div>
                 {% endfor %}
