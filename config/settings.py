@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'tailwind',
     'theme', # Tailwind theme app
     'django_htmx',
+    'solo', # For site configuration
 
     # Local Apps
     'apps.users',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'apps.bookings',
     'apps.payments',
     'apps.reviews',
+    'apps.site_config', # New config app
 ]
 
 MIDDLEWARE = [
@@ -99,10 +101,19 @@ USE_I18N = True
 USE_TZ = True
 
 
+# # Static files (CSS, JavaScript, Images)
+# STATIC_URL = 'static/'
+# # Point to the root static/ folder for project-wide static files
+# STATICFILES_DIRS = [ BASE_DIR / "static" ]
+
 # Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
 STATIC_URL = 'static/'
-# Point to the root static/ folder for project-wide static files
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
+
+# Media files (User-uploaded content)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
 
 # Default primary key field type
