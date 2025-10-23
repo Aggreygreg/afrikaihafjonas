@@ -1,21 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold">Welcome to the Homepage</h1>
-    <p class="mt-2">This is the basic homepage for the Afrikai Hajfonás platform.</p>
+<div 
+    class="relative h-[60vh] bg-cover bg-center flex items-center justify-center text-white" 
+    style="background-image: url('https://images.unsplash.com/photo-1521590832167-7ce63300f797?q=80&w=2070');">
+    
+    <div class="absolute inset-0 bg-black opacity-50"></div> <div class="relative z-10 text-center px-4">
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">Authentic African Braiding in the Heart of Budapest</h1>
+        <p class="mt-4 text-lg md:text-xl max-w-2xl mx-auto">Experience timeless beauty and intricate designs, handcrafted with passion and tradition.</p>
+        <a href="#services" class="mt-8 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">
+            Book Now
+        </a>
+    </div>
+</div>
 
+
+<div id="services" class="container mx-auto p-4 md:p-8">
     <div class="mt-8">
-        <h2 class="text-2xl font-bold">Our Services</h2>
-        {% if services %}
-            <ul>
+        <h2 class="text-3xl font-bold text-center text-gray-800">Popular Services</h2>
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% if services %}
                 {% for service in services %}
-                    <li class="mt-2 p-2 border rounded">{{ service.title }} - €{{ service.base_price }}</li>
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <div class="h-48 bg-gray-200"></div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800">{{ service.title }}</h3>
+                            <p class="text-gray-600 mt-2">Starting at €{{ service.base_price }}</p>
+                        </div>
+                    </div>
                 {% endfor %}
-            </ul>
-        {% else %}
-            <p>No services have been added yet. Please add some in the admin panel.</p>
-        {% endif %}
+            {% else %}
+                <p class="col-span-full text-center text-gray-600">No services have been added yet. Please add some in the admin panel.</p>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

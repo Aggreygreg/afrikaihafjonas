@@ -2,23 +2,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF--8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Afrikai Hajfonás</title>
     {% tailwind_css %}
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-sans">
     
-    <header>
-        </header>
+    <header class="bg-white shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="/" class="text-xl font-bold text-gray-800">Afrikai Hajfonás</a>
+            <div class="hidden md:flex space-x-6">
+                <a href="#" class="text-gray-600 hover:text-gray-800">Services</a>
+                <a href="#" class="text-gray-600 hover:text-gray-800">Providers</a>
+                <a href="#" class="text-gray-600 hover:text-gray-800">FAQ</a>
+                <a href="#" class="text-gray-600 hover:text-gray-800">About</a>
+                <a href="#" class="text-gray-600 hover:text-gray-800">Contact</a>
+            </div>
+            <div>
+                <a href="#" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Login / Sign Up
+                </a>
+            </div>
+        </nav>
+    </header>
 
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    <footer>
-        </footer>
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-4">
+            <p class="text-center">&copy; 2025 Afrikai Hajfonás. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8RMhPG" crossorigin="anonymous"></script>
 </body>
