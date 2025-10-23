@@ -32,7 +32,7 @@ class Booking(models.Model):
 
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    total_price = models.DecimalField(max_digits=8, decimal_places=2)
+    total_price = models.DecimalField(max_digits=8, decimal_places=0)
     status = models.CharField(
         max_length=50,
         choices=BookingStatus.choices,

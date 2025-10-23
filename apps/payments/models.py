@@ -15,7 +15,7 @@ class Payment(models.Model):
         on_delete=models.PROTECT,
         related_name="payments"
     )
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
+    amount = models.DecimalField(max_digits=8, decimal_places=0)
     gateway = models.CharField(max_length=50, help_text="e.g., Stripe, PayPal, Cash")
     gateway_transaction_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
     status = models.CharField(

@@ -4,7 +4,7 @@ from apps.providers.models import Provider
 class Service(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
-    base_price = models.DecimalField(max_digits=8, decimal_places=2)
+    base_price = models.DecimalField(max_digits=8, decimal_places=0)
     duration_minutes = models.PositiveIntegerField(
         help_text="Duration of the service in minutes."
     )
