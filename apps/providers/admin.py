@@ -14,3 +14,9 @@ class ProviderAdmin(admin.ModelAdmin):
     list_display = ('display_name', 'user')
     search_fields = ('display_name', 'user__username')
     inlines = [AvailabilityRuleInline, TimeSlotOverrideInline]
+
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'display_name', 'bio', 'profile_image')
+        }),
+    )
