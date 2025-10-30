@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Afrikai Hajfonás</title>
+
+  <!-- Tailwind CDN custom config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { 500: '#2563eb', 600: '#1d4ed8', 700: '#1e40af' },
+            footer: '#272e4b'
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Smooth scrolling for modern browsers */
+    html { scroll-behavior: smooth; }
+
+    /* Slide animation for mobile menu panel */
+    @keyframes slideDown {
+      from { transform: translateY(-8px); opacity: 0; }
+      to   { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slideDown { animation: slideDown 260ms cubic-bezier(.2,.9,.2,1); }
+
+    /* Prevent background scroll while mobile menu open */
+    .no-scroll { overflow: hidden !important; height: 100%; }
+
+    /* Simple focus-outline helper */
+    .focus-outline:focus { outline: 3px solid rgba(37,99,235,0.18); outline-offset: 3px; }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-900">
+
+  <!-- HEADER / NAV -->
+  <header class="bg-white shadow-md sticky top-0 z-50">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center relative" aria-label="Primary navigation">
+      <!-- Logo -->
+      <a href="/" class="text-xl font-bold text-gray-800">Afrikai Hajfonás</a>
+
+      <!-- Desktop nav (visible md and up) -->
+      <div class="hidden md:flex space-x-6 items-center">
+        <a href="#" class="text-gray-600 hover:text-gray-800">Services</a>
+        <a href="#" class="text-gray-600 hover:text-gray-800">Providers</a>
+        <!-- About & Contact visible on desktop -->
+        <a href="#about-section" class="text-gray-600 hover:text-gray-800">About</a>
+        <a href="#contact-section" class="text-gray-600 hover:text-gray-800">Contact</a>
+        <a href="#faq" class="text-gray-600 hover:text-gray-800">FAQ</a>
+      </div>
+
+      <!-- Right side: login (desktop) + hamburger (mobile) -->
+      <div class="flex items-center">
+        <a href="#" class="hidden md:inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition transform hover:scale-105">
+          Login / Sign Up
+        </a>
+
+        <!-- Hamburger (mobile only) -->
+        <button id="menu-toggle"
+                aria-controls="mobile-overlay"
+                aria-expanded="false"
+                class="md:hidden ml-4 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 focus-outline"
+                aria-label="Open menu">
+          <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- MOBILE OVERLAY + MENU (hidden by default) -->
+    <div id="mobile-overlay" class="hidden fixed inset-0 z-50" aria-hidden="true">
+      <!-- backdrop -->
+      <div id="mobile-backdrop" class="absolute inset-0 bg-black/55 backdrop-blur-sm"></div>
+
+      <!-- centered panel -->
+      <div class="relative max-w-md mx-auto mt-8 px-4">
+        <div id="mobile-menu-panel"
+             class="bg-white rounded-xl shadow-xl ring-1 ring-black/5 overflow-hidden animate-slideDown"
+             role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title">
+          <div class="px-6 py-6">
+            <div class="flex items-center justify-between">
+              <h3 id="mobile-menu-title" class="text-lg font-semibold text-gray-800">Menu</h3>
+              <button id="mobile-menu-close" class="p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus-outline" aria-label="Close menu">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- MOBILE MENU LINKS
+                 NOTE: On mobile we intentionally omit About & Contact to keep menu concise -->
+            <nav class="mt-4 flex flex-col space-y-3">
+              <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">Services</a>
+              <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">Providers</a>
+              <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">FAQ</a> <!-- On mobile it will link to the real FAQ page -->
+
+              <div class="pt-4 border-t border-gray-100">
+                <a href="#" class="block w-full text-center bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold transition">
+                  Login / Sign Up
+                </a>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- invisible catch to close when clicking outside -->
+      <button id="mobile-close-catch" aria-hidden="true" class="absolute inset-0 bg-transparent"></button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <!-- FOOTER (About & Contact anchors live here) -->
+  <footer class="mt-16 text-white" style="background-color: #272e4b;">
+    <div class="max-w-7xl mx-auto px-6 py-20">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 text-gray-300 text-center md:text-left mb-16">
+
+        <!-- ABOUT -->
+        <div id="about-section" tabindex="-1">
+          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">About</h3>
+          <ul class="space-y-4 text-sm">
+            <li><a href="#" class="hover:text-pink-400 transition">About Afrikai Hajfonás</a></li>
+            <li><a href="#" class="hover:text-pink-400 transition">How To Videos</a></li>
+          </ul>
+        </div>
+
+        <!-- CONTACT -->
+        <div id="contact-section" tabindex="-1">
+          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">Contact Info</h3>
+          <ul class="space-y-4 text-sm">
+            {% if config.salon_address %}
+            <li class="flex justify-center md:justify-start gap-3 hover:text-pink-400">
+              <i data-lucide="map-pin" class="w-5 h-5 text-pink-400"></i>
+              <span>{{ config.salon_address }}</span>
+            </li>
+            {% endif %}
+            {% if config.salon_phone %}
+            <li class="flex justify-center md:justify-start gap-3 hover:text-pink-400">
+              <i data-lucide="phone" class="w-5 h-5 text-pink-400"></i>
+              <a href="tel:{{ config.salon_phone }}">{{ config.salon_phone }}</a>
+            </li>
+            {% endif %}
+            {% if config.salon_email %}
+            <li class="flex justify-center md:justify-start gap-3 hover:text-pink-400">
+              <i data-lucide="mail" class="w-5 h-5 text-pink-400"></i>
+              <a href="mailto:{{ config.salon_email }}">{{ config.salon_email }}</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- FOLLOW US -->
+        <div>
+          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">Follow Us</h3>
+          <ul class="space-y-4 text-sm">
+            {% if config.social_instagram %}
+            <li class="flex justify-center md:justify-start gap-3 hover:text-pink-400">
+              <i data-lucide="instagram" class="w-5 h-5 text-pink-400"></i>
+              <a href="{{ config.social_instagram }}">Instagram</a>
+            </li>
+            {% endif %}
+            {% if config.social_facebook %}
+            <li class="flex justify-center md:justify-start gap-3 hover:text-pink-400">
+              <i data-lucide="facebook" class="w-5 h-5 text-pink-400"></i>
+              <a href="{{ config.social_facebook }}">Facebook</a>
+            </li>
+            {% endif %}
+            {% if config.social_tiktok %}
+            <li class="flex justify-center md:justify-start gap-3 hover:text-pink-400">
+              <i data-lucide="video" class="w-5 h-5 text-pink-400"></i>
+              <a href="{{ config.social_tiktok }}">TikTok</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+
+        <!-- LEGAL -->
+        <div id="faq">
+          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">Legal / Informational Links</h3>
+          <ul class="space-y-4 text-sm">
+            <li><a href="#" class="hover:text-pink-400 transition">FAQs</a></li>
+            <li><a href="#" class="hover:text-pink-400 transition">Terms & Conditions</a></li>
+            <li><a href="#" class="hover:text-pink-400 transition">Privacy Policy</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="border-t border-gray-800 pt-10 text-center text-sm">
+        <p class="text-gray-300">
+          &copy; 2025 Afrikai Hajfonás - All rights reserved.
+          <p><span class="italic text-pink-400">Braids that rhyme with time.</span></p>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ICONS + SCRIPTS -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script> lucide.createIcons(); </script>
+
+  <script>
+    (function() {
+      const menuToggle = document.getElementById('menu-toggle');
+      const overlay = document.getElementById('mobile-overlay');
+      const backdrop = document.getElementById('mobile-backdrop');
+      const panelClose = document.getElementById('mobile-menu-close');
+      const closeCatch = document.getElementById('mobile-close-catch');
+
+      function openMenu() {
+        overlay.classList.remove('hidden');
+        document.documentElement.classList.add('no-scroll'); // prevent background scroll
+        menuToggle.setAttribute('aria-expanded', 'true');
+        // focus first link inside panel
+        const firstLink = overlay.querySelector('nav a');
+        if (firstLink) firstLink.focus();
+      }
+
+      function closeMenu() {
+        overlay.classList.add('hidden');
+        document.documentElement.classList.remove('no-scroll');
+        menuToggle.setAttribute('aria-expanded', 'false');
+        menuToggle.focus();
+      }
+
+      // Toggle handler
+      menuToggle.addEventListener('click', function (e) {
+        const isHidden = overlay.classList.contains('hidden');
+        if (isHidden) openMenu(); else closeMenu();
+      });
+
+      // Close interactions
+      backdrop && backdrop.addEventListener('click', closeMenu);
+      closeCatch && closeCatch.addEventListener('click', closeMenu);
+      panelClose && panelClose.addEventListener('click', closeMenu);
+
+      // Escape key to close
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !overlay.classList.contains('hidden')) closeMenu();
+      });
+
+      // Smooth scroll with header offset when anchor links are clicked
+      (function () {
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.getBoundingClientRect().height : 0;
+
+        document.addEventListener('click', function (e) {
+          const a = e.target.closest('a[href^="#"]');
+          if (!a) return;
+          const hash = a.getAttribute('href');
+          if (!hash || hash === '#') return;
+          const target = document.querySelector(hash);
+          if (!target) return;
+
+          // If mobile menu is open, close it first
+          if (!overlay.classList.contains('hidden')) closeMenu();
+
+          // Prevent default and perform offset scroll
+          e.preventDefault();
+          const rect = target.getBoundingClientRect();
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const targetY = rect.top + scrollTop - headerHeight - 12;
+
+          window.scrollTo({ top: targetY, behavior: 'smooth' });
+
+          // Focus the target for accessibility
+          setTimeout(() => {
+            target.setAttribute('tabindex', '-1');
+            target.focus({ preventScroll: true });
+          }, 400);
+        });
+      })();
+
+    })();
+  </script>
+</body>
+</html>

@@ -24,8 +24,11 @@ django==4.2.25
     #   -r requirements.in
     #   dj-database-url
     #   django-htmx
+    #   django-solo
     #   django-tailwind
 django-htmx==1.26.0
+    # via -r requirements.in
+django-solo==2.4.0
     # via -r requirements.in
 django-tailwind==3.6.0
     # via -r requirements.in
@@ -38,6 +41,8 @@ packaging==25.0
     #   build
     #   gunicorn
     #   pytest
+pillow==12.0.0
+    # via -r requirements.in
 pip-tools==7.5.1
     # via -r requirements.in
 pluggy==1.6.0

@@ -7,10 +7,14 @@ dj-database-url
 
 # Tools
 pip-tools
+pillow
 
 # Frontend
 django-tailwind
 django-htmx
+
+# Site Config
+django-solo
 
 # Testing
 pytest
