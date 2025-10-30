@@ -10,6 +10,6 @@ def homepage_view(request):
     
     context = {
         "services": services,
-        "config": config,
+        # "config": config,  # No longer needed as it's provided by the context processor
     }
     return render(request, "home.html", context)

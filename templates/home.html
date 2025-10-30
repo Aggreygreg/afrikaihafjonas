@@ -19,24 +19,22 @@
   <div class="mt-8">
     <h2 class="text-3xl font-bold text-center text-gray-800">Popular Services</h2>
     <div class="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {% if services %}
-        {% for service in services %}
-          <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
-            
-            <div class="h-48 bg-gray-200"></div>
-            
-            <div class="p-6">
-              <h3 class="text-xl font-bold text-gray-800">{{ service.title }}</h3>
-              <p class="text-gray-600 mt-2">Starting at {{ service.base_price|floatformat:0 }} Ft</p>
-            </div>
-          </div>
-        {% endfor %}
-      {% else %}
-        <p class="col-span-full text-center text-gray-600">
-          No services have been added yet. Please add some in the admin panel.
-        </p>
-      {% endif %}
-    </div>
+          {% if services %}
+            {% for service in services %}
+              <a href="{% url 'services:service_detail' pk=service.pk %}" class="block bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
+                <div class="h-48 bg-gray-200"></div>
+                <div class="p-6">
+                  <h3 class="text-xl font-bold text-gray-800">{{ service.title }}</h3>
+                  <p class="text-gray-600 mt-2">Starting at {{ service.base_price|floatformat:0 }} Ft</p>
+                </div>
+              </a>
+            {% endfor %}
+          {% else %}
+            <p class="col-span-full text-center text-gray-600">
+              No services have been added yet. Please add some in the admin panel.
+            </p>
+          {% endif %}
+        </div>
   </div>
 </div>
 
