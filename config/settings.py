@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'apps.providers',
     'apps.bookings',
     'apps.payments',
-    'apps.reviews',
+    # 'apps.reviews',
     'apps.site_config', # New config app
 ]
 
