@@ -1,19 +1,19 @@
 from django.contrib import admin
-from .models import Service, ServiceCategory, ServiceImage, ServiceOption
+from .models import Service, ParentCategory, ServiceCategory, ServiceImage, ServiceOption
 
 class ServiceImageInline(admin.TabularInline):
     model = ServiceImage
-    extra = 1 # Show one extra blank form for images
+    extra = 1 
     ordering = ('order',)
 
 class ServiceOptionInline(admin.TabularInline):
     model = ServiceOption
-    extra = 1 # Show one extra blank form for options
+    extra = 1 
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'base_price', 'duration_minutes', 'is_popular')
-    list_filter = ('category', 'is_popular', 'providers')
+    list_filter = ('category__parent', 'category', 'is_popular', 'providers') # Added parent filter
     search_fields = ('title', 'description')
     filter_horizontal = ('providers',)
     inlines = [ServiceImageInline, ServiceOptionInline]
@@ -36,7 +36,14 @@ class ServiceAdmin(admin.ModelAdmin):
         }),
     )
 
-@admin.register(ServiceCategory)
-class ServiceCategoryAdmin(admin.ModelAdmin):
+@admin.register(ParentCategory)
+class ParentCategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
+
+@admin.register(ServiceCategory)
+class ServiceCategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'parent') # Show parent in the list
+    list_filter = ('parent',) # Allow filtering by parent
+    search_fields = ('name',)
+    ordering = ('parent', 'name')

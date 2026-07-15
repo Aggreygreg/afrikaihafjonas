@@ -1,17 +1,36 @@
 from django.db import models
 from apps.providers.models import Provider
 
-class ServiceCategory(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+class ParentCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True, help_text="e.g., 'Women's Braids', 'Men's Braids'")
     
     class Meta:
-        verbose_name = "Service Category"
-        verbose_name_plural = "Service Categories"
+        verbose_name = "Parent Category"
+        verbose_name_plural = "Parent Categories"
         ordering = ['name']
 
     def __str__(self):
         return self.name
 
+class ServiceCategory(models.Model):
+    parent = models.ForeignKey(
+        ParentCategory,
+        on_delete=models.CASCADE,
+        related_name="subcategories",
+        null=True # Allow for now
+    )
+    name = models.CharField(max_length=100, unique=True)
+    
+    class Meta:
+        verbose_name = "Service Category"
+        verbose_name_plural = "Service Categories"
+        ordering = ['parent', 'name']
+
+    def __str__(self):
+        if self.parent:
+            return f"{self.parent.name} - {self.name}"
+        return self.name 
+    
 class Service(models.Model):
     category = models.ForeignKey(
         ServiceCategory,
@@ -20,6 +39,7 @@ class Service(models.Model):
         blank=True
     )
     title = models.CharField(max_length=200)
+    # ... (rest of Service model remains unchanged) ...
     description = models.TextField()
     base_price = models.DecimalField(max_digits=8, decimal_places=0)
     duration_minutes = models.PositiveIntegerField(
@@ -55,6 +75,7 @@ class Service(models.Model):
     def __str__(self):
         return self.title
 
+# ... (ServiceImage and ServiceOption models remain unchanged) ...
 class ServiceImage(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='service_images/')
