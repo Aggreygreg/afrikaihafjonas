@@ -12,7 +12,13 @@ class Provider(models.Model):
     )
     display_name = models.CharField(max_length=100)
     bio = models.TextField(blank=True)
-    # profile_image_url will be handled by an ImageField in a later step
+    display_name = models.CharField(max_length=100)
+    bio = models.TextField(blank=True)
+    profile_image = models.ImageField(
+        upload_to='provider_images/',
+        blank=True,
+        null=True
+    )# profile_image_url handled by an ImageField
 
     class Meta:
         verbose_name = "Provider"
