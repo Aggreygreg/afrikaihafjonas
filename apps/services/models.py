@@ -2,7 +2,7 @@ from django.db import models
 from apps.providers.models import Provider
 
 class ParentCategory(models.Model):
-    name = models.CharField(max_length=100, unique=True, help_text="e.g., 'Women's Braids', 'Men's Braids'")
+    name = models.CharField(max_length=100, unique=True, help_text="e.g., 'Women's Braids', 'Men's Braids', 'Children's Braids'")
     
     class Meta:
         verbose_name = "Parent Category"
@@ -17,7 +17,7 @@ class ServiceCategory(models.Model):
         ParentCategory,
         on_delete=models.CASCADE,
         related_name="subcategories",
-        null=True # Allow for now
+        null=True
     )
     name = models.CharField(max_length=100, unique=True)
     
@@ -29,8 +29,8 @@ class ServiceCategory(models.Model):
     def __str__(self):
         if self.parent:
             return f"{self.parent.name} - {self.name}"
-        return self.name 
-    
+        return self.name
+
 class Service(models.Model):
     category = models.ForeignKey(
         ServiceCategory,
@@ -39,8 +39,26 @@ class Service(models.Model):
         blank=True
     )
     title = models.CharField(max_length=200)
-    # ... (rest of Service model remains unchanged) ...
     description = models.TextField()
+    
+    # --- NEW SUITABILITY & AGE FIELDS ---
+    target_audience = models.CharField(
+        max_length=50,
+        choices=[('Adults', 'Adults (16+)'), ('Children', 'Children (8-15)'), ('Everyone', 'Everyone (8+)')],
+        default='Adults',
+        help_text="Defines the strict age policy for this service."
+    )
+    best_for_hair_types = models.CharField(
+        max_length=255, 
+        blank=True, 
+        help_text="e.g., 'Medium Hair, Thick Hair'"
+    )
+    suitability_warning = models.TextField(
+        blank=True,
+        help_text="e.g., 'This hairstyle may place additional tension on very thin hair.'"
+    )
+    # ------------------------------------
+
     base_price = models.DecimalField(max_digits=8, decimal_places=0)
     duration_minutes = models.PositiveIntegerField(
         help_text="Duration of the service in minutes."
@@ -52,20 +70,8 @@ class Service(models.Model):
         help_text="Providers who can perform this service."
     )
     
-    # New fields
-    video_url = models.URLField(
-        blank=True,
-        help_text="Optional: A link to a TikTok, Instagram, or Google Drive video."
-    )
-    is_popular = models.BooleanField(
-        default=False,
-        help_text="Check this to feature the service on the homepage."
-    )
-
-    # Per-service payment options
-    allow_full_payment = models.BooleanField(default=True)
-    allow_deposit_payment = models.BooleanField(default=True)
-    allow_pay_later = models.BooleanField(default=False)
+    video_url = models.URLField(blank=True, help_text="Optional: A link to a TikTok, Instagram, or Google Drive video.")
+    is_popular = models.BooleanField(default=False, help_text="Check this to feature the service on the homepage.")
 
     class Meta:
         verbose_name = "Service"
@@ -75,14 +81,11 @@ class Service(models.Model):
     def __str__(self):
         return self.title
 
-# ... (ServiceImage and ServiceOption models remain unchanged) ...
+# ... (ServiceImage and ServiceOption models remain unchanged for now) ...
 class ServiceImage(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='service_images/')
-    order = models.PositiveSmallIntegerField(
-        default=0,
-        help_text="Images will be sorted by this number (0 is first)."
-    )
+    order = models.PositiveSmallIntegerField(default=0, help_text="Images will be sorted by this number (0 is first).")
 
     class Meta:
         verbose_name = "Service Image"
@@ -91,20 +94,9 @@ class ServiceImage(models.Model):
 
 class ServiceOption(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='options')
-    group_name = models.CharField(
-        max_length=100,
-        help_text="e.g., 'Color', 'Length', 'Add-on'"
-    )
-    value = models.CharField(
-        max_length=100,
-        help_text="e.g., 'Black', '16 inches', 'Deep Conditioning'"
-    )
-    additional_price = models.DecimalField(
-        max_digits=8,
-        decimal_places=0,
-        default=0,
-        help_text="Added to the base price if this option is selected."
-    )
+    group_name = models.CharField(max_length=100, help_text="e.g., 'Color', 'Length', 'Add-on'")
+    value = models.CharField(max_length=100, help_text="e.g., 'Black', '16 inches', 'Deep Conditioning'")
+    additional_price = models.DecimalField(max_digits=8, decimal_places=0, default=0, help_text="Added to base price.")
 
     class Meta:
         verbose_name = "Service Option"
