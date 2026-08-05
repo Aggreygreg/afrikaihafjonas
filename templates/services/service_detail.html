@@ -67,12 +67,14 @@
             </div>
             {% endif %}
 
+            <!-- Book Now Button (CONNECTED TO BOOKING APPS) -->
             <div class="mt-8 pt-6 border-t">
-                <a href="#" class="w-full text-center block bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">
+                <a href="{% url 'bookings:book_service' service_pk=service.pk %}" 
+                   class="w-full text-center block bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300">
                     Book This Service
                 </a>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
+{% endblock %}`

@@ -12,8 +12,8 @@ class ServiceOptionInline(admin.TabularInline):
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'base_price', 'duration_minutes', 'is_popular')
-    list_filter = ('category__parent', 'category', 'is_popular', 'providers') # Added parent filter
+    list_display = ('title', 'category', 'target_audience', 'base_price', 'duration_minutes', 'is_popular')
+    list_filter = ('category__parent', 'category', 'target_audience', 'is_popular')
     search_fields = ('title', 'description')
     filter_horizontal = ('providers',)
     inlines = [ServiceImageInline, ServiceOptionInline]
@@ -22,14 +22,14 @@ class ServiceAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('title', 'description', 'category', 'is_popular')
         }),
+        ('Suitability & Requirements', {
+            'fields': ('target_audience', 'best_for_hair_types', 'suitability_warning')
+        }),
         ('Pricing & Duration', {
             'fields': ('base_price', 'duration_minutes')
         }),
         ('Providers', {
             'fields': ('providers',)
-        }),
-        ('Payment Options', {
-            'fields': ('allow_full_payment', 'allow_deposit_payment', 'allow_pay_later')
         }),
         ('Optional Video', {
             'fields': ('video_url',)

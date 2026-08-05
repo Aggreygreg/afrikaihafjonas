@@ -23,6 +23,7 @@ from .views import homepage_view
 urlpatterns = [
     path('', homepage_view, name='homepage'),
     path('services/', include('apps.services.urls', namespace='services')),
+    path('bookings/', include('apps.bookings.urls', namespace='bookings')),
     path('admin/', admin.site.urls),
 ]
 
