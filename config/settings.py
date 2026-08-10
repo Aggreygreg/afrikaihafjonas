@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'apps.services',
     'apps.providers',
     'apps.bookings',
-    'apps.payments',
+    # 'apps.payments',  # DECOMMISSIONED — manual bank transfers only
     # 'apps.reviews',
     'apps.site_config', # New config app
 ]
@@ -84,6 +84,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': dj_database_url.config(conn_max_age=600, ssl_require=False)
 }
+
+# Email — Console backend for dev (prints to terminal)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@afrikaihajfonas.hu'
 
 
 # Password validation
