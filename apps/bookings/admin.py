@@ -1,21 +1,63 @@
 from django.contrib import admin
-from .models import Booking
 
-@admin.register(Booking)
-class BookingAdmin(admin.ModelAdmin):
+from .models import AppointmentRequest, RefundQueue
+
+
+@admin.register(AppointmentRequest)
+class AppointmentRequestAdmin(admin.ModelAdmin):
     list_display = (
-        'booking_code',
-        'service',
-        'client',
-        'provider',
-        'start_time',
-        'status',
+        "payment_reference",
+        "client_name",
+        "service",
+        "provider",
+        "target_date",
+        "target_time",
+        "status",
+        "payment_status",
+        "held_until",
     )
-    list_filter = ('status', 'provider', 'start_time')
+    list_filter = ("status", "payment_status", "provider", "target_date")
     search_fields = (
-        'client__username',
-        'provider__display_name',
-        'service__title',
-        'booking_code',
+        "payment_reference",
+        "client_name",
+        "client_email",
+        "client_phone",
     )
-    readonly_fields = ('booking_code', 'created_at')
+    readonly_fields = (
+        "payment_reference",
+        "created_at",
+        "held_until",
+        "selected_options",
+    )
+    date_hierarchy = "target_date"
+    ordering = ("-created_at",)
+
+
+@admin.register(RefundQueue)
+class RefundQueueAdmin(admin.ModelAdmin):
+    """
+    Admin view filtered to only rejected/expired requests.
+    Used by salon owner to track who needs a manual bank-transfer refund.
+    """
+    list_display = (
+        "payment_reference",
+        "client_name",
+        "client_email",
+        "service",
+        "deposit_amount",
+        "payment_method",
+        "status",
+        "created_at",
+    )
+    list_filter = ("status", "payment_method")
+    search_fields = (
+        "payment_reference",
+        "client_name",
+        "client_email",
+    )
+    readonly_fields = (
+        "payment_reference",
+        "created_at",
+        "held_until",
+    )
+    ordering = ("-created_at",)
