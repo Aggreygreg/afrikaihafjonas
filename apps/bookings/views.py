@@ -47,6 +47,7 @@ def consult_wizard_view(request, service_pk):
             "today": date.today().isoformat(),
             "current_step": 1,
             "deposit": calculate_deposit(service.discounted_price),
+            "discount_amount": service.base_price - service.discounted_price,
         }
         return render(request, "bookings/consult_wizard.html", context)
 
@@ -69,6 +70,7 @@ def consult_wizard_view(request, service_pk):
             "today": date.today().isoformat(),
             "current_step": 2,
             "deposit": calculate_deposit(service.discounted_price),
+            "discount_amount": service.base_price - service.discounted_price,
         }
         return render(request, "bookings/partials/wizard_step_2.html", context)
 
@@ -86,6 +88,7 @@ def consult_wizard_view(request, service_pk):
             "selected_option_ids": saved_option_ids,
             "current_step": 1,
             "deposit": calculate_deposit(service.discounted_price),
+            "discount_amount": service.base_price - service.discounted_price,
         }
         return render(request, "bookings/partials/wizard_step_1.html", context)
 

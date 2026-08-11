@@ -24,7 +24,7 @@
     {% if service.has_discount %}
     <div class="flex justify-between text-sm text-green-600">
         <span>{% trans "Discount" %} ({{ service.discount_percentage }}%)</span>
-        <span id="summary-discount">-{{ service.base_price|floatformat:0 }} Ft</span>
+        <span id="summary-discount">-{{ discount_amount|floatformat:0 }} Ft</span>
     </div>
     {% endif %}
 
