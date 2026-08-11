@@ -46,3 +46,8 @@ def load_available_slots_view(request):
         'slots': slots,
     }
     return render(request, 'bookings/partials/time_slots.html', context)
+
+
+def booking_status_placeholder_view(request):
+    """Placeholder for the Guest Lookup Page — real implementation in Phase 4."""
+    return render(request, 'bookings/booking_status_placeholder.html')

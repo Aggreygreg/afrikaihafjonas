@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {% block content %}
 <div class="bg-gray-50 min-h-screen">
@@ -13,7 +14,7 @@
         <!-- Top Search & Gender section -->
         <div class="bg-white border-b border-gray-100 py-10 shadow-sm">
             <div class="container mx-auto px-6 max-w-7xl">
-                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight text-center md:text-left mb-6">Explore Braid Styles</h1>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight text-center md:text-left mb-6">{% trans "Explore Braid Styles" %}</h1>
                 
                 <!-- Hidden input to track gender state -->
                 <input type="hidden" name="gender" id="gender-input" value="{{ active_gender }}">
@@ -25,12 +26,17 @@
                         <button type="button" 
                                 onclick="switchGender('Women\'s Braids')"
                                 class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {% if active_gender == 'Women\'s Braids' %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-                            Women's Braids
+                            {% trans "Women's Braids" %}
                         </button>
                         <button type="button" 
                                 onclick="switchGender('Men\'s Braids')"
                                 class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {% if active_gender == 'Men\'s Braids' %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-                            Men's Braids
+                            {% trans "Men's Braids" %}
+                        </button>
+                        <button type="button" 
+                                onclick="switchGender('Children\'s Braids')"
+                                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {% if active_gender == 'Children\'s Braids' %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                            {% trans "Children's Braids" %}
                         </button>
                     </div>
 
@@ -42,7 +48,7 @@
                             </svg>
                         </span>
                         <input type="search" name="q" value="{{ search_query }}" 
-                               placeholder="Search for cornrows, pop smoke, twists..." 
+                               placeholder="{% trans 'Search for cornrows, pop smoke, twists...' %}" 
                                hx-get="{% url 'services:service_list' %}"
                                hx-trigger="keyup changed delay:400ms, search"
                                hx-target="#services-wrapper"

@@ -1,0 +1,304 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: hu\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/base.html
+msgid "Primary navigation"
+msgstr "Fő navigáció"
+
+msgid "Services"
+msgstr "Szolgáltatások"
+
+msgid "Providers"
+msgstr "Szakemberek"
+
+msgid "About"
+msgstr "Rólunk"
+
+msgid "Contact"
+msgstr "Kapcsolat"
+
+msgid "FAQs"
+msgstr "GYIK"
+
+msgid "Check Booking Status"
+msgstr "Foglalás állapotának ellenőrzése"
+
+msgid "Open menu"
+msgstr "Menü megnyitása"
+
+msgid "Menu"
+msgstr "Menü"
+
+msgid "Close menu"
+msgstr "Menü bezárása"
+
+msgid "Staff Login"
+msgstr "Belépés munkatársaknak"
+
+msgid "About Afrikai Hajfonás"
+msgstr "Az Afrikai Hajfonásról"
+
+msgid "How To Videos"
+msgstr "Hogyan csináld videók"
+
+msgid "Contact Info"
+msgstr "Elérhetőségek"
+
+msgid "Follow Us"
+msgstr "Kövessen minket"
+
+msgid "Essentials"
+msgstr "Alapvető információk"
+
+msgid "Terms & Conditions"
+msgstr "Általános feltételek"
+
+msgid "Privacy Policy"
+msgstr "Adatvédelmi irányelvek"
+
+msgid "All rights reserved."
+msgstr "Minden jog fenntartva."
+
+msgid "Choose your language"
+msgstr "Válassza ki a nyelvet"
+
+msgid "This choice will be remembered. You can change it at any time."
+msgstr "Ezt a választást megjegyezzük. Bármikor megváltoztathatja."
+
+#: templates/home.html
+msgid "Book Now"
+msgstr "Foglalás most"
+
+msgid "Popular Services"
+msgstr "Népszerű szolgáltatások"
+
+msgid "Discover our clients' favorite authentic styles"
+msgstr "Fedezze fel ügyfeleink kedvenc autentikus stílusait"
+
+msgid "Women's Braid"
+msgstr "Női hajfonás"
+
+msgid "Men's Braid"
+msgstr "Férfi hajfonás"
+
+msgid "mins"
+msgstr "perc"
+
+msgid "No popular services have been selected yet. Mark some as \"is_popular\" in the admin panel."
+msgstr "Még nincsenek népszerű szolgáltatások kiválasztva. Jelöljön meg néhányat \"is_popular\"-ként az adminisztrációs panelen."
+
+msgid "View All Services"
+msgstr "Az összes szolgáltatás megtekintése"
+
+msgid "Sign up for our newsletter"
+msgstr "Iratkozzon fel hírlevelünkre"
+
+msgid "Stay up to date with our latest styles and offers. Subscribe to receive exclusive deals and braid inspirations."
+msgstr "Legyen naprakész a legújabb stílusokkal és ajánlatokkal. Iratkozzon fel, hogy exkluzív ajánlatokat és hajfonási inspirációkat kapjon."
+
+msgid "Enter your email"
+msgstr "Adja meg e-mail címét"
+
+msgid "Subscribe"
+msgstr "Feliratkozás"
+
+msgid "We care about the protection of your data."
+msgstr "Fontos számunkra az adatai védelme."
+
+msgid "Read our Privacy Policy"
+msgstr "Olvassa el adatvédelmi irányelveinket"
+
+#: templates/services/service_list.html
+msgid "Explore Braid Styles"
+msgstr "Fedezze fel a hajfonási stílusokat"
+
+msgid "Women's Braids"
+msgstr "Női hajfonások"
+
+msgid "Men's Braids"
+msgstr "Férfi hajfonások"
+
+msgid "Children's Braids"
+msgstr "Gyermek hajfonások"
+
+msgid "Search for cornrows, pop smoke, twists..."
+msgstr "Keressen frizurákra, pop smoke, twist..."
+
+#: templates/services/partials/service_grid.html
+msgid "Filters"
+msgstr "Szűrők"
+
+msgid "Braid Type"
+msgstr "Hajfonás típusa"
+
+msgid "All Types"
+msgstr "Összes típus"
+
+msgid "Price Range (HUF)"
+msgstr "Ártartomány (HUF)"
+
+msgid "Min"
+msgstr "Min"
+
+msgid "to"
+msgstr "–"
+
+msgid "Max"
+msgstr "Max"
+
+msgid "Max Duration"
+msgstr "Maximális időtartam"
+
+msgid "Any Duration"
+msgstr "Bármely időtartam"
+
+msgid "Under 1 hour"
+msgstr "1 órán belül"
+
+msgid "Under 2 hours"
+msgstr "2 órán belül"
+
+msgid "Under 3 hours"
+msgstr "3 órán belül"
+
+msgid "Under 4 hours"
+msgstr "4 órán belül"
+
+msgid "Sort By"
+msgstr "Rendezés"
+
+msgid "Most Popular"
+msgstr "Legnépszerűbb"
+
+msgid "Price (Low to High)"
+msgstr "Ár (alacsonytól magasig)"
+
+msgid "Price (High to Low)"
+msgstr "Ár (magastól alacsonyig)"
+
+msgid "Newest Styles"
+msgstr "Legújabb stílusok"
+
+msgid "Apply Filters"
+msgstr "Szűrők alkalmazása"
+
+msgid "No services match your search."
+msgstr "Nincs a keresésnek megfelelő szolgáltatás."
+
+msgid "Try adjusting your filters, clearing prices, or entering a new keyword."
+msgstr "Próbálja meg módosítani a szűrőket, törölni az árakat, vagy új kulcsszót megadni."
+
+#: templates/bookings/book_service.html
+msgid "Book Appointment"
+msgstr "Időpont foglalása"
+
+msgid "1. Select Stylist & Date"
+msgstr "1. Szakember és dátum kiválasztása"
+
+msgid "Stylist"
+msgstr "Szakember"
+
+msgid "Select a Stylist"
+msgstr "Válasszon szakembert"
+
+msgid "Date"
+msgstr "Dátum"
+
+msgid "Please choose your stylist and appointment date above to view free sessions."
+msgstr "Kérjük, válassza ki a szakembert és a dátumot fent a szabad időpontok megtekintéséhez."
+
+msgid "2. Contact Information"
+msgstr "2. Kapcsolattartási adatok"
+
+msgid "Your Name"
+msgstr "Az Ön neve"
+
+msgid "Jane Doe"
+msgstr "Kovács Júlia"
+
+msgid "Email Address"
+msgstr "E-mail cím"
+
+msgid "jane@example.com"
+msgstr "julia@pelda.hu"
+
+msgid "Phone Number"
+msgstr "Telefonszám"
+
+msgid "Subscribe to our newsletter?"
+msgstr "Feliratkozik a hírlevelünkre?"
+
+msgid "Yes, send me braid styling inspirations and exclusive offers"
+msgstr "Igen, küldjenek hajfonási inspirációkat és exkluzív ajánlatokat"
+
+msgid "No, thank you"
+msgstr "Nem, köszönöm"
+
+msgid "3. Secure Payment Options"
+msgstr "3. Biztonságos fizetési lehetőségek"
+
+msgid "Select how you want to secure your booking below:"
+msgstr "Válassza ki, hogyan szeretné lebiztosítani a foglalását:"
+
+msgid "Pay Full Amount Now"
+msgstr "Fizessen most a teljes összeget"
+
+msgid "Secure online check-out via Barion"
+msgstr "Biztonságos online fizetés Barionon keresztül"
+
+msgid "Pay Deposit Only"
+msgstr "Fizessen csak előleget"
+
+msgid "Pay a small confirmation deposit online, and settle the rest at the salon"
+msgstr "Fizessen egy kis megerősítő előleget online, a többit pedig a szalonban"
+
+msgid "Pay at the Salon"
+msgstr "Fizetés a szalonban"
+
+msgid "Reserve now and complete payment after your service is finished"
+msgstr "Foglaljon most, és a szolgáltatás befejezése után fizessen"
+
+msgid "Summary"
+msgstr "Összegzés"
+
+msgid "Duration:"
+msgstr "Időtartam:"
+
+msgid "Base Service Cost"
+msgstr "Alapszolgáltatás költsége"
+
+msgid "Style Add-ons"
+msgstr "Stílus kiegészítők"
+
+msgid "Estimated Total"
+msgstr "Becsült összesen"
+
+msgid "Confirm Appointment"
+msgstr "Időpont megerősítése"
+
+msgid "By booking, you agree to our 24-hour rescheduling and cancellation policies."
+msgstr "A foglalással elfogadja az 24 órás átszervezési és lemondási szabályzatainkat."
+
+#: templates/bookings/partials/time_slots.html
+msgid "Available Times"
+msgstr "Szabad időpontok"
+
+msgid "No appointment slots found."
+msgstr "Nem találhatók szabad időpontok."
+
+msgid "The stylist may be fully booked or off-duty on this date. Try another date or stylist."
+msgstr "Előfordulhat, hogy a szakember erre a napra már tele van, vagy nem dolgozik. Próbáljon más dátumot vagy szakembert."
+
+#: templates/bookings/booking_status_placeholder.html
+msgid "This feature will be available soon. You will be able to check your appointment request status using your email and booking reference code."
+msgstr "Ez a funkció hamarosan elérhető lesz. E-mail címe és foglalási hivatkozási kódja segítségével ellenőrizheti majd az időpontkérés állapotát."
+
+msgid "Browse Services"
+msgstr "Szolgáltatások böngészése"

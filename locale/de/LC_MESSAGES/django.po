@@ -1,0 +1,304 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: templates/base.html
+msgid "Primary navigation"
+msgstr ""
+
+msgid "Services"
+msgstr ""
+
+msgid "Providers"
+msgstr ""
+
+msgid "About"
+msgstr ""
+
+msgid "Contact"
+msgstr ""
+
+msgid "FAQs"
+msgstr ""
+
+msgid "Check Booking Status"
+msgstr ""
+
+msgid "Open menu"
+msgstr ""
+
+msgid "Menu"
+msgstr ""
+
+msgid "Close menu"
+msgstr ""
+
+msgid "Staff Login"
+msgstr ""
+
+msgid "About Afrikai Hajfonás"
+msgstr ""
+
+msgid "How To Videos"
+msgstr ""
+
+msgid "Contact Info"
+msgstr ""
+
+msgid "Follow Us"
+msgstr ""
+
+msgid "Essentials"
+msgstr ""
+
+msgid "Terms & Conditions"
+msgstr ""
+
+msgid "Privacy Policy"
+msgstr ""
+
+msgid "All rights reserved."
+msgstr ""
+
+msgid "Choose your language"
+msgstr ""
+
+msgid "This choice will be remembered. You can change it at any time."
+msgstr ""
+
+#: templates/home.html
+msgid "Book Now"
+msgstr ""
+
+msgid "Popular Services"
+msgstr ""
+
+msgid "Discover our clients' favorite authentic styles"
+msgstr ""
+
+msgid "Women's Braid"
+msgstr ""
+
+msgid "Men's Braid"
+msgstr ""
+
+msgid "mins"
+msgstr ""
+
+msgid "No popular services have been selected yet. Mark some as \"is_popular\" in the admin panel."
+msgstr ""
+
+msgid "View All Services"
+msgstr ""
+
+msgid "Sign up for our newsletter"
+msgstr ""
+
+msgid "Stay up to date with our latest styles and offers. Subscribe to receive exclusive deals and braid inspirations."
+msgstr ""
+
+msgid "Enter your email"
+msgstr ""
+
+msgid "Subscribe"
+msgstr ""
+
+msgid "We care about the protection of your data."
+msgstr ""
+
+msgid "Read our Privacy Policy"
+msgstr ""
+
+#: templates/services/service_list.html
+msgid "Explore Braid Styles"
+msgstr ""
+
+msgid "Women's Braids"
+msgstr ""
+
+msgid "Men's Braids"
+msgstr ""
+
+msgid "Children's Braids"
+msgstr ""
+
+msgid "Search for cornrows, pop smoke, twists..."
+msgstr ""
+
+#: templates/services/partials/service_grid.html
+msgid "Filters"
+msgstr ""
+
+msgid "Braid Type"
+msgstr ""
+
+msgid "All Types"
+msgstr ""
+
+msgid "Price Range (HUF)"
+msgstr ""
+
+msgid "Min"
+msgstr ""
+
+msgid "to"
+msgstr ""
+
+msgid "Max"
+msgstr ""
+
+msgid "Max Duration"
+msgstr ""
+
+msgid "Any Duration"
+msgstr ""
+
+msgid "Under 1 hour"
+msgstr ""
+
+msgid "Under 2 hours"
+msgstr ""
+
+msgid "Under 3 hours"
+msgstr ""
+
+msgid "Under 4 hours"
+msgstr ""
+
+msgid "Sort By"
+msgstr ""
+
+msgid "Most Popular"
+msgstr ""
+
+msgid "Price (Low to High)"
+msgstr ""
+
+msgid "Price (High to Low)"
+msgstr ""
+
+msgid "Newest Styles"
+msgstr ""
+
+msgid "Apply Filters"
+msgstr ""
+
+msgid "No services match your search."
+msgstr ""
+
+msgid "Try adjusting your filters, clearing prices, or entering a new keyword."
+msgstr ""
+
+#: templates/bookings/book_service.html
+msgid "Book Appointment"
+msgstr ""
+
+msgid "1. Select Stylist & Date"
+msgstr ""
+
+msgid "Stylist"
+msgstr ""
+
+msgid "Select a Stylist"
+msgstr ""
+
+msgid "Date"
+msgstr ""
+
+msgid "Please choose your stylist and appointment date above to view free sessions."
+msgstr ""
+
+msgid "2. Contact Information"
+msgstr ""
+
+msgid "Your Name"
+msgstr ""
+
+msgid "Jane Doe"
+msgstr ""
+
+msgid "Email Address"
+msgstr ""
+
+msgid "jane@example.com"
+msgstr ""
+
+msgid "Phone Number"
+msgstr ""
+
+msgid "Subscribe to our newsletter?"
+msgstr ""
+
+msgid "Yes, send me braid styling inspirations and exclusive offers"
+msgstr ""
+
+msgid "No, thank you"
+msgstr ""
+
+msgid "3. Secure Payment Options"
+msgstr ""
+
+msgid "Select how you want to secure your booking below:"
+msgstr ""
+
+msgid "Pay Full Amount Now"
+msgstr ""
+
+msgid "Secure online check-out via Barion"
+msgstr ""
+
+msgid "Pay Deposit Only"
+msgstr ""
+
+msgid "Pay a small confirmation deposit online, and settle the rest at the salon"
+msgstr ""
+
+msgid "Pay at the Salon"
+msgstr ""
+
+msgid "Reserve now and complete payment after your service is finished"
+msgstr ""
+
+msgid "Summary"
+msgstr ""
+
+msgid "Duration:"
+msgstr ""
+
+msgid "Base Service Cost"
+msgstr ""
+
+msgid "Style Add-ons"
+msgstr ""
+
+msgid "Estimated Total"
+msgstr ""
+
+msgid "Confirm Appointment"
+msgstr ""
+
+msgid "By booking, you agree to our 24-hour rescheduling and cancellation policies."
+msgstr ""
+
+#: templates/bookings/partials/time_slots.html
+msgid "Available Times"
+msgstr ""
+
+msgid "No appointment slots found."
+msgstr ""
+
+msgid "The stylist may be fully booked or off-duty on this date. Try another date or stylist."
+msgstr ""
+
+#: templates/bookings/booking_status_placeholder.html
+msgid "This feature will be available soon. You will be able to check your appointment request status using your email and booking reference code."
+msgstr ""
+
+msgid "Browse Services"
+msgstr ""
