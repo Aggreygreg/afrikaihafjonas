@@ -91,6 +91,11 @@
 - Internal notes hidden
 - No authentication required
 
+**Model Corrections Needed (Phase 4):**
+- `proof_of_payment` → add `blank=True` (currently NOT blank — would break Step 3 creation)
+- `payment_method` → add `blank=True` (same reason — Step 3 creates record before payment data exists)
+- Upload paths stay FLAT (no AFH subfolders — future optimization, not Phase 4)
+
 **Dispatch Plan:**
 - hack_3: Wizard Steps 3-4 + Confirmation Page (draft approach)
 - hack_1: Guest Lookup Page (parallel — independent, reads same AppointmentRequest model)

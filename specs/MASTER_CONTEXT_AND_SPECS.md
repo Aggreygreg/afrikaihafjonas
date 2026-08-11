@@ -176,7 +176,7 @@ Intentionally scrapped. No star ratings, comments, or review system.
 - Proof of payment: `.jpg`, `.jpeg`, `.png`, `.pdf` — max 5MB
 - Client-side: `accept` attribute + JS size check
 - Server-side: Django form validation
-- Storage paths: `MEDIA_ROOT/hair_photos/<AFH-XXXXXX>/` and `MEDIA_ROOT/proof_of_payment/<AFH-XXXXXX>/`
+- Storage paths: FLAT for now (`MEDIA_ROOT/hair_photos/` and `MEDIA_ROOT/payment_proofs/`) — no AFH reference subfolders yet. Future optimization.
 - Files retained indefinitely (no auto-deletion)
 
 ---

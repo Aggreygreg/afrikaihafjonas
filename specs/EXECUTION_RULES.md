@@ -169,7 +169,8 @@
 - `JSONField` on SQLite works fine for dev but needs PostgreSQL for prod.
 - `ImageField` requires `Pillow` (already installed in venv).
 - The old `Booking` model no longer exists. All references must use `AppointmentRequest`.
-- `proof_of_payment` is `blank=True` — Step 3 creates the record without it, Step 4 adds it.
+- `proof_of_payment` and `payment_method` MUST be set to `blank=True` in Phase 4 — the model currently has neither as blank. Step 3 creates the record before payment data exists, so both fields need `blank=True`. This is a Phase 4 task, not existing state.
+- Upload paths are FLAT for now (`hair_photos/`, `payment_proofs/`) — no AFH reference subfolders. That's a future optimization, not a Phase 4 concern.
 
 ---
 
