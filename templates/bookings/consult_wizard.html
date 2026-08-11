@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Book" %}: {{ service.title }}{% endblock %}
+
+{% block content %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+<div class="bg-gray-50 min-h-screen pb-16">
+    <div class="container mx-auto px-4 py-8 md:py-10">
+
+        <!-- ── Progress Indicator ─────────────────────────────── -->
+        <div class="max-w-6xl mx-auto mb-8">
+            <ol class="flex items-center w-full">
+                <!-- Step 1 -->
+                <li class="flex items-center w-full last:w-auto">
+                    <div class="flex flex-col items-center">
+                        <span class="flex items-center justify-center w-9 h-9 rounded-full font-semibold text-sm {% if current_step >= 1 %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">1</span>
+                        <span class="mt-1 text-xs font-medium {% if current_step == 1 %}text-blue-700{% else %}text-gray-500{% endif %}">{% trans "Configure" %}</span>
+                    </div>
+                    <div class="flex-1 h-1 mx-2 rounded {% if current_step >= 2 %}bg-blue-600{% else %}bg-gray-200{% endif %}"></div>
+                </li>
+                <!-- Step 2 -->
+                <li class="flex items-center w-full last:w-auto">
+                    <div class="flex flex-col items-center">
+                        <span class="flex items-center justify-center w-9 h-9 rounded-full font-semibold text-sm {% if current_step >= 2 %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">2</span>
+                        <span class="mt-1 text-xs font-medium {% if current_step == 2 %}text-blue-700{% else %}text-gray-500{% endif %}">{% trans "Schedule" %}</span>
+                    </div>
+                    <div class="flex-1 h-1 mx-2 rounded bg-gray-200"></div>
+                </li>
+                <!-- Step 3 (coming soon) -->
+                <li class="flex items-center w-full last:w-auto" title="{% trans 'Coming soon' %}">
+                    <div class="flex flex-col items-center opacity-50">
+                        <span class="flex items-center justify-center w-9 h-9 rounded-full font-semibold text-sm bg-gray-200 text-gray-400">3</span>
+                        <span class="mt-1 text-xs font-medium text-gray-400">{% trans "Details" %}</span>
+                    </div>
+                    <div class="flex-1 h-1 mx-2 rounded bg-gray-200"></div>
+                </li>
+                <!-- Step 4 (coming soon) -->
+                <li class="flex flex-col items-center opacity-50" title="{% trans 'Coming soon' %}">
+                    <span class="flex items-center justify-center w-9 h-9 rounded-full font-semibold text-sm bg-gray-200 text-gray-400">4</span>
+                    <span class="mt-1 text-xs font-medium text-gray-400">{% trans "Review" %}</span>
+                </li>
+            </ol>
+        </div>
+
+        <!-- ── Two-Column Layout: Content + Summary ──────────── -->
+        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- MAIN CONTENT (swapped by HTMX) -->
+            <div class="lg:col-span-2" id="wizard-content">
+                {% include "bookings/partials/wizard_step_1.html" %}
+            </div>
+
+            <!-- SUMMARY SIDEBAR (persists across steps) -->
+            <div class="lg:col-span-1">
+                {% include "bookings/partials/wizard_summary.html" %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- HTMX runtime (the base template does not bundle it) -->
+<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+
+<script>
+(function () {
+    "use strict";
+
+    // ── CSRF for HTMX POSTs ──
+    document.addEventListener("htmx:configRequest", function (evt) {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta && meta.content) {
+            evt.detail.headers["X-CSRFToken"] = meta.content;
+        }
+    });
+
+    // ── Live Price Calculator (drives the summary sidebar) ──
+    const baseDiscounted = parseFloat("{{ service.discounted_price|floatformat:0 }}");
+    const baseOriginal = parseFloat("{{ service.base_price|floatformat:0 }}");
+
+    function recalculateSummary() {
+        let optionsTotal = 0;
+        const selectedLabels = [];
+
+        // 1) Checkbox / radio-card option inputs
+        document
+            .querySelectorAll('#wizard-content input[name="selected_options"]:checked')
+            .forEach(function (input) {
+                const price = parseFloat(input.dataset.price || "0");
+                optionsTotal += price;
+                const label = input.closest("label");
+                const valueEl = label ? label.querySelector(".option-value") : null;
+                const labelText = valueEl ? valueEl.textContent.trim() : "";
+                const groupName = input.dataset.group || "";
+                if (labelText) {
+                    selectedLabels.push({ group: groupName, value: labelText, price: price });
+                }
+            });
+
+        // 2) <select> option groups (>4 options)
+        document
+            .querySelectorAll('#wizard-content select[name="selected_options"]')
+            .forEach(function (sel) {
+                const opt = sel.options[sel.selectedIndex];
+                if (!opt || !opt.value) return;
+                const price = parseFloat(opt.dataset.price || "0");
+                optionsTotal += price;
+                selectedLabels.push({
+                    group: sel.dataset.group || "",
+                    value: opt.textContent.replace(/\s*\+.*$/, "").trim(),
+                    price: price,
+                });
+            });
+
+        const grandTotal = baseDiscounted + optionsTotal;
+
+        const totalEl = document.getElementById("summary-total");
+        if (totalEl) totalEl.textContent = Math.round(grandTotal).toLocaleString("en") + " Ft";
+
+        const deposit = grandTotal >= 45000 ? 20000 : 10000;
+        const depositEl = document.getElementById("summary-deposit");
+        if (depositEl) depositEl.textContent = deposit.toLocaleString("en") + " Ft";
+
+        const optionsContainer = document.getElementById("summary-options");
+        if (optionsContainer) {
+            if (selectedLabels.length === 0) {
+                optionsContainer.innerHTML = "";
+            } else {
+                optionsContainer.innerHTML = selectedLabels
+                    .map(function (item) {
+                        return (
+                            '<div class="flex justify-between text-sm">' +
+                            '<span class="text-gray-500">' + item.group + ": " + item.value + "</span>" +
+                            (item.price > 0
+                                ? '<span class="text-gray-600">+' + item.price.toLocaleString("en") + " Ft</span>"
+                                : "") +
+                            "</div>"
+                        );
+                    })
+                    .join("");
+            }
+        }
+    }
+
+    // ── Single-select enforcement for radio-card groups ──
+    // Required groups contain checkboxes that should behave like radios:
+    // selecting one clears the others within the same group container.
+    document.addEventListener("change", function (e) {
+        const input = e.target;
+        if (!input || input.name !== "selected_options") return;
+
+        // Recompute summary on every change
+        recalculateSummary();
+
+        // Mutual exclusion inside single-select (required) groups
+        const group = input.closest('[data-required-group="true"]');
+        if (group && input.type === "checkbox" && input.checked) {
+            group
+                .querySelectorAll('input[name="selected_options"]:checked')
+                .forEach(function (other) {
+                    if (other !== input) {
+                        other.checked = false;
+                    }
+                });
+        }
+    });
+
+    // ── Re-run after HTMX swaps step content ──
+    document.body.addEventListener("htmx:afterSwap", function (e) {
+        if (e.detail.target && e.detail.target.id === "wizard-content") {
+            if (window.recalculateSummary) window.recalculateSummary();
+        }
+    });
+
+    // Initial calculation (once HTMX + DOM are ready)
+    window.recalculateSummary = recalculateSummary;
+    document.addEventListener("DOMContentLoaded", recalculateSummary);
+    // Fallback: run shortly after load in case of timing issues
+    setTimeout(recalculateSummary, 300);
+
+    // ── Step 1 validation gate ──
+    window.validateStep1 = function () {
+        const groups = document.querySelectorAll(
+            '#wizard-content [data-required-group="true"]'
+        );
+        let valid = true;
+        let firstInvalid = null;
+
+        groups.forEach(function (group) {
+            let hasSelection = false;
+
+            // Checkbox radio-card inputs
+            const checked = group.querySelectorAll(
+                'input[name="selected_options"]:checked'
+            );
+            if (checked.length > 0) {
+                hasSelection = true;
+            }
+
+            // <select> groups
+            const selectEl = group.querySelector(
+                'select[name="selected_options"]'
+            );
+            if (selectEl && selectEl.value) {
+                hasSelection = true;
+            }
+
+            if (!hasSelection) {
+                valid = false;
+                group.classList.add("ring-2", "ring-red-400", "rounded-xl");
+                if (!firstInvalid) firstInvalid = group;
+            } else {
+                group.classList.remove("ring-2", "ring-red-400", "rounded-xl");
+            }
+        });
+
+        if (!valid) {
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            return false; // block the HTMX request
+        }
+        return true;
+    };
+})();
+</script>
+{% endblock %}

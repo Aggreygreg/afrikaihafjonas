@@ -125,6 +125,32 @@ class Service(models.Model):
             return self.base_price - discount_amount
         return self.base_price
 
+    def get_options_grouped(self):
+        """
+        Returns a list of dicts, one per option group:
+        [{"group_name": "Color", "options": [<ServiceOption>, ...], "is_addon": False},
+         {"group_name": "Add-on", "options": [...], "is_addon": True}]
+
+        Groups whose name contains 'add' or 'extra' (case-insensitive) are
+        treated as multi-select, optional add-ons. All other groups are
+        single-select and required.
+        """
+        from collections import OrderedDict
+
+        grouped = OrderedDict()
+        for opt in self.options.all().order_by("group_name", "value"):
+            if opt.group_name not in grouped:
+                is_addon = any(
+                    kw in opt.group_name.lower() for kw in ["add", "extra"]
+                )
+                grouped[opt.group_name] = {
+                    "group_name": opt.group_name,
+                    "options": [],
+                    "is_addon": is_addon,
+                }
+            grouped[opt.group_name]["options"].append(opt)
+        return list(grouped.values())
+
 
 class ServiceImage(models.Model):
     service = models.ForeignKey(
