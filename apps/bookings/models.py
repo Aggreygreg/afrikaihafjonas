@@ -84,14 +84,14 @@ class AppointmentRequest(models.Model):
         help_text="Calculated deposit amount in HUF (frozen at request time)."
     )
     payment_method = models.CharField(
-        max_length=30, choices=PaymentMethod.choices
+        max_length=30, choices=PaymentMethod.choices, blank=True
     )
     payment_reference = models.CharField(
         max_length=20, unique=True, blank=True,
         help_text="Auto-generated. Format: AFH-XXXXXX"
     )
     proof_of_payment = models.ImageField(
-        upload_to="payment_proofs/",
+        upload_to="payment_proofs/", blank=True,
         help_text="Screenshot of the manual bank transfer.",
     )
 
