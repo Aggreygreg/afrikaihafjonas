@@ -83,7 +83,9 @@ def service_detail_view(request, pk):
     Displays the detailed page for a single service.
     """
     service = get_object_or_404(
-        Service.objects.prefetch_related('images', 'options'),
+        Service.objects.prefetch_related(
+            'images__linked_options', 'options'
+        ),
         pk=pk
     )
     
