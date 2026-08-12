@@ -33,6 +33,21 @@
 - Never commit secrets, API keys, or credentials
 - `.env` files in `.gitignore`
 
+### 4.5. ⛔ HOST SAFETY — NEVER Kill Parent/System Processes
+
+**This is the #1 rule. Violating it takes down the entire QwenPaw service and ALL agents.**
+
+- **NEVER** run `Stop-Process`, `taskkill`, `pkill`, or any process-termination command on:
+  - Any `python` / `python.exe` process
+  - Any `uvicorn`, `gunicorn`, `django` server process
+  - Any `node`, `qwenpaw`, or `cloudflared` process
+  - ANY process you did not start yourself
+- **NEVER** run `Stop-Process -Force` on ANYTHING without explicit user permission
+- **NEVER** run system-modifying commands that affect the host OS, service registry, or network stack
+- If a dev server (e.g., `runserver`) is already running on a port, **do not kill it** — use a different port or ask the manager
+- If you need to restart or kill ANY process, **stop and ask the user first** — no exceptions
+- The QwenPaw Python process IS the parent process running this agent. Killing it = killing yourself AND every other agent in the fleet
+
 ---
 
 ## Business Logic Restraints
@@ -186,3 +201,4 @@
 8. **NO** Celery (use management commands + cron)
 9. **NO** SMS integrations
 10. **NO** multi-tenant logic
+11. **NO** process-termination commands (`Stop-Process`, `taskkill`, `pkill`) on ANY process you didn't start — see Rule 4.5
