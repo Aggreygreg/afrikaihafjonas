@@ -14,390 +14,406 @@ msgstr ""
 
 #: _extract_strings.py _extract_strings.py _extract_strings.py
 msgid "..."
-msgstr ""
+msgstr "…"
 
 #: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
 msgid "This service is for adults aged 16 and over."
-msgstr ""
+msgstr "Diese Dienstleistung ist für Erwachsene ab 16 Jahren."
 
 #: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
 msgid "This service is for children aged 8 to 15."
-msgstr ""
+msgstr "Diese Dienstleistung ist für Kinder von 8 bis 15 Jahren."
 
 #: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
 msgid "Clients must be at least 8 years old for this service."
-msgstr ""
+msgstr "Kunden müssen für diese Dienstleistung mindestens 8 Jahre alt sein."
 
 #: apps/bookings/forms.py
 msgid "%(label)s is too large. The maximum file size is 5 MB."
-msgstr ""
+msgstr "%(label)s ist zu groß. Die maximale Dateigröße beträgt 5 MB."
 
 #: apps/bookings/forms.py
 msgid "%(label)s has an unsupported format. Allowed: %(formats)s."
-msgstr ""
+msgstr "%(label)s hat ein nicht unterstütztes Format. Erlaubt: %(formats)s."
 
 #: apps/bookings/forms.py
 msgid "%(label)s has an unsupported file type."
-msgstr ""
+msgstr "%(label)s hat einen nicht unterstützten Dateityp."
 
 #: apps/bookings/forms.py
 msgid "I have read and accept the Privacy Policy and consent to the"
 msgstr ""
+"Ich habe die Datenschutzerklärung gelesen und akzeptiere sie und stimme der"
 
 #: apps/bookings/forms.py
 msgid "You must accept the privacy policy to continue."
-msgstr ""
+msgstr "Sie müssen die Datenschutzerklärung akzeptieren, um fortzufahren."
 
 #: apps/bookings/forms.py
 msgid "JPG, PNG or WEBP — max 5 MB."
-msgstr ""
+msgstr "JPG, PNG oder WEBP — max. 5 MB."
 
 #: apps/bookings/forms.py
 msgid "Front photo"
-msgstr ""
+msgstr "Foto von vorne"
 
 #: apps/bookings/forms.py
 msgid "Side photo"
-msgstr ""
+msgstr "Foto von der Seite"
 
 #: apps/bookings/forms.py
 msgid "Back photo"
-msgstr ""
+msgstr "Foto von hinten"
 
 #: apps/bookings/forms.py
 msgid "I confirm the deposit has been transferred and I agree to the"
 msgstr ""
+"Ich bestätige, dass die Anzahlung überwiesen wurde, und ich stimme den"
 
 #: apps/bookings/forms.py
 msgid "You must agree to the policy to submit your request."
-msgstr ""
+msgstr "Sie müssen den Bedingungen zustimmen, um Ihre Anfrage einzureichen."
 
 #: apps/bookings/forms.py
 msgid "JPG, PNG or PDF — max 5 MB."
-msgstr ""
+msgstr "JPG, PNG oder PDF — max. 5 MB."
 
 #: apps/bookings/forms.py
 msgid "Proof of payment"
-msgstr ""
+msgstr "Zahlungsbestätigung"
 
 #: apps/bookings/views.py
 msgid "Please select a stylist, date and an available time slot"
 msgstr ""
+"Bitte wählen Sie einen Stylisten, ein Datum und einen verfügbaren Termin"
 
 #: apps/bookings/views.py
 msgid "We received your request and are verifying your deposit."
-msgstr ""
+msgstr "Wir haben Ihre Anfrage erhalten und prüfen Ihre Anzahlung."
 
 #: apps/bookings/views.py
 msgid "Your deposit is verified! We"
-msgstr ""
+msgstr "Ihre Anzahlung ist bestätigt! Wir"
 
 #: apps/bookings/views.py
 msgid "Your appointment is confirmed!"
-msgstr ""
+msgstr "Ihr Termin ist bestätigt!"
 
 #: apps/bookings/views.py
 msgid "Unfortunately, your request was not approved."
-msgstr ""
+msgstr "Leider wurde Ihre Anfrage nicht genehmigt."
 
 #: apps/bookings/views.py
 msgid "Your request has expired. Your hold on this time slot has ended."
 msgstr ""
+"Ihre Anfrage ist abgelaufen. Ihre Reservierung für diesen Termin ist "
+"beendet."
 
 #: apps/bookings/views.py
 msgid "Please enter both your email address and AFH reference code."
-msgstr ""
+msgstr "Bitte geben Sie Ihre E-Mail-Adresse und Ihren AFH-Referenzcode ein."
 
 #: apps/bookings/views.py
 msgid "No request found. Please check your email and reference code"
 msgstr ""
+"Keine Anfrage gefunden. Bitte überprüfen Sie Ihre E-Mail-Adresse und den "
+"Referenzcode"
 
 #: templates/base.html
 msgid "Primary navigation"
-msgstr ""
+msgstr "Hauptnavigation"
 
 #: templates/base.html templates/base.html
 msgid "Services"
-msgstr ""
+msgstr "Dienstleistungen"
 
 #: templates/base.html templates/base.html
 msgid "Providers"
-msgstr ""
+msgstr "Stylisten"
 
 #: templates/base.html templates/base.html templates/base.html
 msgid "About"
-msgstr ""
+msgstr "Über uns"
 
 #: templates/base.html templates/base.html
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #: templates/base.html templates/base.html templates/base.html
 msgid "FAQs"
-msgstr ""
+msgstr "FAQ"
 
 #: templates/base.html templates/base.html
 msgid "Check Booking Status"
-msgstr ""
+msgstr "Buchungsstatus prüfen"
 
 #: templates/base.html
 msgid "Open menu"
-msgstr ""
+msgstr "Menü öffnen"
 
 #: templates/base.html
 msgid "Menu"
-msgstr ""
+msgstr "Menü"
 
 #: templates/base.html
 msgid "Close menu"
-msgstr ""
+msgstr "Menü schließen"
 
 #: templates/base.html templates/base.html
 msgid "Staff Login"
-msgstr ""
+msgstr "Mitarbeiter-Login"
 
 #: templates/base.html templates/pages/about.html
 msgid "About Afrikai Hajfonás"
-msgstr ""
+msgstr "Über Afrikai Hajfonás"
 
 #: templates/base.html
 msgid "How To Videos"
-msgstr ""
+msgstr "Anleitungsvideos"
 
 #: templates/base.html
 msgid "Contact Info"
-msgstr ""
+msgstr "Kontaktinformationen"
 
 #: templates/base.html
 msgid "Follow Us"
-msgstr ""
+msgstr "Folgen Sie uns"
 
 #: templates/base.html
 msgid "Essentials"
-msgstr ""
+msgstr "Wesentliches"
 
 #: templates/base.html templates/pages/terms.html
 msgid "Terms & Conditions"
-msgstr ""
+msgstr "AGB"
 
 #: templates/base.html templates/pages/privacy.html
 msgid "Privacy Policy"
-msgstr ""
+msgstr "Datenschutzerklärung"
 
 #: templates/base.html
 msgid "All rights reserved."
-msgstr ""
+msgstr "Alle Rechte vorbehalten."
 
 #: templates/base.html
 msgid "Choose your language"
-msgstr ""
+msgstr "Wählen Sie Ihre Sprache"
 
 #: templates/base.html
 msgid "This choice will be remembered. You can change it at any time."
-msgstr ""
+msgstr "Diese Auswahl wird gespeichert. Sie können sie jederzeit ändern."
 
 #: templates/home.html
 msgid "Book Now"
-msgstr ""
+msgstr "Jetzt buchen"
 
 #: templates/home.html
 msgid "Popular Services"
-msgstr ""
+msgstr "Beliebte Dienstleistungen"
 
 #: templates/home.html
 msgid "Discover our clients"
-msgstr ""
+msgstr "Entdecken Sie unsere Kundinnen"
 
 #: templates/home.html templates/services/service_list.html
 msgid "Women"
-msgstr ""
+msgstr "Damen"
 
 #: templates/home.html templates/services/service_list.html
 msgid "Men"
-msgstr ""
+msgstr "Herren"
 
 #: templates/home.html
 msgid "mins"
-msgstr ""
+msgstr "Min."
 
 #: templates/home.html
 msgid "No popular services have been selected yet. Mark some as \\"
 msgstr ""
+"Es wurden noch keine beliebten Dienstleistungen ausgewählt. Markieren Sie "
+"einige als \\"
 
 #: templates/home.html
 msgid "View All Services"
-msgstr ""
+msgstr "Alle Dienstleistungen ansehen"
 
 #: templates/home.html
 msgid "Sign up for our newsletter"
-msgstr ""
+msgstr "Abonnieren Sie unseren Newsletter"
 
 #: templates/home.html
 msgid ""
 "Stay up to date with our latest styles and offers. Subscribe to receive "
 "exclusive deals and braid inspirations."
 msgstr ""
+"Bleiben Sie auf dem Laufenden mit unseren neuesten Styles und Angeboten. "
+"Abonnieren Sie, um exklusive Deals und Flecht-Inspirationen zu erhalten."
 
 #: templates/home.html
 msgid "Enter your email"
-msgstr ""
+msgstr "E-Mail-Adresse eingeben"
 
 #: templates/home.html
 msgid "Subscribe"
-msgstr ""
+msgstr "Abonnieren"
 
 #: templates/home.html
 msgid "We care about the protection of your data."
-msgstr ""
+msgstr "Uns ist der Schutz Ihrer Daten wichtig."
 
 #: templates/home.html
 msgid "Read our Privacy Policy"
-msgstr ""
+msgstr "Lesen Sie unsere Datenschutzerklärung"
 
 #: templates/admin/index.html
 msgid "Dashboard"
-msgstr ""
+msgstr "Dashboard"
 
 #: templates/bookings/confirmation.html
 msgid "Request Submitted"
-msgstr ""
+msgstr "Anfrage eingereicht"
 
 #: templates/bookings/confirmation.html
 msgid "Your appointment request has been submitted!"
-msgstr ""
+msgstr "Ihre Terminanfrage wurde eingereicht!"
 
 #: templates/bookings/confirmation.html
 msgid "Thank you. We have received your request and deposit details."
 msgstr ""
+"Vielen Dank. Wir haben Ihre Anfrage und Ihre Anzahlungsdetails erhalten."
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Your Payment Reference"
-msgstr ""
+msgstr "Ihre Zahlungsreferenz"
 
 #: templates/bookings/confirmation.html templates/bookings/confirmation.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Copy"
-msgstr ""
+msgstr "Kopieren"
 
 #: templates/bookings/confirmation.html
 msgid "Save your reference"
-msgstr ""
+msgstr "Speichern Sie Ihren Referenzcode"
 
 #: templates/bookings/confirmation.html
 msgid "What happens next?"
-msgstr ""
+msgstr "Wie geht es weiter?"
 
 #: templates/bookings/confirmation.html templates/pages/terms.html
 msgid "We"
-msgstr ""
+msgstr "Wir"
 
 #: templates/bookings/confirmation.html
 msgid ""
 "Once approved, your appointment is confirmed and your time slot is locked "
 "in."
 msgstr ""
+"Nach der Genehmigung ist Ihr Termin bestätigt und Ihr Zeitfenster "
+"reserviert."
 
 #: templates/bookings/confirmation.html
 msgid "If anything is missing, we"
-msgstr ""
+msgstr "Wenn etwas fehlt, werden"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/guest_lookup_result.html
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Service"
-msgstr ""
+msgstr "Dienstleistung"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/guest_lookup_result.html
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Stylist"
-msgstr ""
+msgstr "Stylist"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/wizard_step_3.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Date & Time"
-msgstr ""
+msgstr "Datum & Uhrzeit"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/guest_lookup_result.html
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Deposit"
-msgstr ""
+msgstr "Anzahlung"
 
 #: templates/bookings/confirmation.html
 msgid "Check your request status"
-msgstr ""
+msgstr "Prüfen Sie Ihren Anfragestatus"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/wizard_step_4.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Copied!"
-msgstr ""
+msgstr "Kopiert!"
 
 #: templates/bookings/consult_wizard.html
 msgid "Book"
-msgstr ""
+msgstr "Buchen"
 
 #: templates/bookings/guest_lookup.html templates/bookings/guest_lookup.html
 msgid "Check Your Request Status"
-msgstr ""
+msgstr "Anfragestatus prüfen"
 
 #: templates/bookings/guest_lookup.html
 msgid ""
 "Enter your email address and the reference code we gave you to view the "
 "status of your appointment request."
 msgstr ""
+"Geben Sie Ihre E-Mail-Adresse und den Referenzcode ein, den wir Ihnen "
+"gegeben haben, um den Status Ihrer Terminanfrage zu sehen."
 
 #: templates/bookings/guest_lookup.html
 msgid "Email address"
-msgstr ""
+msgstr "E-Mail-Adresse"
 
 #: templates/bookings/guest_lookup.html
 msgid "AFH reference code"
-msgstr ""
+msgstr "AFH-Referenzcode"
 
 #: templates/bookings/guest_lookup.html
 msgid "Look up status"
-msgstr ""
+msgstr "Status abfragen"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Request not found"
-msgstr ""
+msgstr "Anfrage nicht gefunden"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Deposit verified"
-msgstr ""
+msgstr "Anzahlung bestätigt"
 
 #: templates/bookings/partials/guest_lookup_result.html
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Time"
-msgstr ""
+msgstr "Uhrzeit"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Payment method"
-msgstr ""
+msgstr "Zahlungsmethode"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Not yet provided"
-msgstr ""
+msgstr "Noch nicht angegeben"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Reference"
-msgstr ""
+msgstr "Referenz"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Admin note"
-msgstr ""
+msgstr "Notiz"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Refund information"
-msgstr ""
+msgstr "Rückerstattungsinformation"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid ""
@@ -405,164 +421,177 @@ msgid ""
 "business days. Please keep your reference code handy. If you do not receive "
 "the refund, contact us quoting your reference."
 msgstr ""
+"Ihre Anzahlung wird innerhalb von 5 Werktagen auf Ihre ursprüngliche "
+"Zahlungsmethode zurückerstattet. Bitte halten Sie Ihren Referenzcode bereit."
+" Falls Sie die Rückerstattung nicht erhalten, kontaktieren Sie uns unter "
+"Angabe Ihres Referenzcodes."
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Would you like to submit a new request?"
-msgstr ""
+msgstr "Möchten Sie eine neue Anfrage einreichen?"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Submit a new request"
-msgstr ""
+msgstr "Neue Anfrage einreichen"
 
 #: templates/bookings/partials/time_slots.html
 msgid "Available Times"
-msgstr ""
+msgstr "Verfügbare Termine"
 
 #: templates/bookings/partials/time_slots.html
 msgid "No appointment slots found."
-msgstr ""
+msgstr "Keine freien Termine gefunden."
 
 #: templates/bookings/partials/time_slots.html
 msgid ""
 "The stylist may be fully booked or off-duty on this date. Try another date "
 "or stylist."
 msgstr ""
+"Der Stylist ist möglicherweise vollständig gebucht oder hat an diesem Tag "
+"frei. Versuchen Sie ein anderes Datum oder einen anderen Stylisten."
 
 #: templates/bookings/partials/wizard_progress.html
 msgid "Configure"
-msgstr ""
+msgstr "Konfigurieren"
 
 #: templates/bookings/partials/wizard_progress.html
 msgid "Schedule"
-msgstr ""
+msgstr "Terminplanung"
 
 #: templates/bookings/partials/wizard_progress.html
 msgid "Details"
-msgstr ""
+msgstr "Angaben"
 
 #: templates/bookings/partials/wizard_progress.html
 msgid "Review"
-msgstr ""
+msgstr "Überprüfung"
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "Optional"
-msgstr ""
+msgstr "Optional"
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "Required"
-msgstr ""
+msgstr "Erforderlich"
 
 #: templates/bookings/partials/wizard_step_1.html
 #: templates/services/service_detail.html
 msgid "Select"
-msgstr ""
+msgstr "Auswählen"
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "Please select one option."
-msgstr ""
+msgstr "Bitte wählen Sie eine Option."
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "This service has no customizable options. Click Continue to proceed."
 msgstr ""
+"Diese Dienstleistung hat keine anpassbaren Optionen. Klicken Sie auf Weiter,"
+" um fortzufahren."
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "Continue to Scheduling"
-msgstr ""
+msgstr "Weiter zur Terminplanung"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Select Your Stylist"
-msgstr ""
+msgstr "Wählen Sie Ihren Stylisten"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Auto-assigned"
-msgstr ""
+msgstr "Automatisch zugewiesen"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Select a Stylist"
-msgstr ""
+msgstr "Stylisten auswählen"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "No stylists are currently assigned to this service."
-msgstr ""
+msgstr "Derzeit sind diesem Service keine Stylisten zugeordnet."
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Please contact us directly."
-msgstr ""
+msgstr "Bitte kontaktieren Sie uns direkt."
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Pick a Date & Time"
-msgstr ""
+msgstr "Wählen Sie Datum und Uhrzeit"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Select a stylist and date to see available times."
 msgstr ""
+"Wählen Sie einen Stylisten und ein Datum, um verfügbare Zeiten zu sehen."
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Back to Options"
-msgstr ""
+msgstr "Zurück zu den Optionen"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Continue to Your Details"
-msgstr ""
+msgstr "Weiter zu Ihren Angaben"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Please select a stylist, date and an available time slot."
 msgstr ""
+"Bitte wählen Sie einen Stylisten, ein Datum und einen verfügbaren Termin."
 
 #: templates/bookings/partials/wizard_step_3.html
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Your Details"
-msgstr ""
+msgstr "Ihre Angaben"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Full Name"
-msgstr ""
+msgstr "Vollständiger Name"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Phone Number"
-msgstr ""
+msgstr "Telefonnummer"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Email Address"
-msgstr ""
+msgstr "E-Mail-Adresse"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Age"
-msgstr ""
+msgstr "Alter"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Current Hair Length"
-msgstr ""
+msgstr "Aktuelle Haarlänge"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Select the option that best matches your hair length today."
 msgstr ""
+"Wählen Sie die Option, die Ihrer heutigen Haarlänge am besten entspricht."
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Hair Photos"
-msgstr ""
+msgstr "Haarfotos"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid ""
 "Upload clear photos of your hair from three angles. JPG, PNG or WEBP — max 5"
 " MB each."
 msgstr ""
+"Laden Sie klare Fotos Ihrer Haare aus drei Winkeln hoch. JPG, PNG oder WEBP "
+"— max. 5 MB pro Foto."
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Front View"
-msgstr ""
+msgstr "Vorderansicht"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Side View"
-msgstr ""
+msgstr "Seitenansicht"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Back View"
-msgstr ""
+msgstr "Rückansicht"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "IMPORTANT warning"
-msgstr ""
+msgstr "WICHTIGER Hinweis"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid ""
@@ -570,53 +599,58 @@ msgid ""
 " could lead to breakage. We will assess your photos before confirming your "
 "appointment."
 msgstr ""
+"Sehr feines oder brüchiges Haar ist möglicherweise nicht für bestimmte "
+"straffe Styles geeignet und kann zu Haarbruch führen. Wir werden Ihre Fotos "
+"vor der Bestätigung Ihres Termins begutachten."
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Back to Scheduling"
-msgstr ""
+msgstr "Zurück zur Terminplanung"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Continue to Payment"
-msgstr ""
+msgstr "Weiter zur Zahlung"
 
 #: templates/bookings/partials/wizard_step_3.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "File is too large. Maximum size is 5 MB."
-msgstr ""
+msgstr "Datei ist zu groß. Die maximale Größe beträgt 5 MB."
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Review & Payment"
-msgstr ""
+msgstr "Überprüfung & Zahlung"
 
 #: templates/bookings/partials/wizard_step_4.html
 #: templates/bookings/partials/wizard_summary.html
 msgid "Deposit Required"
-msgstr ""
+msgstr "Anzahlung erforderlich"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid ""
 "Use this exact reference on your transfer so we can match your deposit."
 msgstr ""
+"Verwenden Sie genau diese Referenz bei Ihrer Überweisung, damit wir Ihre "
+"Anzahlung zuordnen können."
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Payment Method"
-msgstr ""
+msgstr "Zahlungsmethode"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Transfer your deposit using one of the methods below."
-msgstr ""
+msgstr "Überweisen Sie Ihre Anzahlung mit einer der untenstehenden Methoden."
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Proof of Payment"
-msgstr ""
+msgstr "Zahlungsbestätigung"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Upload your transfer screenshot"
-msgstr ""
+msgstr "Laden Sie einen Screenshot der Überweisung hoch"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Policy Review"
-msgstr ""
+msgstr "Richtlinienüberprüfung"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid ""
@@ -624,60 +658,68 @@ msgid ""
 "your hair photos. If your request is not approved, your deposit will be "
 "refunded. Please ensure the transferred amount and reference match exactly."
 msgstr ""
+"Ihr Zeitfenster wird 12 Stunden reserviert, während wir Ihre Anzahlung "
+"prüfen und Ihre Haarfotos begutachten. Falls Ihre Anfrage nicht genehmigt "
+"wird, wird Ihre Anzahlung zurückerstattet. Bitte stellen Sie sicher, dass "
+"der überwiesene Betrag und die Referenz genau übereinstimmen."
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Back to Details"
-msgstr ""
+msgstr "Zurück zu den Angaben"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Submit Request"
-msgstr ""
+msgstr "Anfrage einreichen"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Booking Summary"
-msgstr ""
+msgstr "Buchungszusammenfassung"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Base Price"
-msgstr ""
+msgstr "Grundpreis"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Discount"
-msgstr ""
+msgstr "Rabatt"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Total"
-msgstr ""
+msgstr "Gesamt"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "A deposit holds your slot for 12 hours while we review your request."
 msgstr ""
+"Eine Anzahlung reserviert Ihren Termin für 12 Stunden, während wir Ihre "
+"Anfrage prüfen."
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Estimated Duration"
-msgstr ""
+msgstr "Geschätzte Dauer"
 
 #: templates/pages/about.html
 msgid "Premium African Braiding"
-msgstr ""
+msgstr "Premium afrikanische Flechtkunst"
 
 #: templates/pages/about.html
 msgid ""
 "Authentic, handcrafted African braiding traditions — proudly brought to the "
 "heart of Budapest."
 msgstr ""
+"Authentische, handgefertigte afrikanische Flechttraditionen — stolz ins Herz"
+" von Budapest gebracht."
 
 #: templates/pages/about.html
 msgid "Explore Our Styles"
-msgstr ""
+msgstr "Entdecken Sie unsere Styles"
 
 #: templates/pages/about.html
 msgid "Our Story"
-msgstr ""
+msgstr "Unsere Geschichte"
 
 #: templates/pages/about.html
 msgid "Tradition you can feel in every strand"
-msgstr ""
+msgstr "Tradition, die Sie in jeder Strähne spüren"
 
 #: templates/pages/about.html
 msgid ""
@@ -686,6 +728,10 @@ msgid ""
 "Hungary. What began as a passion for sharing authentic styles has grown into"
 " Budapest"
 msgstr ""
+"Afrikai Hajfonás wurde aus einer einfachen Überzeugung gegründet: dass "
+"afrikanisches Flechten eine Kunstform ist, die über Generationen "
+"weitergegeben wurde und ein echtes Zuhause in Ungarn verdient. Was als "
+"Leidenschaft für authentische Styles begann, ist in Budapest"
 
 #: templates/pages/about.html
 msgid ""
@@ -693,22 +739,25 @@ msgid ""
 "understand your hair, your lifestyle, and the look you dream of — because "
 "beautiful, long-lasting braids start with understanding."
 msgstr ""
+"Jeder Termin beginnt mit einer persönlichen Beratung. Wir nehmen uns Zeit, "
+"Ihre Haare, Ihren Lebensstil und Ihr Wunsch-Look zu verstehen — denn schöne,"
+" langlebige Flechtungen beginnen mit Verständnis."
 
 #: templates/pages/about.html
 msgid "Braiding close-up"
-msgstr ""
+msgstr "Flechten aus der Nähe"
 
 #: templates/pages/about.html
 msgid "Salon styling chair"
-msgstr ""
+msgstr "Salon-Styling-Stuhl"
 
 #: templates/pages/about.html
 msgid "Our Mission"
-msgstr ""
+msgstr "Unsere Mission"
 
 #: templates/pages/about.html
 msgid "Beauty, care, and integrity"
-msgstr ""
+msgstr "Schönheit, Sorgfalt und Integrität"
 
 #: templates/pages/about.html
 msgid ""
@@ -716,6 +765,9 @@ msgid ""
 "of your hair. We are honest about what each style requires — from hair "
 "length and texture to the right thickness for the design you want."
 msgstr ""
+"Unsere Mission ist es, makellose Ergebnisse zu liefern, ohne die Gesundheit "
+"Ihrer Haare zu gefährden. Wir sind ehrlich darüber, was jeder Stil erfordert"
+" — von Haarlänge und Textur bis zur richtigen Dicke für Ihr Wunschdesign."
 
 #: templates/pages/about.html
 msgid ""
@@ -724,231 +776,240 @@ msgid ""
 "style, and only then secure your slot — so you always leave our chair "
 "delighted."
 msgstr ""
+"Deshalb ist jede Buchung eine Terminanfrage, keine sofortige Reservierung. "
+"Wir begutachten Ihre Fotos, bestätigen, dass Ihre Haare für den Stil "
+"geeignet sind, und sichern erst dann Ihren Termin — damit Sie immer "
+"zufrieden von unserem Stuhl aufstehen."
 
 #: templates/pages/about.html
 msgid "What sets us apart"
-msgstr ""
+msgstr "Was uns auszeichnet"
 
 #: templates/pages/about.html
 msgid "The principles behind every appointment at Afrikai Hajfonás."
-msgstr ""
+msgstr "Die Prinzipien hinter jedem Termin bei Afrikai Hajfonás."
 
 #: templates/pages/about.html
 msgid "Handcrafted Artistry"
-msgstr ""
+msgstr "Handwerkliche Kunst"
 
 #: templates/pages/about.html
 msgid "Every braid is shaped by hand by experienced stylists."
-msgstr ""
+msgstr "Jede Flechtung wird von erfahrenen Stylisten von Hand geformt."
 
 #: templates/pages/about.html
 msgid "Hair-First Care"
-msgstr ""
+msgstr "Haar-Erst-Pflege"
 
 #: templates/pages/about.html
 msgid "We only accept styles that suit your hair"
-msgstr ""
+msgstr "Wir akzeptieren nur Styles, die zu Ihren Haaren passen"
 
 #: templates/pages/about.html
 msgid "Authentic Styles"
-msgstr ""
+msgstr "Authentische Styles"
 
 #: templates/pages/about.html
 msgid "True African braiding techniques, never shortcuts."
-msgstr ""
+msgstr "Echte afrikanische Flechttechniken, niemals Abkürzungen."
 
 #: templates/pages/about.html
 msgid "Warm Hospitality"
-msgstr ""
+msgstr "Herzliche Gastfreundschaft"
 
 #: templates/pages/about.html
 msgid "A welcoming, comfortable experience from start to finish."
-msgstr ""
+msgstr "Ein einladendes, komfortables Erlebnis von Anfang bis Ende."
 
 #: templates/pages/about.html
 msgid "The Team"
-msgstr ""
+msgstr "Das Team"
 
 #: templates/pages/about.html
 msgid "Meet our braiders"
-msgstr ""
+msgstr "Lernen Sie unsere Flechter kennen"
 
 #: templates/pages/about.html
 msgid "Skilled hands, genuine passion, and years of braiding experience."
-msgstr ""
+msgstr "Geschickte Hände, echte Leidenschaft und jahrelange Flecht-Erfahrung."
 
 #: templates/pages/about.html
 msgid "Master Braider"
-msgstr ""
+msgstr "Meister-Flechter"
 
 #: templates/pages/about.html
 msgid "Specialist in knotless braids & protective styling"
-msgstr ""
+msgstr "Spezialist für Knotless Braids & Protective Styling"
 
 #: templates/pages/about.html
 msgid "Trusted & registered"
-msgstr ""
+msgstr "Vertrauenswürdig & registriert"
 
 #: templates/pages/about.html
 msgid "Licensed Salon"
-msgstr ""
+msgstr "Lizenzierter Salon"
 
 #: templates/pages/about.html
 msgid "Hair-Safe Products"
-msgstr ""
+msgstr "Haarfreundliche Produkte"
 
 #: templates/pages/about.html
 msgid "EN · HU · DE"
-msgstr ""
+msgstr "EN · HU · DE"
 
 #: templates/pages/about.html
 msgid "Premium Service"
-msgstr ""
+msgstr "Premium-Service"
 
 #: templates/pages/about.html
 msgid "Ready for your transformation?"
-msgstr ""
+msgstr "Bereit für Ihre Verwandlung?"
 
 #: templates/pages/about.html
 msgid "Browse our styles and start your appointment request today."
 msgstr ""
+"Stöbern Sie in unseren Styles und beginnen Sie noch heute Ihre "
+"Terminanfrage."
 
 #: templates/pages/about.html templates/pages/contact.html
 msgid "View Services"
-msgstr ""
+msgstr "Dienstleistungen ansehen"
 
 #: templates/pages/contact.html
 msgid "Get in touch"
-msgstr ""
+msgstr "Nehmen Sie Kontakt auf"
 
 #: templates/pages/contact.html
 msgid "Contact Afrikai Hajfonás"
-msgstr ""
+msgstr "Kontakt zu Afrikai Hajfonás"
 
 #: templates/pages/contact.html
 msgid "Questions about a style, an appointment, or your deposit? We"
-msgstr ""
+msgstr "Fragen zu einem Stil, einem Termin oder Ihrer Anzahlung?"
 
 #: templates/pages/contact.html
 msgid "Visit our salon"
-msgstr ""
+msgstr "Besuchen Sie unseren Salon"
 
 #: templates/pages/contact.html
 msgid "Budapest, Hungary"
-msgstr ""
+msgstr "Budapest, Ungarn"
 
 #: templates/pages/contact.html
 msgid "Call us"
-msgstr ""
+msgstr "Rufen Sie uns an"
 
 #: templates/pages/contact.html
 msgid "Phone coming soon"
-msgstr ""
+msgstr "Telefon folgt in Kürze"
 
 #: templates/pages/contact.html
 msgid "Email us"
-msgstr ""
+msgstr "Schreiben Sie uns"
 
 #: templates/pages/contact.html
 msgid "Email coming soon"
-msgstr ""
+msgstr "E-Mail folgt in Kürze"
 
 #: templates/pages/contact.html
 msgid "Business hours"
-msgstr ""
+msgstr "Geschäftszeiten"
 
 #: templates/pages/contact.html
 msgid "Monday"
-msgstr ""
+msgstr "Montag"
 
 #: templates/pages/contact.html templates/pages/contact.html
 #: templates/pages/contact.html
 msgid "10:00 – 19:00"
-msgstr ""
+msgstr "10:00 – 19:00"
 
 #: templates/pages/contact.html
 msgid "Tuesday"
-msgstr ""
+msgstr "Dienstag"
 
 #: templates/pages/contact.html
 msgid "Wednesday"
-msgstr ""
+msgstr "Mittwoch"
 
 #: templates/pages/contact.html
 msgid "Thursday"
-msgstr ""
+msgstr "Donnerstag"
 
 #: templates/pages/contact.html
 msgid "Friday"
-msgstr ""
+msgstr "Freitag"
 
 #: templates/pages/contact.html
 msgid "10:00 – 20:00"
-msgstr ""
+msgstr "10:00 – 20:00"
 
 #: templates/pages/contact.html
 msgid "Saturday"
-msgstr ""
+msgstr "Samstag"
 
 #: templates/pages/contact.html
 msgid "09:00 – 20:00"
-msgstr ""
+msgstr "09:00 – 20:00"
 
 #: templates/pages/contact.html
 msgid "Sunday"
-msgstr ""
+msgstr "Sonntag"
 
 #: templates/pages/contact.html
 msgid "Closed"
-msgstr ""
+msgstr "Geschlossen"
 
 #: templates/pages/contact.html
 msgid "Follow us"
-msgstr ""
+msgstr "Folgen Sie uns"
 
 #: templates/pages/contact.html
 msgid "Instagram"
-msgstr ""
+msgstr "Instagram"
 
 #: templates/pages/contact.html
 msgid "Facebook"
-msgstr ""
+msgstr "Facebook"
 
 #: templates/pages/contact.html
 msgid "TikTok"
-msgstr ""
+msgstr "TikTok"
 
 #: templates/pages/contact.html
 msgid "Social links coming soon."
-msgstr ""
+msgstr "Social-Media-Links folgen in Kürze."
 
 #: templates/pages/contact.html
 msgid "Find us"
-msgstr ""
+msgstr "Finden Sie uns"
 
 #: templates/pages/contact.html
 msgid "Salon location map"
-msgstr ""
+msgstr "Salon-Standortkarte"
 
 #: templates/pages/contact.html
 msgid "Prefer to book right now?"
-msgstr ""
+msgstr "Möchten Sie lieber sofort buchen?"
 
 #: templates/pages/contact.html
 msgid "Browse our styles and submit an appointment request online."
 msgstr ""
+"Stöbern Sie in unseren Styles und reichen Sie Ihre Terminanfrage online ein."
 
 #: templates/pages/privacy.html templates/pages/terms.html
 msgid "Legal"
-msgstr ""
+msgstr "Rechtliches"
 
 #: templates/pages/privacy.html
 msgid "How Afrikai Hajfonás collects, uses, and protects your personal data."
 msgstr ""
+"Wie Afrikai Hajfonás Ihre personenbezogenen Daten erfasst, verwendet und "
+"schützt."
 
 #: templates/pages/privacy.html templates/pages/terms.html
 msgid "Last updated: August 2026"
-msgstr ""
+msgstr "Zuletzt aktualisiert: August 2026"
 
 #: templates/pages/privacy.html
 msgid ""
@@ -957,85 +1018,100 @@ msgid ""
 "Regulation (GDPR). This policy explains what we collect, why, and the rights"
 " you have over your information."
 msgstr ""
+"Afrikai Hajfonás („wir\") respektiert Ihre Privatsphäre und verpflichtet "
+"sich, Ihre personenbezogenen Daten im Einklang mit der EU-Datenschutz-"
+"Grundverordnung (DSGVO) zu schützen. Diese Richtlinie erklärt, was wir "
+"erheben, warum, und welche Rechte Sie an Ihren Daten haben."
 
 #: templates/pages/privacy.html
 msgid "Data we collect"
-msgstr ""
+msgstr "Von uns erhobene Daten"
 
 #: templates/pages/privacy.html
 msgid ""
 "When you request an appointment, we collect only what is necessary to assess"
 " and confirm your booking:"
 msgstr ""
+"Wenn Sie einen Termin anfragen, erheben wir nur die Daten, die zur "
+"Beurteilung und Bestätigung Ihrer Buchung erforderlich sind:"
 
 #: templates/pages/privacy.html
 msgid "Contact details"
-msgstr ""
+msgstr "Kontaktdaten"
 
 #: templates/pages/privacy.html
 msgid "Name, email address, phone number, and age."
-msgstr ""
+msgstr "Name, E-Mail-Adresse, Telefonnummer und Alter."
 
 #: templates/pages/privacy.html
 msgid "Hair information"
-msgstr ""
+msgstr "Haarinformation"
 
 #: templates/pages/privacy.html
 msgid "Hair length and three photos (front, side, back)."
-msgstr ""
+msgstr "Haarlänge und drei Fotos (Vorder-, Seiten- und Rückansicht)."
 
 #: templates/pages/privacy.html
 msgid "Payment proof"
-msgstr ""
+msgstr "Zahlungsnachweis"
 
 #: templates/pages/privacy.html
 msgid "A screenshot of your bank transfer as proof of deposit."
-msgstr ""
+msgstr "Ein Screenshot Ihrer Banküberweisung als Anzahlungsnachweis."
 
 #: templates/pages/privacy.html
 msgid "Booking details"
-msgstr ""
+msgstr "Buchungsdetails"
 
 #: templates/pages/privacy.html
 msgid "Chosen service, stylist, options, date, and time."
-msgstr ""
+msgstr "Gewählte Dienstleistung, Stylist, Optionen, Datum und Uhrzeit."
 
 #: templates/pages/privacy.html
 msgid ""
 "We do not require you to create an account, and we do not collect more data "
 "than is needed to process your request."
 msgstr ""
+"Sie müssen kein Konto erstellen, und wir erheben nicht mehr Daten, als zur "
+"Verarbeitung Ihrer Anfrage erforderlich sind."
 
 #: templates/pages/privacy.html
 msgid "How we use your data"
-msgstr ""
+msgstr "Wie wir Ihre Daten verwenden"
 
 #: templates/pages/privacy.html
 msgid "To assess whether your hair is suited to the style you requested."
 msgstr ""
+"Um zu beurteilen, ob Ihre Haare für den gewünschten Stil geeignet sind."
 
 #: templates/pages/privacy.html
 msgid "To verify your deposit and process your appointment request."
-msgstr ""
+msgstr "Um Ihre Anzahlung zu prüfen und Ihre Terminanfrage zu verarbeiten."
 
 #: templates/pages/privacy.html
 msgid ""
 "To communicate with you about your booking and any necessary follow-up."
 msgstr ""
+"Um mit Ihnen über Ihre Buchung und notwendige Folgeaktionen zu "
+"kommunizieren."
 
 #: templates/pages/privacy.html
 msgid "To meet our legal and financial record-keeping obligations."
 msgstr ""
+"Um unseren gesetzlichen und finanziellen Aufbewahrungspflichten "
+"nachzukommen."
 
 #: templates/pages/privacy.html
 msgid ""
 "We do not sell your data and do not use it for unrelated marketing without "
 "your consent."
 msgstr ""
+"Wir verkaufen Ihre Daten nicht und verwenden sie nicht für unverwandtes "
+"Marketing ohne Ihre Zustimmung."
 
 #: templates/pages/privacy.html
 msgid "Data retention"
-msgstr ""
+msgstr "Datenaufbewahrung"
 
 #: templates/pages/privacy.html
 msgid ""
@@ -1045,52 +1121,60 @@ msgid ""
 "maintain accurate service history. You may request deletion at any time (see"
 " Your Rights below)."
 msgstr ""
+"Wir bewahren Ihre Termininformationen, Haarfotos und Zahlungsnachweise so "
+"lange auf, wie zur Erbringung unserer Dienstleistung und zur Erfüllung "
+"gesetzlicher Anforderungen erforderlich. Fotos und Buchungsdatensätze können"
+" aufbewahrt werden, um zukünftige Beratungen zu unterstützen und eine genaue"
+" Service-Historie zu führen. Sie können jederzeit Löschung beantragen (siehe"
+" Ihre Rechte unten)."
 
 #: templates/pages/privacy.html
 msgid "Your rights under GDPR"
-msgstr ""
+msgstr "Ihre Rechte gemäß DSGVO"
 
 #: templates/pages/privacy.html
 msgid "Access"
-msgstr ""
+msgstr "Auskunft"
 
 #: templates/pages/privacy.html
 msgid "Request a copy of the data we hold about you."
-msgstr ""
+msgstr "Eine Kopie der Daten anzufordern, die wir über Sie gespeichert haben."
 
 #: templates/pages/privacy.html
 msgid "Rectification"
-msgstr ""
+msgstr "Berichtigung"
 
 #: templates/pages/privacy.html
 msgid "Ask us to correct inaccurate information."
-msgstr ""
+msgstr "Uns zu bitten, ungenaue Informationen zu korrigieren."
 
 #: templates/pages/privacy.html
 msgid "Erasure"
-msgstr ""
+msgstr "Löschung"
 
 #: templates/pages/privacy.html
 msgid "Request deletion of your data (the"
-msgstr ""
+msgstr "Löschung Ihrer Daten zu beantragen (die"
 
 #: templates/pages/privacy.html
 msgid "Portability"
-msgstr ""
+msgstr "Datenübertragbarkeit"
 
 #: templates/pages/privacy.html
 msgid "Receive your data in a portable format."
-msgstr ""
+msgstr "Ihre Daten in einem portablen Format zu erhalten."
 
 #: templates/pages/privacy.html
 msgid ""
 "You also have the right to object to certain processing and to lodge a "
 "complaint with the relevant data protection authority."
 msgstr ""
+"Sie haben auch das Recht, bestimmten Verarbeitungen zu widersprechen und bei"
+" der zuständigen Datenschutzbehörde Beschwerde einzulegen."
 
 #: templates/pages/privacy.html
 msgid "Data security"
-msgstr ""
+msgstr "Datensicherheit"
 
 #: templates/pages/privacy.html
 msgid ""
@@ -1099,32 +1183,40 @@ msgid ""
 "details and photos is restricted to our salon team and is handled "
 "confidentially."
 msgstr ""
+"Wir treffen angemessene technische und organisatorische Maßnahmen, um Ihre "
+"Daten vor unbefugtem Zugriff, Verlust oder Missbrauch zu schützen. Der "
+"Zugriff auf Ihre Buchungsdetails und Fotos ist auf unser Salonteam "
+"beschränkt und wird vertraulich behandelt."
 
 #: templates/pages/privacy.html
 msgid "Contact for privacy concerns"
-msgstr ""
+msgstr "Kontakt für Datenschutzfragen"
 
 #: templates/pages/privacy.html
 msgid ""
 "To exercise any of your rights or ask a question about your data, contact us"
 " using the details on our"
 msgstr ""
+"Zur Ausübung Ihrer Rechte oder bei Fragen zu Ihren Daten kontaktieren Sie "
+"uns über die Angaben auf unserer"
 
 #: templates/pages/privacy.html templates/pages/terms.html
 msgid "Contact page"
-msgstr ""
+msgstr "Kontaktseite"
 
 #: templates/pages/privacy.html
 msgid "We will respond in accordance with applicable law."
-msgstr ""
+msgstr "Wir werden gemäß geltendem Recht antworten."
 
 #: templates/pages/terms.html
 msgid "Please read these terms carefully before requesting an appointment."
 msgstr ""
+"Bitte lesen Sie diese Bedingungen sorgfältig, bevor Sie einen Termin "
+"anfragen."
 
 #: templates/pages/terms.html
 msgid "About our booking process"
-msgstr ""
+msgstr "Über unseren Buchungsprozess"
 
 #: templates/pages/terms.html
 msgid ""
@@ -1134,30 +1226,41 @@ msgid ""
 "send a deposit. Your slot is held temporarily while we review your request "
 "and approve or decline it."
 msgstr ""
+"Afrikai Hajfonás betreibt ein Terminanfrage- und Reservierungssystem. "
+"Aufwendiges Flechten hängt von Ihrer Haarlänge, Ihrem Alter und der "
+"Haardicke ab, daher bieten wir keine Sofortbuchungen an. Stattdessen "
+"konfigurieren Sie einen Stil, laden Haarfotos hoch und senden eine "
+"Anzahlung. Ihr Termin wird vorübergehend reserviert, während wir Ihre "
+"Anfrage prüfen und genehmigen oder ablehnen."
 
 #: templates/pages/terms.html
 msgid "Deposit & Hold Policy"
-msgstr ""
+msgstr "Anzahlungs- und Reservierungsrichtlinie"
 
 #: templates/pages/terms.html
 msgid ""
 "A deposit is required to hold your requested time slot. The deposit amount "
 "depends on the service"
 msgstr ""
+"Eine Anzahlung ist erforderlich, um Ihr gewünschtes Zeitfenster zu "
+"reservieren. Die Höhe der Anzahlung hängt von der Dienstleistung ab"
 
 #: templates/pages/terms.html
 msgid "Services of 45,000 Ft or more: a 20,000 Ft deposit."
-msgstr ""
+msgstr "Dienstleistungen ab 45.000 Ft: eine Anzahlung von 20.000 Ft."
 
 #: templates/pages/terms.html
 msgid "Services under 45,000 Ft: a 10,000 Ft deposit."
-msgstr ""
+msgstr "Dienstleistungen unter 45.000 Ft: eine Anzahlung von 10.000 Ft."
 
 #: templates/pages/terms.html
 msgid ""
 "Once submitted, your slot is held for 12 hours. If we do not confirm within "
 "that window, the hold expires and the slot is released."
 msgstr ""
+"Nach der Einreichung wird Ihr Termin für 12 Stunden reserviert. Wenn wir "
+"nicht innerhalb dieses Zeitfensters bestätigen, läuft die Reservierung ab "
+"und der Termin wird freigegeben."
 
 #: templates/pages/terms.html
 msgid ""
@@ -1166,46 +1269,56 @@ msgid ""
 "refundable except where required by law or where we decline your request — "
 "in which case a full refund is arranged via our refund queue."
 msgstr ""
+"Zahlungen erfolgen ausschließlich per manueller Banküberweisung (Revolut, "
+"Wise, TransferGo oder Banküberweisung). Wir akzeptieren keine "
+"Kartenzahlungen. Anzahlungen sind nicht erstattungsfähig, außer soweit "
+"gesetzlich vorgeschrieben oder wenn wir Ihre Anfrage ablehnen — in diesem "
+"Fall wird eine vollständige Rückerstattung über unsere "
+"Rückerstattungswarteschlange veranlasst."
 
 #: templates/pages/terms.html
 msgid "Appointment Request Process"
-msgstr ""
+msgstr "Terminanfrage-Prozess"
 
 #: templates/pages/terms.html
 msgid "Choose your style"
-msgstr ""
+msgstr "Wählen Sie Ihren Stil"
 
 #: templates/pages/terms.html
 msgid "Select a service and configure your options."
-msgstr ""
+msgstr "Wählen Sie eine Dienstleistung und konfigurieren Sie Ihre Optionen."
 
 #: templates/pages/terms.html
 msgid "Pick a stylist, date & time"
-msgstr ""
+msgstr "Wählen Sie Stylist, Datum & Uhrzeit"
 
 #: templates/pages/terms.html
 msgid "Choose from available slots based on the stylist"
-msgstr ""
+msgstr "Wählen Sie aus den verfügbaren Terminen basierend auf dem Stylisten"
 
 #: templates/pages/terms.html
 msgid "Share your details & photos"
-msgstr ""
+msgstr "Teilen Sie Ihre Angaben & Fotos"
 
 #: templates/pages/terms.html
 msgid ""
 "Provide your contact details and clear hair photos so we can assess "
 "suitability."
 msgstr ""
+"Geben Sie Ihre Kontaktdaten und klare Haarfotos an, damit wir die Eignung "
+"beurteilen können."
 
 #: templates/pages/terms.html
 msgid "Send your deposit"
-msgstr ""
+msgstr "Senden Sie Ihre Anzahlung"
 
 #: templates/pages/terms.html
 msgid ""
 "Transfer the deposit and upload your proof of payment using your reference "
 "code (AFH-XXXXXX)."
 msgstr ""
+"Überweisen Sie die Anzahlung und laden Sie Ihren Zahlungsnachweis mit Ihrem "
+"Referenzcode (AFH-XXXXXX) hoch."
 
 #: templates/pages/terms.html
 msgid ""
@@ -1213,10 +1326,13 @@ msgid ""
 "confirmation once your appointment is approved. You can check your status "
 "anytime via the booking status lookup."
 msgstr ""
+"Wir prüfen dann Ihre Anzahlung und begutachten Ihre Haarfotos. Sie erhalten "
+"eine Bestätigung, sobald Ihr Termin genehmigt wurde. Sie können Ihren Status"
+" jederzeit über die Buchungsstatus-Abfrage prüfen."
 
 #: templates/pages/terms.html
 msgid "Photo Submission Policy"
-msgstr ""
+msgstr "Foto-Einreichungsrichtlinie"
 
 #: templates/pages/terms.html
 msgid ""
@@ -1224,6 +1340,9 @@ msgid ""
 " front, side, and back. These help us confirm length, texture, and thickness"
 " before you commit."
 msgstr ""
+"Um zu beurteilen, ob Ihre Haare zum gewählten Stil passen, bitten wir um "
+"drei Fotos: Vorder-, Seiten- und Rückansicht. Diese helfen uns, Länge, "
+"Textur und Dicke zu bestätigen, bevor Sie sich festlegen."
 
 #: templates/pages/terms.html
 msgid ""
@@ -1231,188 +1350,203 @@ msgid ""
 " reviewed only by our team and stored securely. See our Privacy Policy for "
 "how your images are handled."
 msgstr ""
+"Akzeptierte Formate: JPG, JPEG, PNG und WEBP, bis zu 5 MB pro Foto. Fotos "
+"werden nur von unserem Team begutachtet und sicher gespeichert. Siehe unsere"
+" Datenschutzerklärung zum Umgang mit Ihren Bildern."
 
 #: templates/pages/terms.html
 msgid ""
 "Proof of payment (a screenshot of your bank transfer) may be uploaded as "
 "JPG, JPEG, PNG, or PDF, up to 5 MB."
 msgstr ""
+"Der Zahlungsnachweis (ein Screenshot Ihrer Banküberweisung) kann als JPG, "
+"JPEG, PNG oder PDF hochgeladen werden, bis zu 5 MB."
 
 #: templates/pages/terms.html
 msgid "Cancellation Policy"
-msgstr ""
+msgstr "Stornierungsrichtlinie"
 
 #: templates/pages/terms.html
 msgid ""
 "If you need to cancel, please contact us as early as possible. Because "
 "braiding appointments reserve several hours of a stylist"
 msgstr ""
+"Wenn Sie stornieren müssen, kontaktieren Sie uns bitte so früh wie möglich. "
+"Da Flechttermine mehrere Stunden eines Stylisten"
 
 #: templates/pages/terms.html
 msgid "If we decline your request, your deposit is refunded in full."
 msgstr ""
+"Wenn wir Ihre Anfrage ablehnen, wird Ihre Anzahlung vollständig "
+"zurückerstattet."
 
 #: templates/pages/terms.html
 msgid ""
 "If your request expires (no action within 12 hours), it is moved to our "
 "refund queue for processing."
 msgstr ""
+"Wenn Ihre Anfrage abläuft (keine Aktion innerhalb von 12 Stunden), wird sie "
+"zur Verarbeitung in unsere Rückerstattungswarteschlange verschoben."
 
 #: templates/pages/terms.html
 msgid ""
 "No-shows or late cancellations of approved appointments may forfeit the "
 "deposit."
 msgstr ""
+"Bei Nichterscheinen oder späten Stornierungen genehmigter Termine kann die "
+"Anzahlung verfallen."
 
 #: templates/pages/terms.html
 msgid "Questions about these terms?"
-msgstr ""
+msgstr "Fragen zu diesen Bedingungen?"
 
 #: templates/services/service_detail.html
 msgid "No image available"
-msgstr ""
+msgstr "Kein Bild verfügbar"
 
 #: templates/services/service_detail.html
 msgid "Available Options"
-msgstr ""
+msgstr "Verfügbare Optionen"
 
 #: templates/services/service_detail.html
 msgid "Style Details"
-msgstr ""
+msgstr "Style-Details"
 
 #: templates/services/service_detail.html
 msgid "Suitability Information"
-msgstr ""
+msgstr "Eignungsinformationen"
 
 #: templates/services/service_detail.html
 msgid "Target Audience"
-msgstr ""
+msgstr "Zielgruppe"
 
 #: templates/services/service_detail.html
 msgid "Best For"
-msgstr ""
+msgstr "Am besten für"
 
 #: templates/services/service_detail.html
 msgid "Not specified"
-msgstr ""
+msgstr "Nicht angegeben"
 
 #: templates/services/service_detail.html
 msgid "IMPORTANT"
-msgstr ""
+msgstr "WICHTIG"
 
 #: templates/services/service_detail.html
 msgid "Watch Video"
-msgstr ""
+msgstr "Video ansehen"
 
 #: templates/services/service_detail.html
 msgid "View a video of this style"
-msgstr ""
+msgstr "Ein Video dieses Styles ansehen"
 
 #: templates/services/service_detail.html
 msgid "Book Consultation"
-msgstr ""
+msgstr "Beratung buchen"
 
 #: templates/services/service_list.html
 msgid "Explore Braid Styles"
-msgstr ""
+msgstr "Flechtstile entdecken"
 
 #: templates/services/service_list.html
 msgid "Children"
-msgstr ""
+msgstr "Kinder"
 
 #: templates/services/service_list.html
 msgid "Search for cornrows, pop smoke, twists..."
-msgstr ""
+msgstr "Suchen Sie nach Cornrows, Pop Smoke, Twists..."
 
 #: templates/services/partials/service_grid.html
 msgid "Filters"
-msgstr ""
+msgstr "Filter"
 
 #: templates/services/partials/service_grid.html
 msgid "Braid Type"
-msgstr ""
+msgstr "Flechttyp"
 
 #: templates/services/partials/service_grid.html
 msgid "All Types"
-msgstr ""
+msgstr "Alle Typen"
 
 #: templates/services/partials/service_grid.html
 msgid "Price Range (HUF)"
-msgstr ""
+msgstr "Preisbereich (HUF)"
 
 #: templates/services/partials/service_grid.html
 msgid "Min"
-msgstr ""
+msgstr "Min"
 
 #: templates/services/partials/service_grid.html
 msgid "to"
-msgstr ""
+msgstr "–"
 
 #: templates/services/partials/service_grid.html
 msgid "Max"
-msgstr ""
+msgstr "Max"
 
 #: templates/services/partials/service_grid.html
 msgid "Max Duration"
-msgstr ""
+msgstr "Max. Dauer"
 
 #: templates/services/partials/service_grid.html
 msgid "Any Duration"
-msgstr ""
+msgstr "Beliebige Dauer"
 
 #: templates/services/partials/service_grid.html
 msgid "Under 1 hour"
-msgstr ""
+msgstr "Unter 1 Stunde"
 
 #: templates/services/partials/service_grid.html
 msgid "Under 2 hours"
-msgstr ""
+msgstr "Unter 2 Stunden"
 
 #: templates/services/partials/service_grid.html
 msgid "Under 3 hours"
-msgstr ""
+msgstr "Unter 3 Stunden"
 
 #: templates/services/partials/service_grid.html
 msgid "Under 4 hours"
-msgstr ""
+msgstr "Unter 4 Stunden"
 
 #: templates/services/partials/service_grid.html
 msgid "Discounted styles only"
-msgstr ""
+msgstr "Nur rabattierte Styles"
 
 #: templates/services/partials/service_grid.html
 msgid "Sort By"
-msgstr ""
+msgstr "Sortieren nach"
 
 #: templates/services/partials/service_grid.html
 msgid "Most Popular"
-msgstr ""
+msgstr "Beliebteste"
 
 #: templates/services/partials/service_grid.html
 msgid "Price (Low to High)"
-msgstr ""
+msgstr "Preis (niedrig zu hoch)"
 
 #: templates/services/partials/service_grid.html
 msgid "Price (High to Low)"
-msgstr ""
+msgstr "Preis (hoch zu niedrig)"
 
 #: templates/services/partials/service_grid.html
 msgid "Biggest Discount"
-msgstr ""
+msgstr "Größter Rabatt"
 
 #: templates/services/partials/service_grid.html
 msgid "Newest Styles"
-msgstr ""
+msgstr "Neueste Styles"
 
 #: templates/services/partials/service_grid.html
 msgid "Apply Filters"
-msgstr ""
+msgstr "Filter anwenden"
 
 #: templates/services/partials/service_grid.html
 msgid "No services match your search."
-msgstr ""
+msgstr "Keine Dienstleistungen entsprechen Ihrer Suche."
 
 #: templates/services/partials/service_grid.html
 msgid ""
 "Try adjusting your filters, clearing prices, or entering a new keyword."
 msgstr ""
+"Versuchen Sie, Ihre Filter anzupassen, Preise zu löschen oder ein neues "
+"Schlagwort einzugeben."

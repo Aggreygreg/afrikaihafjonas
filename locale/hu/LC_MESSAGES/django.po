@@ -14,103 +14,105 @@ msgstr ""
 
 #: _extract_strings.py _extract_strings.py _extract_strings.py
 msgid "..."
-msgstr ""
+msgstr "…"
 
 #: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
 msgid "This service is for adults aged 16 and over."
-msgstr ""
+msgstr "Ez a szolgáltatás 16 éves és idősebb felnőtteknek szól."
 
 #: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
 msgid "This service is for children aged 8 to 15."
-msgstr ""
+msgstr "Ez a szolgáltatás 8–15 éves gyermekeknek szól."
 
 #: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
 msgid "Clients must be at least 8 years old for this service."
-msgstr ""
+msgstr "Az ügyfélnek legalább 8 évesnek kell lennie ehhez a szolgáltatáshoz."
 
 #: apps/bookings/forms.py
 msgid "%(label)s is too large. The maximum file size is 5 MB."
-msgstr ""
+msgstr "%(label)s túl nagy. A maximális fájlméret 5 MB."
 
 #: apps/bookings/forms.py
 msgid "%(label)s has an unsupported format. Allowed: %(formats)s."
-msgstr ""
+msgstr "%(label)s formátuma nem támogatott. Engedélyezett: %(formats)s."
 
 #: apps/bookings/forms.py
 msgid "%(label)s has an unsupported file type."
-msgstr ""
+msgstr "%(label)s fájltípusa nem támogatott."
 
 #: apps/bookings/forms.py
 msgid "I have read and accept the Privacy Policy and consent to the"
 msgstr ""
+"Elolvastam és elfogadom az Adatvédelmi Irányelveket, és hozzájárulok a"
 
 #: apps/bookings/forms.py
 msgid "You must accept the privacy policy to continue."
-msgstr ""
+msgstr "A folytatáshoz el kell fogadnia az adatvédelmi irányelveket."
 
 #: apps/bookings/forms.py
 msgid "JPG, PNG or WEBP — max 5 MB."
-msgstr ""
+msgstr "JPG, PNG vagy WEBP — max 5 MB."
 
 #: apps/bookings/forms.py
 msgid "Front photo"
-msgstr ""
+msgstr "Előlről készült fotó"
 
 #: apps/bookings/forms.py
 msgid "Side photo"
-msgstr ""
+msgstr "Oldalról készült fotó"
 
 #: apps/bookings/forms.py
 msgid "Back photo"
-msgstr ""
+msgstr "Hátulról készült fotó"
 
 #: apps/bookings/forms.py
 msgid "I confirm the deposit has been transferred and I agree to the"
-msgstr ""
+msgstr "Megerősítem, hogy az előleget átutaltam, és egyetértek a"
 
 #: apps/bookings/forms.py
 msgid "You must agree to the policy to submit your request."
-msgstr ""
+msgstr "A kérelem benyújtásához el kell fogadnia a feltételeket."
 
 #: apps/bookings/forms.py
 msgid "JPG, PNG or PDF — max 5 MB."
-msgstr ""
+msgstr "JPG, PNG vagy PDF — max 5 MB."
 
 #: apps/bookings/forms.py
 msgid "Proof of payment"
-msgstr ""
+msgstr "Fizetési bizonylat"
 
 #: apps/bookings/views.py
 msgid "Please select a stylist, date and an available time slot"
-msgstr ""
+msgstr "Kérjük, válasszon szakembert, dátumot és egy szabad időpontot"
 
 #: apps/bookings/views.py
 msgid "We received your request and are verifying your deposit."
-msgstr ""
+msgstr "Megkaptuk a kérelmét, és ellenőrizzük az előleget."
 
 #: apps/bookings/views.py
 msgid "Your deposit is verified! We"
-msgstr ""
+msgstr "Az előlege visszaigazolva! Most"
 
 #: apps/bookings/views.py
 msgid "Your appointment is confirmed!"
-msgstr ""
+msgstr "Az időpontja visszaigazolva!"
 
 #: apps/bookings/views.py
 msgid "Unfortunately, your request was not approved."
-msgstr ""
+msgstr "Sajnos a kérelmét nem hagyták jóvá."
 
 #: apps/bookings/views.py
 msgid "Your request has expired. Your hold on this time slot has ended."
-msgstr ""
+msgstr "A kérelme lejárt. A foglalása erre az időpontra megszűnt."
 
 #: apps/bookings/views.py
 msgid "Please enter both your email address and AFH reference code."
-msgstr ""
+msgstr "Kérjük, adja meg az e-mail címét és az AFH hivatkozási kódot."
 
 #: apps/bookings/views.py
 msgid "No request found. Please check your email and reference code"
 msgstr ""
+"Nem található kérelem. Ellenőrizze az e-mail címét és a hivatkozási kódot"
 
 #: templates/base.html
 msgid "Primary navigation"
@@ -206,15 +208,15 @@ msgstr "Népszerű szolgáltatások"
 
 #: templates/home.html
 msgid "Discover our clients"
-msgstr ""
+msgstr "Ismerje meg ügyfeleink"
 
 #: templates/home.html templates/services/service_list.html
 msgid "Women"
-msgstr ""
+msgstr "Nők"
 
 #: templates/home.html templates/services/service_list.html
 msgid "Men"
-msgstr ""
+msgstr "Férfiak"
 
 #: templates/home.html
 msgid "mins"
@@ -223,6 +225,8 @@ msgstr "perc"
 #: templates/home.html
 msgid "No popular services have been selected yet. Mark some as \\"
 msgstr ""
+"Még nincsenek népszerű szolgáltatások kiválasztva. Jelöljön meg néhányat "
+"mint \\"
 
 #: templates/home.html
 msgid "View All Services"
@@ -258,57 +262,57 @@ msgstr "Olvassa el adatvédelmi irányelveinket"
 
 #: templates/admin/index.html
 msgid "Dashboard"
-msgstr ""
+msgstr "Irányítópult"
 
 #: templates/bookings/confirmation.html
 msgid "Request Submitted"
-msgstr ""
+msgstr "Kérelem leadva"
 
 #: templates/bookings/confirmation.html
 msgid "Your appointment request has been submitted!"
-msgstr ""
+msgstr "Az időpontfoglalási kérelmét sikeresen leadta!"
 
 #: templates/bookings/confirmation.html
 msgid "Thank you. We have received your request and deposit details."
-msgstr ""
+msgstr "Köszönjük. Megkaptuk a kérelmét és az előlegadatokat."
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Your Payment Reference"
-msgstr ""
+msgstr "Az Ön fizetési hivatkozása"
 
 #: templates/bookings/confirmation.html templates/bookings/confirmation.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Copy"
-msgstr ""
+msgstr "Másolás"
 
 #: templates/bookings/confirmation.html
 msgid "Save your reference"
-msgstr ""
+msgstr "Mentse el a hivatkozási kódját"
 
 #: templates/bookings/confirmation.html
 msgid "What happens next?"
-msgstr ""
+msgstr "Mi történik ezután?"
 
 #: templates/bookings/confirmation.html templates/pages/terms.html
 msgid "We"
-msgstr ""
+msgstr "Mi"
 
 #: templates/bookings/confirmation.html
 msgid ""
 "Once approved, your appointment is confirmed and your time slot is locked "
 "in."
-msgstr ""
+msgstr "Jóváhagyás után az időpontja véglegesítve lesz."
 
 #: templates/bookings/confirmation.html
 msgid "If anything is missing, we"
-msgstr ""
+msgstr "Ha bármi hiányzik, mi"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/guest_lookup_result.html
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Service"
-msgstr ""
+msgstr "Szolgáltatás"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/guest_lookup_result.html
@@ -320,57 +324,59 @@ msgstr "Szakember"
 #: templates/bookings/partials/wizard_step_3.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Date & Time"
-msgstr ""
+msgstr "Dátum és idő"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/guest_lookup_result.html
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Deposit"
-msgstr ""
+msgstr "Előleg"
 
 #: templates/bookings/confirmation.html
 msgid "Check your request status"
-msgstr ""
+msgstr "Ellenőrizze a kérelme állapotát"
 
 #: templates/bookings/confirmation.html
 #: templates/bookings/partials/wizard_step_4.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Copied!"
-msgstr ""
+msgstr "Lemásolva!"
 
 #: templates/bookings/consult_wizard.html
 msgid "Book"
-msgstr ""
+msgstr "Foglalás"
 
 #: templates/bookings/guest_lookup.html templates/bookings/guest_lookup.html
 msgid "Check Your Request Status"
-msgstr ""
+msgstr "Kérelem állapotának ellenőrzése"
 
 #: templates/bookings/guest_lookup.html
 msgid ""
 "Enter your email address and the reference code we gave you to view the "
 "status of your appointment request."
 msgstr ""
+"Adja meg e-mail címét és a kapott hivatkozási kódot, hogy megtekinthesse a "
+"kérelme állapotát."
 
 #: templates/bookings/guest_lookup.html
 msgid "Email address"
-msgstr ""
+msgstr "E-mail cím"
 
 #: templates/bookings/guest_lookup.html
 msgid "AFH reference code"
-msgstr ""
+msgstr "AFH hivatkozási kód"
 
 #: templates/bookings/guest_lookup.html
 msgid "Look up status"
-msgstr ""
+msgstr "Állapot lekérdezése"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Request not found"
-msgstr ""
+msgstr "Kérelem nem található"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Deposit verified"
-msgstr ""
+msgstr "Előleg visszaigazolva"
 
 #: templates/bookings/partials/guest_lookup_result.html
 #: templates/bookings/partials/wizard_step_2.html
@@ -379,27 +385,27 @@ msgstr "Dátum"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Time"
-msgstr ""
+msgstr "Időpont"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Payment method"
-msgstr ""
+msgstr "Fizetési mód"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Not yet provided"
-msgstr ""
+msgstr "Még nincs megadva"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Reference"
-msgstr ""
+msgstr "Hivatkozás"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Admin note"
-msgstr ""
+msgstr "Megjegyzés"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Refund information"
-msgstr ""
+msgstr "Visszatérítési információ"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid ""
@@ -407,14 +413,17 @@ msgid ""
 "business days. Please keep your reference code handy. If you do not receive "
 "the refund, contact us quoting your reference."
 msgstr ""
+"Az előleget 5 munkanapon belül visszatérítjük az eredeti fizetési módra. "
+"Kérjük, tartsa kéznél a hivatkozási kódot. Ha nem kapja meg a "
+"visszatérítést, lépjen velünk kapcsolatba a hivatkozási kód megadásával."
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Would you like to submit a new request?"
-msgstr ""
+msgstr "Szeretne új kérelmet leadni?"
 
 #: templates/bookings/partials/guest_lookup_result.html
 msgid "Submit a new request"
-msgstr ""
+msgstr "Új kérelem leadása"
 
 #: templates/bookings/partials/time_slots.html
 msgid "Available Times"
@@ -434,52 +443,54 @@ msgstr ""
 
 #: templates/bookings/partials/wizard_progress.html
 msgid "Configure"
-msgstr ""
+msgstr "Konfigurálás"
 
 #: templates/bookings/partials/wizard_progress.html
 msgid "Schedule"
-msgstr ""
+msgstr "Időpont"
 
 #: templates/bookings/partials/wizard_progress.html
 msgid "Details"
-msgstr ""
+msgstr "Adatok"
 
 #: templates/bookings/partials/wizard_progress.html
 msgid "Review"
-msgstr ""
+msgstr "Áttekintés"
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "Optional"
-msgstr ""
+msgstr "Opcionális"
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "Required"
-msgstr ""
+msgstr "Kötelező"
 
 #: templates/bookings/partials/wizard_step_1.html
 #: templates/services/service_detail.html
 msgid "Select"
-msgstr ""
+msgstr "Kiválasztás"
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "Please select one option."
-msgstr ""
+msgstr "Kérjük, válasszon egy lehetőséget."
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "This service has no customizable options. Click Continue to proceed."
 msgstr ""
+"Ez a szolgáltatás nem rendelkezik testreszabható opciókkal. Kattintson a "
+"Folytatás gombra."
 
 #: templates/bookings/partials/wizard_step_1.html
 msgid "Continue to Scheduling"
-msgstr ""
+msgstr "Tovább az időpontfoglaláshoz"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Select Your Stylist"
-msgstr ""
+msgstr "Válassza ki a szakemberét"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Auto-assigned"
-msgstr ""
+msgstr "Automatikusan hozzárendelve"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Select a Stylist"
@@ -487,40 +498,40 @@ msgstr "Válasszon szakembert"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "No stylists are currently assigned to this service."
-msgstr ""
+msgstr "Jelenleg nincs szakember ehhez a szolgáltatáshoz rendelve."
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Please contact us directly."
-msgstr ""
+msgstr "Kérjük, lépjen velünk közvetlenül kapcsolatba."
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Pick a Date & Time"
-msgstr ""
+msgstr "Válasszon dátumot és időpontot"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Select a stylist and date to see available times."
-msgstr ""
+msgstr "Válasszon szakembert és dátumot a szabad időpontok megtekintéséhez."
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Back to Options"
-msgstr ""
+msgstr "Vissza az opciókhoz"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Continue to Your Details"
-msgstr ""
+msgstr "Tovább az adataihoz"
 
 #: templates/bookings/partials/wizard_step_2.html
 msgid "Please select a stylist, date and an available time slot."
-msgstr ""
+msgstr "Kérjük, válasszon szakembert, dátumot és egy szabad időpontot."
 
 #: templates/bookings/partials/wizard_step_3.html
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Your Details"
-msgstr ""
+msgstr "Az Ön adatai"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Full Name"
-msgstr ""
+msgstr "Teljes név"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Phone Number"
@@ -532,41 +543,45 @@ msgstr "E-mail cím"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Age"
-msgstr ""
+msgstr "Életkor"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Current Hair Length"
-msgstr ""
+msgstr "Jelenlegi hajhossz"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Select the option that best matches your hair length today."
 msgstr ""
+"Válassza ki azt a lehetőséget, amely a legjobban megfelel a jelenlegi "
+"hajhosszának."
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Hair Photos"
-msgstr ""
+msgstr "Hajfotók"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid ""
 "Upload clear photos of your hair from three angles. JPG, PNG or WEBP — max 5"
 " MB each."
 msgstr ""
+"Töltsön fel egyértelmű fotókat a hajáról három szögből. JPG, PNG vagy WEBP —"
+" max 5 MB képenként."
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Front View"
-msgstr ""
+msgstr "Előlnézet"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Side View"
-msgstr ""
+msgstr "Oldalnézet"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Back View"
-msgstr ""
+msgstr "Hátulnézet"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "IMPORTANT warning"
-msgstr ""
+msgstr "FONTOS figyelmeztetés"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid ""
@@ -574,53 +589,58 @@ msgid ""
 " could lead to breakage. We will assess your photos before confirming your "
 "appointment."
 msgstr ""
+"Nagyon vékony vagy sérülékeny haj esetleg nem alkalmas bizonyos feszes "
+"stílusokhoz, és töréshez vezethet. Fotóit az időpont megerősítése előtt "
+"felülvizsgáljuk."
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Back to Scheduling"
-msgstr ""
+msgstr "Vissza az időponthoz"
 
 #: templates/bookings/partials/wizard_step_3.html
 msgid "Continue to Payment"
-msgstr ""
+msgstr "Tovább a fizetéshez"
 
 #: templates/bookings/partials/wizard_step_3.html
 #: templates/bookings/partials/wizard_step_4.html
 msgid "File is too large. Maximum size is 5 MB."
-msgstr ""
+msgstr "A fájl túl nagy. A maximális méret 5 MB."
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Review & Payment"
-msgstr ""
+msgstr "Áttekintés és fizetés"
 
 #: templates/bookings/partials/wizard_step_4.html
 #: templates/bookings/partials/wizard_summary.html
 msgid "Deposit Required"
-msgstr ""
+msgstr "Szükséges előleg"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid ""
 "Use this exact reference on your transfer so we can match your deposit."
 msgstr ""
+"Használja ezt a pontos hivatkozást az utaláson, hogy össze tudjuk párosítani"
+" az előleggel."
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Payment Method"
-msgstr ""
+msgstr "Fizetési mód"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Transfer your deposit using one of the methods below."
-msgstr ""
+msgstr "Utalja át az előleget az alábbi módszerek egyikével."
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Proof of Payment"
-msgstr ""
+msgstr "Fizetési bizonylat"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Upload your transfer screenshot"
-msgstr ""
+msgstr "Töltse fel az utalás képernyőképét"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Policy Review"
-msgstr ""
+msgstr "Tájékoztató áttekintése"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid ""
@@ -628,60 +648,68 @@ msgid ""
 "your hair photos. If your request is not approved, your deposit will be "
 "refunded. Please ensure the transferred amount and reference match exactly."
 msgstr ""
+"Az időpontja 12 órán át van fenntartva, amíg ellenőrizzük az előleget és "
+"felülvizsgáljuk a hajfotóit. Ha a kérelmét nem hagyják jóvá, az előleget "
+"visszatérítjük. Kérjük, győződjön meg arról, hogy az átutalt összeg és a "
+"hivatkozás pontosan megegyezik."
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Back to Details"
-msgstr ""
+msgstr "Vissza az adatokhoz"
 
 #: templates/bookings/partials/wizard_step_4.html
 msgid "Submit Request"
-msgstr ""
+msgstr "Kérelem leadása"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Booking Summary"
-msgstr ""
+msgstr "Foglalási összegzés"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Base Price"
-msgstr ""
+msgstr "Alapár"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Discount"
-msgstr ""
+msgstr "Kedvezmény"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Total"
-msgstr ""
+msgstr "Összesen"
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "A deposit holds your slot for 12 hours while we review your request."
 msgstr ""
+"Az előleg 12 órán át fenntartja az időpontját, amíg felülvizsgáljuk a "
+"kérelmét."
 
 #: templates/bookings/partials/wizard_summary.html
 msgid "Estimated Duration"
-msgstr ""
+msgstr "Becsült időtartam"
 
 #: templates/pages/about.html
 msgid "Premium African Braiding"
-msgstr ""
+msgstr "Prémium afrikai hajfonás"
 
 #: templates/pages/about.html
 msgid ""
 "Authentic, handcrafted African braiding traditions — proudly brought to the "
 "heart of Budapest."
 msgstr ""
+"Hiteles, kézzel készített afrikai hajfonási hagyományok — büszkén Budapest "
+"szívébe hozva."
 
 #: templates/pages/about.html
 msgid "Explore Our Styles"
-msgstr ""
+msgstr "Fedezze fel stílusainkat"
 
 #: templates/pages/about.html
 msgid "Our Story"
-msgstr ""
+msgstr "Történetünk"
 
 #: templates/pages/about.html
 msgid "Tradition you can feel in every strand"
-msgstr ""
+msgstr "Hagyomány, amelyet minden tincsen érezhet"
 
 #: templates/pages/about.html
 msgid ""
@@ -690,6 +718,10 @@ msgid ""
 "Hungary. What began as a passion for sharing authentic styles has grown into"
 " Budapest"
 msgstr ""
+"Az Afrikai Hajfonás egy egyszerű meggyőződésen alapul: hogy az afrikai "
+"hajfonás egy művészeti forma, amely generációkon keresztül hagyományozódott,"
+" és megérdemel egy igazi otthont Magyarországon. Ami az autentikus stílusok "
+"megosztásának szenvedélyeként indult, Budapesten"
 
 #: templates/pages/about.html
 msgid ""
@@ -697,22 +729,25 @@ msgid ""
 "understand your hair, your lifestyle, and the look you dream of — because "
 "beautiful, long-lasting braids start with understanding."
 msgstr ""
+"Minden találkozó személyes konzultációval kezdődik. Megértjük a haját, az "
+"életmódját és az álmait — mert a gyönyörű, tartós hajfonatok a megértéssel "
+"kezdődnek."
 
 #: templates/pages/about.html
 msgid "Braiding close-up"
-msgstr ""
+msgstr "Hajfonás közelről"
 
 #: templates/pages/about.html
 msgid "Salon styling chair"
-msgstr ""
+msgstr "Szalon szék"
 
 #: templates/pages/about.html
 msgid "Our Mission"
-msgstr ""
+msgstr "Küldetésünk"
 
 #: templates/pages/about.html
 msgid "Beauty, care, and integrity"
-msgstr ""
+msgstr "Szépség, gondosság és becsület"
 
 #: templates/pages/about.html
 msgid ""
@@ -720,6 +755,9 @@ msgid ""
 "of your hair. We are honest about what each style requires — from hair "
 "length and texture to the right thickness for the design you want."
 msgstr ""
+"Küldetésünk, hogy hibátlan eredményeket nyújtsunk a haja egészségének "
+"kompromittálása nélkül. Őszinték vagyunk arról, amit minden stílus megkíván "
+"— a hajhossztól és textúrától a megfelelő vastagságig."
 
 #: templates/pages/about.html
 msgid ""
@@ -728,231 +766,238 @@ msgid ""
 "style, and only then secure your slot — so you always leave our chair "
 "delighted."
 msgstr ""
+"Ezért minden foglalás egy időpont-kérelem, nem pedig azonnali regisztráció. "
+"Felülvizsgáljuk a fotóit, megerősítjük, hogy a haja alkalmas-e a stílusra, "
+"és csak azután biztosítjuk az időpontot — hogy mindig elégedetten távozzon a"
+" székünkből."
 
 #: templates/pages/about.html
 msgid "What sets us apart"
-msgstr ""
+msgstr "Mi tesz minket különlegessé"
 
 #: templates/pages/about.html
 msgid "The principles behind every appointment at Afrikai Hajfonás."
 msgstr ""
+"Az elvek, amelyek minden időpontfoglalás mögött állnak az Afrikai "
+"Hajfonásnál."
 
 #: templates/pages/about.html
 msgid "Handcrafted Artistry"
-msgstr ""
+msgstr "Kézműves mesterség"
 
 #: templates/pages/about.html
 msgid "Every braid is shaped by hand by experienced stylists."
-msgstr ""
+msgstr "Minden hajfonást tapasztalt szakemberek formálnak kézzel."
 
 #: templates/pages/about.html
 msgid "Hair-First Care"
-msgstr ""
+msgstr "Haj-első gondosság"
 
 #: templates/pages/about.html
 msgid "We only accept styles that suit your hair"
-msgstr ""
+msgstr "Csak olyan stílusokat fogadunk el, amelyek megfelelnek a hajának"
 
 #: templates/pages/about.html
 msgid "Authentic Styles"
-msgstr ""
+msgstr "Hiteles stílusok"
 
 #: templates/pages/about.html
 msgid "True African braiding techniques, never shortcuts."
-msgstr ""
+msgstr "Valódi afrikai hajfonási technikák, sosem kompromisszumok."
 
 #: templates/pages/about.html
 msgid "Warm Hospitality"
-msgstr ""
+msgstr "Meleg vendégszeretet"
 
 #: templates/pages/about.html
 msgid "A welcoming, comfortable experience from start to finish."
-msgstr ""
+msgstr "Barátságos, kényelmes élmény az elejétől a végéig."
 
 #: templates/pages/about.html
 msgid "The Team"
-msgstr ""
+msgstr "A csapatunk"
 
 #: templates/pages/about.html
 msgid "Meet our braiders"
-msgstr ""
+msgstr "Ismerje meg a fodrászainkat"
 
 #: templates/pages/about.html
 msgid "Skilled hands, genuine passion, and years of braiding experience."
-msgstr ""
+msgstr "Képzett kezek, őszinte szenvedély és éveknyi hajfonási tapasztalat."
 
 #: templates/pages/about.html
 msgid "Master Braider"
-msgstr ""
+msgstr "Mester fodrász"
 
 #: templates/pages/about.html
 msgid "Specialist in knotless braids & protective styling"
-msgstr ""
+msgstr "Knotless fonatok és védőstílusok szakértője"
 
 #: templates/pages/about.html
 msgid "Trusted & registered"
-msgstr ""
+msgstr "Megbízható és regisztrált"
 
 #: templates/pages/about.html
 msgid "Licensed Salon"
-msgstr ""
+msgstr "Engedéllyel rendelkező szalon"
 
 #: templates/pages/about.html
 msgid "Hair-Safe Products"
-msgstr ""
+msgstr "Hajbarát termékek"
 
 #: templates/pages/about.html
 msgid "EN · HU · DE"
-msgstr ""
+msgstr "EN · HU · DE"
 
 #: templates/pages/about.html
 msgid "Premium Service"
-msgstr ""
+msgstr "Prémium szolgáltatás"
 
 #: templates/pages/about.html
 msgid "Ready for your transformation?"
-msgstr ""
+msgstr "Készen áll az átalakulásra?"
 
 #: templates/pages/about.html
 msgid "Browse our styles and start your appointment request today."
-msgstr ""
+msgstr "Böngéssze a stílusainkat, és kezdje el az időpontfoglalást még ma."
 
 #: templates/pages/about.html templates/pages/contact.html
 msgid "View Services"
-msgstr ""
+msgstr "Szolgáltatások megtekintése"
 
 #: templates/pages/contact.html
 msgid "Get in touch"
-msgstr ""
+msgstr "Lépjen velünk kapcsolatba"
 
 #: templates/pages/contact.html
 msgid "Contact Afrikai Hajfonás"
-msgstr ""
+msgstr "Kapcsolat az Afrikai Hajfonással"
 
 #: templates/pages/contact.html
 msgid "Questions about a style, an appointment, or your deposit? We"
-msgstr ""
+msgstr "Kérdése van egy stílusról, egy időpontról vagy az előlegről?"
 
 #: templates/pages/contact.html
 msgid "Visit our salon"
-msgstr ""
+msgstr "Látogasson el a szalonunkba"
 
 #: templates/pages/contact.html
 msgid "Budapest, Hungary"
-msgstr ""
+msgstr "Budapest, Magyarország"
 
 #: templates/pages/contact.html
 msgid "Call us"
-msgstr ""
+msgstr "Hívjon minket"
 
 #: templates/pages/contact.html
 msgid "Phone coming soon"
-msgstr ""
+msgstr "Telefonszám hamarosan"
 
 #: templates/pages/contact.html
 msgid "Email us"
-msgstr ""
+msgstr "Írjon nekünk"
 
 #: templates/pages/contact.html
 msgid "Email coming soon"
-msgstr ""
+msgstr "E-mail cím hamarosan"
 
 #: templates/pages/contact.html
 msgid "Business hours"
-msgstr ""
+msgstr "Nyitvatartás"
 
 #: templates/pages/contact.html
 msgid "Monday"
-msgstr ""
+msgstr "Hétfő"
 
 #: templates/pages/contact.html templates/pages/contact.html
 #: templates/pages/contact.html
 msgid "10:00 – 19:00"
-msgstr ""
+msgstr "10:00 – 19:00"
 
 #: templates/pages/contact.html
 msgid "Tuesday"
-msgstr ""
+msgstr "Kedd"
 
 #: templates/pages/contact.html
 msgid "Wednesday"
-msgstr ""
+msgstr "Szerda"
 
 #: templates/pages/contact.html
 msgid "Thursday"
-msgstr ""
+msgstr "Csütörtök"
 
 #: templates/pages/contact.html
 msgid "Friday"
-msgstr ""
+msgstr "Péntek"
 
 #: templates/pages/contact.html
 msgid "10:00 – 20:00"
-msgstr ""
+msgstr "10:00 – 20:00"
 
 #: templates/pages/contact.html
 msgid "Saturday"
-msgstr ""
+msgstr "Szombat"
 
 #: templates/pages/contact.html
 msgid "09:00 – 20:00"
-msgstr ""
+msgstr "09:00 – 20:00"
 
 #: templates/pages/contact.html
 msgid "Sunday"
-msgstr ""
+msgstr "Vasárnap"
 
 #: templates/pages/contact.html
 msgid "Closed"
-msgstr ""
+msgstr "Zárva"
 
 #: templates/pages/contact.html
 msgid "Follow us"
-msgstr ""
+msgstr "Kövessen minket"
 
 #: templates/pages/contact.html
 msgid "Instagram"
-msgstr ""
+msgstr "Instagram"
 
 #: templates/pages/contact.html
 msgid "Facebook"
-msgstr ""
+msgstr "Facebook"
 
 #: templates/pages/contact.html
 msgid "TikTok"
-msgstr ""
+msgstr "TikTok"
 
 #: templates/pages/contact.html
 msgid "Social links coming soon."
-msgstr ""
+msgstr "Közösségi linkek hamarosan."
 
 #: templates/pages/contact.html
 msgid "Find us"
-msgstr ""
+msgstr "Találjon meg minket"
 
 #: templates/pages/contact.html
 msgid "Salon location map"
-msgstr ""
+msgstr "Szalon helyszíne térkép"
 
 #: templates/pages/contact.html
 msgid "Prefer to book right now?"
-msgstr ""
+msgstr "Inkább most foglalna?"
 
 #: templates/pages/contact.html
 msgid "Browse our styles and submit an appointment request online."
-msgstr ""
+msgstr "Böngéssze a stílusainkat, és küldje el az időpont-kérelmét online."
 
 #: templates/pages/privacy.html templates/pages/terms.html
 msgid "Legal"
-msgstr ""
+msgstr "Jogi"
 
 #: templates/pages/privacy.html
 msgid "How Afrikai Hajfonás collects, uses, and protects your personal data."
 msgstr ""
+"Hogyan gyűjti, használja és védi az Afrikai Hajfonás a személyes adatait."
 
 #: templates/pages/privacy.html templates/pages/terms.html
 msgid "Last updated: August 2026"
-msgstr ""
+msgstr "Frissítve: 2026 augusztus"
 
 #: templates/pages/privacy.html
 msgid ""
@@ -961,85 +1006,96 @@ msgid ""
 "Regulation (GDPR). This policy explains what we collect, why, and the rights"
 " you have over your information."
 msgstr ""
+"Az Afrikai Hajfonás („mi\") tiszteletben tartja a magánszféráját, és "
+"elkötelezett a személyes adatainak védelme iránt az EU Általános Adatvédelmi"
+" Rendelet (GDPR) keretében. Ez a tájékoztató elmagyarázza, mit gyűjtünk, "
+"miért, és milyen jogai vannak az adatai felett."
 
 #: templates/pages/privacy.html
 msgid "Data we collect"
-msgstr ""
+msgstr "A gyűjtött adatok"
 
 #: templates/pages/privacy.html
 msgid ""
 "When you request an appointment, we collect only what is necessary to assess"
 " and confirm your booking:"
 msgstr ""
+"Amikor időpontot kér, csak a foglalás értékeléséhez és megerősítéséhez "
+"szükséges adatokat gyűjtjük:"
 
 #: templates/pages/privacy.html
 msgid "Contact details"
-msgstr ""
+msgstr "Kapcsolattartási adatok"
 
 #: templates/pages/privacy.html
 msgid "Name, email address, phone number, and age."
-msgstr ""
+msgstr "Név, e-mail cím, telefonszám és életkor."
 
 #: templates/pages/privacy.html
 msgid "Hair information"
-msgstr ""
+msgstr "Hajadatok"
 
 #: templates/pages/privacy.html
 msgid "Hair length and three photos (front, side, back)."
-msgstr ""
+msgstr "Hajhossz és három fotó (előlről, oldalról, hátulról)."
 
 #: templates/pages/privacy.html
 msgid "Payment proof"
-msgstr ""
+msgstr "Fizetési bizonylat"
 
 #: templates/pages/privacy.html
 msgid "A screenshot of your bank transfer as proof of deposit."
-msgstr ""
+msgstr "A banki átutalás képernyőképe az előleg bizonyítékaként."
 
 #: templates/pages/privacy.html
 msgid "Booking details"
-msgstr ""
+msgstr "Foglalási adatok"
 
 #: templates/pages/privacy.html
 msgid "Chosen service, stylist, options, date, and time."
-msgstr ""
+msgstr "Választott szolgáltatás, szakember, opciók, dátum és idő."
 
 #: templates/pages/privacy.html
 msgid ""
 "We do not require you to create an account, and we do not collect more data "
 "than is needed to process your request."
 msgstr ""
+"Nem kell fiókot létrehoznia, és nem gyűjtünk több adatot, mint amennyi a "
+"kérelme feldolgozásához szükséges."
 
 #: templates/pages/privacy.html
 msgid "How we use your data"
-msgstr ""
+msgstr "Hogyan használjuk az adatait"
 
 #: templates/pages/privacy.html
 msgid "To assess whether your hair is suited to the style you requested."
-msgstr ""
+msgstr "Annak értékeléséhez, hogy a haja alkalmas-e a kért stílushoz."
 
 #: templates/pages/privacy.html
 msgid "To verify your deposit and process your appointment request."
-msgstr ""
+msgstr "Az előleg ellenőrzéséhez és az időpont-kérelem feldolgozásához."
 
 #: templates/pages/privacy.html
 msgid ""
 "To communicate with you about your booking and any necessary follow-up."
 msgstr ""
+"A foglalással és a szükséges utókövetéssel kapcsolatos kommunikációhoz."
 
 #: templates/pages/privacy.html
 msgid "To meet our legal and financial record-keeping obligations."
-msgstr ""
+msgstr "Jogi és pénzügyi nyilvántartási kötelezettségeink teljesítéséhez."
 
 #: templates/pages/privacy.html
 msgid ""
 "We do not sell your data and do not use it for unrelated marketing without "
 "your consent."
 msgstr ""
+"Nem adjuk el az adatait, és nem használjuk fel kapcsolódó marketingre az Ön "
+"hozzájárulása nélkül."
 
 #: templates/pages/privacy.html
 msgid "Data retention"
-msgstr ""
+msgstr "Adatmegőrzés"
 
 #: templates/pages/privacy.html
 msgid ""
@@ -1049,52 +1105,59 @@ msgid ""
 "maintain accurate service history. You may request deletion at any time (see"
 " Your Rights below)."
 msgstr ""
+"Az időpont-információkat, hajfotókat és fizetési bizonylatokat addig "
+"őrizzük, ameddig a szolgáltatás nyújtásához és a jogi követelmények "
+"teljesítéséhez szükséges. A fotók és foglalási bejegyzések megőrizhetők a "
+"jövőbeli konzultációk támogatása és a pontos szolgáltatási előzmények "
+"fenntartása érdekében. Bármikor kérheti a törlést (lásd Az Ön jogai lent)."
 
 #: templates/pages/privacy.html
 msgid "Your rights under GDPR"
-msgstr ""
+msgstr "Az Ön GDPR szerinti jogai"
 
 #: templates/pages/privacy.html
 msgid "Access"
-msgstr ""
+msgstr "Hozzáférés"
 
 #: templates/pages/privacy.html
 msgid "Request a copy of the data we hold about you."
-msgstr ""
+msgstr "Kérheti a rólunk tárolt adatainak másolatát."
 
 #: templates/pages/privacy.html
 msgid "Rectification"
-msgstr ""
+msgstr "Helyesbítés"
 
 #: templates/pages/privacy.html
 msgid "Ask us to correct inaccurate information."
-msgstr ""
+msgstr "Kérheti a pontatlan információk javítását."
 
 #: templates/pages/privacy.html
 msgid "Erasure"
-msgstr ""
+msgstr "Törlés"
 
 #: templates/pages/privacy.html
 msgid "Request deletion of your data (the"
-msgstr ""
+msgstr "Adatai törlésének kérése (a"
 
 #: templates/pages/privacy.html
 msgid "Portability"
-msgstr ""
+msgstr "Hordozhatóság"
 
 #: templates/pages/privacy.html
 msgid "Receive your data in a portable format."
-msgstr ""
+msgstr "Adatai hordozható formátumban történő megkapása."
 
 #: templates/pages/privacy.html
 msgid ""
 "You also have the right to object to certain processing and to lodge a "
 "complaint with the relevant data protection authority."
 msgstr ""
+"Joga van bizonyos adatkezelésekhez való hozzájárulás megtagadására és "
+"panaszt tenni a megfelelő adatvédelmi hatóságnál."
 
 #: templates/pages/privacy.html
 msgid "Data security"
-msgstr ""
+msgstr "Adatbiztonság"
 
 #: templates/pages/privacy.html
 msgid ""
@@ -1103,32 +1166,40 @@ msgid ""
 "details and photos is restricted to our salon team and is handled "
 "confidentially."
 msgstr ""
+"Észszerű technikai és szervezeti intézkedéseket alkalmazunk az adatai "
+"jogosulatlan hozzáférés, elvesztés vagy visszaélés elleni védelme érdekében."
+" A foglalási adataihoz és fotóihoz való hozzáférés a szaloncsapatunkra "
+"korlátozódik, és bizalmasan kezeljük."
 
 #: templates/pages/privacy.html
 msgid "Contact for privacy concerns"
-msgstr ""
+msgstr "Kapcsolat adatvédelmi kérdésekben"
 
 #: templates/pages/privacy.html
 msgid ""
 "To exercise any of your rights or ask a question about your data, contact us"
 " using the details on our"
 msgstr ""
+"Jogainak gyakorlásához vagy adatvédelmi kérdéséhez lépjen velünk kapcsolatba"
+" a"
 
 #: templates/pages/privacy.html templates/pages/terms.html
 msgid "Contact page"
-msgstr ""
+msgstr "Kapcsolat oldalunkon"
 
 #: templates/pages/privacy.html
 msgid "We will respond in accordance with applicable law."
-msgstr ""
+msgstr "Az alkalmazandó jog szerint válaszolunk."
 
 #: templates/pages/terms.html
 msgid "Please read these terms carefully before requesting an appointment."
 msgstr ""
+"Kérjük, foglalja el időpont előtt figyelmesen olvassa el ezeket a "
+"feltételeket."
 
 #: templates/pages/terms.html
 msgid "About our booking process"
-msgstr ""
+msgstr "A foglalási folyamatunkról"
 
 #: templates/pages/terms.html
 msgid ""
@@ -1138,30 +1209,39 @@ msgid ""
 "send a deposit. Your slot is held temporarily while we review your request "
 "and approve or decline it."
 msgstr ""
+"Az Afrikai Hajfonás Időpont-kérelem és Fenntartás rendszert működtet. A "
+"bonyolult hajfonás a hajhossztól, életkortól és vastagságtól függ, ezért nem"
+" kínálunk azonnali foglalást. Ehelyett konfigurál egy stílust, feltölt "
+"hajfotókat és küld előleget. Az időpontját ideiglenesen fenntartjuk, amíg "
+"felülvizsgáljuk a kérelmét és jóváhagyjuk vagy elutasítjuk."
 
 #: templates/pages/terms.html
 msgid "Deposit & Hold Policy"
-msgstr ""
+msgstr "Előleg és foglalási feltételek"
 
 #: templates/pages/terms.html
 msgid ""
 "A deposit is required to hold your requested time slot. The deposit amount "
 "depends on the service"
 msgstr ""
+"A foglalt időpont megerősítéséhez előleg szükséges. Az előleg összege a "
+"szolgáltatástól függ"
 
 #: templates/pages/terms.html
 msgid "Services of 45,000 Ft or more: a 20,000 Ft deposit."
-msgstr ""
+msgstr "45 000 Ft vagy több szolgáltatások: 20 000 Ft előleg."
 
 #: templates/pages/terms.html
 msgid "Services under 45,000 Ft: a 10,000 Ft deposit."
-msgstr ""
+msgstr "45 000 Ft alatti szolgáltatások: 10 000 Ft előleg."
 
 #: templates/pages/terms.html
 msgid ""
 "Once submitted, your slot is held for 12 hours. If we do not confirm within "
 "that window, the hold expires and the slot is released."
 msgstr ""
+"Leadás után az időpontját 12 órán át fenntartjuk. Ha nem erősítjük meg ezen "
+"idő alatt, a foglalás lejár és az időpont felszabadul."
 
 #: templates/pages/terms.html
 msgid ""
@@ -1170,46 +1250,55 @@ msgid ""
 "refundable except where required by law or where we decline your request — "
 "in which case a full refund is arranged via our refund queue."
 msgstr ""
+"A fizetés kizárólag manuális banki átutalással történik (Revolut, Wise, "
+"TransferGo vagy banki átutalás). Nem fogadunk el kártyás fizetést. Az "
+"előlegek nem visszatéríthetők, kivéve, ha a törvény előírja, vagy ha "
+"elutasítjuk a kérelmét — ebben az esetben teljes visszatérítést intézünk a "
+"visszatérítési sorunkon keresztül."
 
 #: templates/pages/terms.html
 msgid "Appointment Request Process"
-msgstr ""
+msgstr "Időpont-kérelem folyamata"
 
 #: templates/pages/terms.html
 msgid "Choose your style"
-msgstr ""
+msgstr "Válassza ki a stílusát"
 
 #: templates/pages/terms.html
 msgid "Select a service and configure your options."
-msgstr ""
+msgstr "Válasszon egy szolgáltatást és állítsa be az opcióit."
 
 #: templates/pages/terms.html
 msgid "Pick a stylist, date & time"
-msgstr ""
+msgstr "Válasszon szakembert, dátumot és időpontot"
 
 #: templates/pages/terms.html
 msgid "Choose from available slots based on the stylist"
-msgstr ""
+msgstr "Válasszon a szakember alapján elérhető időpontok közül"
 
 #: templates/pages/terms.html
 msgid "Share your details & photos"
-msgstr ""
+msgstr "Ossza meg az adatait és fotóit"
 
 #: templates/pages/terms.html
 msgid ""
 "Provide your contact details and clear hair photos so we can assess "
 "suitability."
 msgstr ""
+"Adja meg a kapcsolattartási adatait és egyértelmű hajfotókat, hogy felül "
+"tudjuk vizsgálni az alkalmasságot."
 
 #: templates/pages/terms.html
 msgid "Send your deposit"
-msgstr ""
+msgstr "Küldje el az előleget"
 
 #: templates/pages/terms.html
 msgid ""
 "Transfer the deposit and upload your proof of payment using your reference "
 "code (AFH-XXXXXX)."
 msgstr ""
+"Utalja át az előleget és töltse fel a fizetési bizonylatot a hivatkozási "
+"kódjával (AFH-XXXXXX)."
 
 #: templates/pages/terms.html
 msgid ""
@@ -1217,10 +1306,13 @@ msgid ""
 "confirmation once your appointment is approved. You can check your status "
 "anytime via the booking status lookup."
 msgstr ""
+"Ezután ellenőrizzük az előleget és felülvizsgáljuk a hajfotóit. "
+"visszaigazolást kap, amint az időpontját jóváhagyjuk. Az állapotot bármikor "
+"ellenőrizheti a foglalásállapot-lekérdezőn keresztül."
 
 #: templates/pages/terms.html
 msgid "Photo Submission Policy"
-msgstr ""
+msgstr "Fotófeltöltési szabályzat"
 
 #: templates/pages/terms.html
 msgid ""
@@ -1228,6 +1320,9 @@ msgid ""
 " front, side, and back. These help us confirm length, texture, and thickness"
 " before you commit."
 msgstr ""
+"Annak értékeléséhez, hogy a haja megfelel-e a választott stílusnak, három "
+"fotót kérünk: előlről, oldalról és hátulról. Ezek segítenek megerősíteni a "
+"hosszt, textúrát és vastagságot, mielőtt elkötelezné magát."
 
 #: templates/pages/terms.html
 msgid ""
@@ -1235,86 +1330,98 @@ msgid ""
 " reviewed only by our team and stored securely. See our Privacy Policy for "
 "how your images are handled."
 msgstr ""
+"Elfogadott formátumok: JPG, JPEG, PNG és WEBP, maximum 5 MB fotónként. A "
+"fotókat csak a csapatunk vizsgálja felül, és biztonságosan tároljuk. "
+"Képkezelésünkről lásd az Adatvédelmi Irányelveinket."
 
 #: templates/pages/terms.html
 msgid ""
 "Proof of payment (a screenshot of your bank transfer) may be uploaded as "
 "JPG, JPEG, PNG, or PDF, up to 5 MB."
 msgstr ""
+"A fizetési bizonylat (a banki átutalás képernyőképe) JPG, JPEG, PNG vagy PDF"
+" formátumban tölthető fel, maximum 5 MB."
 
 #: templates/pages/terms.html
 msgid "Cancellation Policy"
-msgstr ""
+msgstr "Lemondási szabályzat"
 
 #: templates/pages/terms.html
 msgid ""
 "If you need to cancel, please contact us as early as possible. Because "
 "braiding appointments reserve several hours of a stylist"
 msgstr ""
+"Ha le kell mondania, kérjük, a lehető leghamarabb lépjen velünk kapcsolatba."
+" Mivel a hajfonási időpontok több órát lefoglalnak a szakemberből"
 
 #: templates/pages/terms.html
 msgid "If we decline your request, your deposit is refunded in full."
 msgstr ""
+"Ha elutasítjuk a kérelmét, az előleget teljes egészében visszatérítjük."
 
 #: templates/pages/terms.html
 msgid ""
 "If your request expires (no action within 12 hours), it is moved to our "
 "refund queue for processing."
 msgstr ""
+"Ha a kérelme lejár (12 órán belül nincs intézkedés), visszatérítési sorba "
+"kerül feldolgozásra."
 
 #: templates/pages/terms.html
 msgid ""
 "No-shows or late cancellations of approved appointments may forfeit the "
 "deposit."
 msgstr ""
+"A jóváhagyott időpontok nem megjelenése vagy késői lemondása az előleg "
+"elvesztését eredményezheti."
 
 #: templates/pages/terms.html
 msgid "Questions about these terms?"
-msgstr ""
+msgstr "Kérdése van ezekkel a feltételekkel kapcsolatban?"
 
 #: templates/services/service_detail.html
 msgid "No image available"
-msgstr ""
+msgstr "Nincs elérhető kép"
 
 #: templates/services/service_detail.html
 msgid "Available Options"
-msgstr ""
+msgstr "Elérhető opciók"
 
 #: templates/services/service_detail.html
 msgid "Style Details"
-msgstr ""
+msgstr "Stílus részletei"
 
 #: templates/services/service_detail.html
 msgid "Suitability Information"
-msgstr ""
+msgstr "Alkalmassági információk"
 
 #: templates/services/service_detail.html
 msgid "Target Audience"
-msgstr ""
+msgstr "Célközönség"
 
 #: templates/services/service_detail.html
 msgid "Best For"
-msgstr ""
+msgstr "Legalkalmasabb"
 
 #: templates/services/service_detail.html
 msgid "Not specified"
-msgstr ""
+msgstr "Nincs megadva"
 
 #: templates/services/service_detail.html
 msgid "IMPORTANT"
-msgstr ""
+msgstr "FONTOS"
 
 #: templates/services/service_detail.html
 msgid "Watch Video"
-msgstr ""
+msgstr "Videó megtekintése"
 
 #: templates/services/service_detail.html
 msgid "View a video of this style"
-msgstr ""
+msgstr "Stílus videójának megtekintése"
 
 #: templates/services/service_detail.html
 msgid "Book Consultation"
-msgstr ""
+msgstr "Konzultáció foglalása"
 
 #: templates/services/service_list.html
 msgid "Explore Braid Styles"
@@ -1322,7 +1429,7 @@ msgstr "Fedezze fel a hajfonási stílusokat"
 
 #: templates/services/service_list.html
 msgid "Children"
-msgstr ""
+msgstr "Gyermekek"
 
 #: templates/services/service_list.html
 msgid "Search for cornrows, pop smoke, twists..."
@@ -1382,7 +1489,7 @@ msgstr "4 órán belül"
 
 #: templates/services/partials/service_grid.html
 msgid "Discounted styles only"
-msgstr ""
+msgstr "Csak kedvezményes stílusok"
 
 #: templates/services/partials/service_grid.html
 msgid "Sort By"
@@ -1402,7 +1509,7 @@ msgstr "Ár (magastól alacsonyig)"
 
 #: templates/services/partials/service_grid.html
 msgid "Biggest Discount"
-msgstr ""
+msgstr "Legnagyobb kedvezmény"
 
 #: templates/services/partials/service_grid.html
 msgid "Newest Styles"
