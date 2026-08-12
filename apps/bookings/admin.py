@@ -3,7 +3,13 @@ from django.db import models as dj_models
 from django.utils import timezone
 from django.utils.html import format_html
 
-from .models import AppointmentRequest, RefundQueue
+from .models import (
+    AppointmentRequest,
+    AppointmentPaymentSnapshot,
+    PaymentDetailField,
+    PaymentMethod,
+    RefundQueue,
+)
 
 
 # ──────────────────────────────────────────────────────────────
@@ -107,9 +113,10 @@ class AppointmentRequestAdmin(admin.ModelAdmin):
         "target_time",
         "colored_status",
         "colored_payment_status",
+        "language_flag",
         "hold_indicator",
     )
-    list_filter = ("status", "payment_status", "provider", "target_date")
+    list_filter = ("status", "payment_status", "provider", "target_date", "customer_language")
     search_fields = (
         "payment_reference",
         "client_name",
@@ -169,7 +176,8 @@ class AppointmentRequestAdmin(admin.ModelAdmin):
         ("💰 Payment", {
             "fields": (
                 "deposit_amount",
-                "payment_method",
+                "payment_method_fk",
+                "customer_language",
                 "proof_of_payment_preview",
             ),
             "classes": ("wide",),
@@ -224,6 +232,21 @@ class AppointmentRequestAdmin(admin.ModelAdmin):
             hours, mins,
         )
     hold_indicator.short_description = "Hold Timer"
+
+    # ── Language Flag (Decision #28) ───────────────────────────
+    LANGUAGE_FLAGS = {
+        "hu": "🇭🇺 HU",
+        "en": "🇬🇧 EN",
+        "de": "🇩🇪 DE",
+    }
+
+    def language_flag(self, obj):
+        flag = self.LANGUAGE_FLAGS.get(obj.customer_language, "❓")
+        return format_html('<span style="font-size: 14px;">{}</span>', flag)
+    language_flag.short_description = "Lang"
+    language_flag.admin_order_field = "customer_language"
+
+    # ── Photo Previews ─────────────────────────────────────────
 
     def photo_front_preview(self, obj):
         if obj.photo_front:
@@ -289,11 +312,11 @@ class RefundQueueAdmin(admin.ModelAdmin):
         "client_email",
         "service",
         "deposit_amount",
-        "payment_method",
+        "payment_method_fk",
         "colored_status",
         "created_at",
     )
-    list_filter = ("status", "payment_method")
+    list_filter = ("status", "payment_method_fk")
     search_fields = (
         "payment_reference",
         "client_name",
@@ -329,3 +352,59 @@ class RefundQueueAdmin(admin.ModelAdmin):
                 AppointmentRequest.Status.EXPIRED,
             ]
         )
+
+
+# ──────────────────────────────────────────────────────────────
+# Payment Method Configuration (Admin-Managed)
+# ──────────────────────────────────────────────────────────────
+
+class PaymentDetailFieldInline(admin.TabularInline):
+    """Inline detail fields for a payment method (IBAN, QR, etc.)."""
+    model = PaymentDetailField
+    extra = 1
+    fields = ("label", "field_type", "value", "image_value", "display_order", "is_active")
+    ordering = ("display_order",)
+
+
+@admin.register(PaymentMethod)
+class PaymentMethodAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "is_active", "display_order", "field_count")
+    list_filter = ("is_active",)
+    list_editable = ("is_active", "display_order")
+    search_fields = ("name", "slug")
+    prepopulated_fields = {"slug": ("name",)}
+    inlines = [PaymentDetailFieldInline]
+    ordering = ("display_order", "name")
+
+    def field_count(self, obj):
+        return obj.detail_fields.count()
+    field_count.short_description = "Detail Fields"
+
+
+# ──────────────────────────────────────────────────────────────
+# Payment Snapshot (Read-Only Audit Inline)
+# ──────────────────────────────────────────────────────────────
+
+class AppointmentPaymentSnapshotInline(admin.StackedInline):
+    """Read-only audit inline showing the frozen payment snapshot.
+
+    Per Decision #31, this data is admin-only. It is NEVER shown to customers.
+    """
+    model = AppointmentPaymentSnapshot
+    can_delete = False
+    extra = 0
+    max_num = 0
+    readonly_fields = (
+        "payment_method_name",
+        "payment_method_slug",
+        "detail_fields_snapshot",
+        "snapshot_created_at",
+    )
+    fields = readonly_fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
+# Attach snapshot inline to AppointmentRequestAdmin
+AppointmentRequestAdmin.inlines = [AppointmentPaymentSnapshotInline]

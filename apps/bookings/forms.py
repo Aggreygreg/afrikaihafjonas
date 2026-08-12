@@ -15,7 +15,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
-from .models import AppointmentRequest
+from .models import AppointmentRequest, PaymentMethod
 
 
 # ── Upload validation constants ──────────────────────────────
@@ -206,18 +206,18 @@ class WizardStep4Form(forms.ModelForm):
 
     class Meta:
         model = AppointmentRequest
-        fields = ["payment_method", "proof_of_payment"]
+        fields = ["payment_method_fk", "proof_of_payment"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # payment_method is blank=True on the model (set in Step 4 only), so
-        # make it explicitly required here.
-        self.fields["payment_method"].required = True
-        # Remove the blank '---------' choice that Django auto-adds because
-        # the model field is blank=True. The template iterates over choices
-        # directly, so the blank entry would render as a stray radio card.
-        self.fields["payment_method"].choices = AppointmentRequest.PaymentMethod.choices
-        self.fields["payment_method"].widget.attrs.update({"class": "sr-only peer"})
+        # Only show active payment methods, ordered by display_order
+        self.fields["payment_method_fk"].queryset = PaymentMethod.objects.filter(
+            is_active=True
+        )
+        self.fields["payment_method_fk"].required = True
+        self.fields["payment_method_fk"].label_from_instance = lambda obj: obj.name
+        self.fields["payment_method_fk"].empty_label = None
+        self.fields["payment_method_fk"].widget.attrs.update({"class": "sr-only peer"})
         self.fields["proof_of_payment"].widget.attrs.update(
             {
                 "accept": "image/jpeg,image/png,application/pdf",
