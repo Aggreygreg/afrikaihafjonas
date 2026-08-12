@@ -250,38 +250,56 @@
 
 ---
 
-## Phase 7: Business-Managed Content & Configuration (QUEUED — NOT STARTED)
-**Principle Document:** `specs/ARCHITECTURAL_PRINCIPLES.md`
+## Phase 7: Business-Managed Content & Configuration (SPEC COMPLETE — NOT STARTED)
+**Principle Document:** `specs/ARCHITECTURAL_PRINCIPLES.md` (Rev 2 — major refinement)
 **Goal:** Move all business-owned content and configuration from code/templates into Django Admin.
+
+### Cross-Cutting Requirements (Apply to All Phases)
+- [ ] **Three Content Categories documented** (A: dev UI `{% trans %}`, B: admin reusable parent+translation, C: appointment-specific no-translation)
+- [ ] **Multilingual content strategy**: parent + `Translation` records for all Category B content (FAQ, ContentBlock, EmailTemplate, SEO, Announcement)
+- [ ] **Appointment language persistence**: `AppointmentRequest.customer_language` (hu/en/de), captured at submission, immutable, drives email language
+- [ ] **Shared `LanguageChoices` enum** in a shared module
 
 ### Phase 7A: Business Information Expansion
 - [ ] Extend `SiteConfiguration` with: business name, address directions, working hours, Google Maps link, website URL, logo, favicon
 - [ ] Replace all hardcoded business info in templates with `{{ config.* }}`
+- [ ] Global SEO fields deferred to Phase 7E (dedicated `GlobalSEO` model)
 
-### Phase 7B: Dynamic Payment Methods + Details
-- [ ] Create `PaymentMethod` model (replaces TextChoices)
+### Phase 7B: Dynamic Payment Methods + Historical Snapshots
+- [ ] Create `PaymentMethod` model (admin-managed, replaces TextChoices)
 - [ ] Create `PaymentDetailField` model (per-method configurable fields)
-- [ ] Data migration: map existing AppointmentRequest.payment_method to FK
-- [ ] Seed initial 4 methods with detail fields
-- [ ] Update Wizard Step 4 + Guest Lookup templates
+- [ ] Create `AppointmentPaymentSnapshot` model (frozen payment config per appointment)
+- [ ] Seed migration: 4 methods (Revolut, Wise, TransferGo, Bank Transfer) + detail fields
+- [ ] Add `customer_language` to `AppointmentRequest` (migration + default `hu`)
+- [ ] Data migration: map existing TextChoices to FK, create snapshots for existing records
+- [ ] Snapshot creation logic at Step 4 submission (same transaction)
+- [ ] Update Wizard Step 4 template to render dynamic fields
+- [ ] Update Guest Lookup to display payment details from SNAPSHOT (not live tables)
+- [ ] Admin: payment snapshot as read-only inline; customer_language display with flag
 
-### Phase 7C: Editable Email Templates
-- [ ] Create `EmailTemplate` model (email_type, subject, body_text, body_html, language)
-- [ ] Build email rendering service (context dict → Django template engine → send)
-- [ ] Migrate hardcoded emails to admin-managed templates
-- [ ] Support per-language templates (HU/EN/DE)
+### Phase 7C: Editable Email Templates (Multilingual)
+- [ ] Create `EmailTemplate` model (parent, email_type enum — developer-controlled)
+- [ ] Create `EmailTemplateTranslation` model (subject, body_text, body_html per language)
+- [ ] Build email rendering service (context dict -> Django template engine -> send)
+- [ ] Language selection: use `appointment.customer_language`, NOT session language
+- [ ] Migrate existing hardcoded emails to admin-managed templates
+- [ ] Fallback: requested language -> HU base -> first available
+- [ ] Keep transactional and newsletter systems strictly separate (newsletter out of scope)
 
-### Phase 7D: Customer-Facing Content
-- [ ] FAQ model (question, answer, order, active)
-- [ ] ContentBlock model for static page content
-- [ ] Update static page templates to use admin-managed content
-- [ ] Announcement/banner system
+### Phase 7D: Customer-Facing Content (Multilingual)
+- [ ] FAQ model (parent + FAQTranslation per language: question, answer)
+- [ ] ContentBlock model (parent + ContentBlockTranslation: title, body — by slug)
+- [ ] Announcement model (parent + AnnouncementTranslation: message, link, scheduling)
+- [ ] Migrate static page content (About, Terms, Privacy) into ContentBlocks
+- [ ] StackedInline admin UX for all translation models
 
-### Phase 7E: SEO Configuration
-- [ ] Add global SEO fields to SiteConfiguration
-- [ ] Create `PageSEO` model for per-page metadata
-- [ ] Build meta tag rendering with fallback logic
-- [ ] Technical SEO (sitemap, robots.txt, hreflang) remains developer-managed
+### Phase 7E: SEO Configuration (Multilingual)
+- [ ] `GlobalSEO` singleton model + `GlobalSEOTranslation` (title, description, OG per language)
+- [ ] `PageSEO` model (targets url_path OR Service FK) + `PageSEOTranslation`
+- [ ] Per-Service SEO (`PageSEO(service=...)`) — service pages are major landing pages
+- [ ] Fallback chain: page-level override -> global default -> hardcoded dev fallback
+- [ ] Meta tag rendering (template tag)
+- [ ] Technical SEO (sitemap, robots.txt, hreflang, JSON-LD) remains developer-managed
 
 ---
 

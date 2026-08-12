@@ -250,15 +250,14 @@
 
 **Rationale:** A routine business change (new phone number, new bank account, updated email wording, new payment service, changed SEO metadata) should never require a developer to modify code or redeploy. The salon owner needs to operate independently once the system is live.
 
-**Scope (see ARCHITECTURAL_PRINCIPLES.md for full detail):**
-1. Business Information — extend `SiteConfiguration` with all fields
-2. Editable Email Templates — `EmailTemplate` model with developer-controlled placeholders
-3. Admin-Managed Payment Methods — dynamic `PaymentMethod` model (replaces TextChoices)
-4. Dynamic Payment Details — `PaymentDetailField` model per payment method
-5. Customer-Facing Content — FAQ, content blocks, announcements
-6. SEO Configuration — global + page-level SEO metadata
+**Scope (see ARCHITECTURAL_PRINCIPLES.md Rev 2 for full detail):**
+1. Business Information — extend `SiteConfiguration` with all fields (Phase 7A)
+2. Admin-Managed Payment Methods + Historical Snapshots — `PaymentMethod`, `PaymentDetailField`, `AppointmentPaymentSnapshot` (Phase 7B)
+3. Editable Email Templates (multilingual) — `EmailTemplate` + `EmailTemplateTranslation` (Phase 7C)
+4. Customer-Facing Content (multilingual) — FAQ, content blocks, announcements (Phase 7D)
+5. SEO Configuration (multilingual) — `GlobalSEO`, `PageSEO` with translations, including per-Service SEO (Phase 7E)
 
-**Implementation:** Phased as Phase 7 (A-E). Not started yet. All queued in ARCHITECTURAL_PRINCIPLES.md.
+**Implementation:** Phased as Phase 7 (A-E). Not started yet. All queued in ARCHITECTURAL_PRINCIPLES.md (Rev 2).
 
 **Preserved:** All existing business rules (deposit math, 12-hour hold, age validation, photo rules, anti-patterns) remain unchanged. This principle moves **where** config lives, not **what** the rules are.
 
@@ -270,3 +269,44 @@
 **Rationale:** GNU gettext could not be installed (no admin access for choco). `polib` provides full .po read/write and .mo compilation from Python. Custom scripts (`_build_po.py`, `_apply_translations.py`, `_compile_mo.py`) replicate the gettext workflow.
 
 **Impact:** Translation workflow is Python-based. JSON files serve as the translation source of truth; scripts apply them to .po files. .mo files are gitignored (build artifacts). After a fresh clone, run `_build_po.py` → `_apply_translations.py` → `_compile_mo.py` to regenerate catalogs.
+
+---
+
+### 26. Three Content Categories (Architectural Foundation for Multilingual Content)
+**Decision:** All content in the system falls into exactly one of three categories, each with a distinct translation strategy:
+
+- **Category A — Developer-Authored UI:** Static template/Python strings → Django i18n `{% trans %}` / `.po` files.
+- **Category B — Admin-Authored Reusable Content:** FAQs, static page text, announcements, email templates, SEO metadata → language-specific DB records (parent + translations), NOT `{% trans %}`.
+- **Category C — Appointment-Specific Free-Form Content:** `admin_notes`, `internal_notes` → no translation system. Admin writes in the customer's language, guided by the appointment's stored `customer_language`.
+
+**Rationale:** `{% trans %}` is for developer-authored strings only. Database-managed content cannot be inserted into `.po` files at runtime. The three-category distinction prevents architectural confusion about what gets translated how.
+
+**Impact:** Every multilingual content model in Phase 7 uses the parent + translation record pattern. `admin_notes` stays simple — just show the language indicator.
+
+### 27. Historical Payment Snapshot (Mandatory)
+**Decision:** Every appointment must have a frozen `AppointmentPaymentSnapshot` that preserves the payment method name, slug, and all detail field values as they existed at submission time.
+
+**Rationale:** Admin may change IBANs, disable methods, or replace payment services later. Historical appointments must continue to represent the payment configuration that was valid when the customer submitted their request. Without snapshots, changing Wise's IBAN would retroactively alter what August customers were told to pay into.
+
+**Impact:** `AppointmentRequest` keeps a FK to live `PaymentMethod` (for admin filtering), but the **authoritative payment details** shown in Guest Lookup come from the snapshot, never from live tables. See ARCHITECTURAL_PRINCIPLES.md §6.2.
+
+### 28. Appointment Language Persistence (customer_language)
+**Decision:** Every `AppointmentRequest` stores `customer_language` (hu/en/de) as a permanent field captured at submission. This field is immutable after creation and drives all transactional email language selection.
+
+**Rationale:** An appointment's communication language must not change if the customer later switches website languages. Transactional emails use this stored value, not the session/browser language at send time.
+
+**Impact:** The email rendering system (Phase 7C) reads `appointment.customer_language` to select the correct `EmailTemplateTranslation`. Django Admin displays the language prominently (🇭🇺 HU / 🇬🇧 EN / 🇩🇪 DE) to guide the admin when writing notes.
+
+### 29. Transactional Emails vs Newsletters (Separate Systems)
+**Decision:** Transactional email templates (`EmailTemplate`) and marketing/newsletter content are strictly separate systems. Newsletters are NOT just another `email_type` in the transactional enum.
+
+**Rationale:** Different triggers (app event vs manual admin action), different audiences (one customer vs filtered group), different models and workflows. Collapsing them would create confusing architecture.
+
+**Impact:** Newsletter system is explicitly out of scope for Phase 7. If needed later, it gets its own `Newsletter` model and workflow.
+
+### 30. Corrected Payment Anti-Pattern Wording
+**Decision:** The master spec anti-pattern §7.1 wording is corrected from "All payments are Manual Bank Transfers" to: "No automated third-party payment gateway integrations. Payments are manually verified using administrator-configured payment methods and instructions."
+
+**Rationale:** The salon accepts multiple methods (Revolut, Wise, TransferGo, Bank Transfer), not just bank transfers. The method set is admin-configurable. The prohibition is on automated gateway integrations (Stripe, PayPal, etc.), not on having multiple payment methods.
+
+**Impact:** Anti-pattern wording updated in MASTER_CONTEXT_AND_SPECS.md §7.1 and apps.payments decommission note.

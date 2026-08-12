@@ -3,7 +3,7 @@
 **Last Updated:** August 12, 2026
 **Role/Purpose:** This document is the absolute source of truth for all autonomous coding agents and developers working on this repository. If a feature or approach contradicts this document, this document wins.
 
-> **See also:** `ARCHITECTURAL_PRINCIPLES.md` — the principle that business-owned content and configuration must be admin-managed, not hardcoded. Implementation tasks for Phase 7 (A-E) are queued there and tracked in `PROGRESS_HISTORY.md`.
+> **See also:** `ARCHITECTURAL_PRINCIPLES.md` — comprehensive specification for Phase 7 (A-E). Covers: business-managed content principle, three content categories (developer UI / admin reusable / appointment-specific), multilingual content strategy (parent + translation records, NOT `{% trans %}` for admin content), payment method architecture with mandatory historical snapshots, appointment language persistence, transactional email system, and SEO configuration. Read before implementing any Phase 7 work.
 
 ---
 
@@ -108,13 +108,17 @@ apps/
 | Relations | `service` (FK), `provider` (FK), `selected_options` (JSONField, frozen historical snapshot) |
 | Client Data | `client_name`, `client_email`, `client_phone`, `client_age` |
 | Hair Data | `hair_length` (Choices: Ear, Chin, Neck, Shoulder, Armpit, Bra Strap, Mid Back, Waist, Hip), `photo_front`, `photo_side`, `photo_back` |
-| Financials | `deposit_amount`, `payment_method` (Revolut, Wise, TransferGo, Bank Transfer), `payment_reference` (Auto-generated `AFH-XXXXXX`), `proof_of_payment` (**blank=True** — created at Step 3, proof added at Step 4) |
+| Financials | `deposit_amount`, `payment_method` (Revolut, Wise, TransferGo, Bank Transfer — currently TextChoices, migrating to FK in Phase 7B), `payment_reference` (Auto-generated `AFH-XXXXXX`), `proof_of_payment` (**blank=True** — created at Step 3, proof added at Step 4) |
 
 > **Planned Migration (Phase 7B):** Per `ARCHITECTURAL_PRINCIPLES.md`, `payment_method` will migrate from hardcoded TextChoices to a dynamic `PaymentMethod` model with admin-managed `PaymentDetailField` entries. Each method will support configurable detail fields (IBAN, account holder, QR codes, etc.). Existing records will be preserved via data migration.
+>
+> **Historical Snapshot (Phase 7B, mandatory):** An `AppointmentPaymentSnapshot` will freeze the payment configuration at submission time. Later admin edits to `PaymentMethod` or `PaymentDetailField` will NOT alter historical appointment records. See `ARCHITECTURAL_PRINCIPLES.md` §6.2.
+>
+> **Appointment Language (Phase 7B/7C, mandatory):** `AppointmentRequest.customer_language` (hu/en/de) will be captured at submission and used for all transactional emails. See `ARCHITECTURAL_PRINCIPLES.md` §10.
 | Timers & State | `target_date`, `target_time`, `created_at`, `held_until` (default 12 hours from creation) |
 | Status | `pending_verification`, `pending_review`, `approved`, `rejected`, `expired` |
 | Payment Status | `pending_verification`, `verified`, `rejected` |
-| Notes | `admin_notes` (client-visible on Guest Lookup), `internal_notes` (private) |
+| Notes | `admin_notes` (client-visible on Guest Lookup — Category C free-form content, NOT auto-translated), `internal_notes` (private) |
 
 **State Machine:**
 ```
@@ -132,7 +136,7 @@ pending_verification → pending_review → approved
 - This avoids temp file storage for multi-step HTMX file uploads.
 
 ### apps.payments (DECOMMISSIONED)
-Stripe/PayPal gateways removed in Phase 0. All payments are now manual bank transfers.
+Stripe/PayPal gateways removed in Phase 0. Payments are manually verified using administrator-configured payment methods and instructions. No automated third-party payment gateway integrations.
 
 ### apps.reviews (DELETED)
 Intentionally scrapped. No star ratings, comments, or review system.
@@ -363,7 +367,7 @@ Because ServiceOption groups are infinite (Color, Length, Cap Size, etc.), the S
 
 To prevent architectural bloat and LLM hallucinations, autonomous agents are strictly forbidden from implementing the following:
 
-1. **NO Third-Party Payment Gateways:** Do not write integrations for Stripe, PayPal, Barion, etc. All payments are Manual Bank Transfers.
+1. **NO Automated Third-Party Payment Gateways:** Do not write integrations for Stripe, PayPal, Barion, etc. Payments are manually verified using administrator-configured payment methods and instructions. The admin defines which methods are available (Revolut, Wise, TransferGo, Bank Transfer initially — admin-configurable via Django Admin in Phase 7B).
 2. **NO Customer Reviews:** The reviews app was intentionally scrapped. Do not create rating models or star UIs.
 3. **NO Provider Logins/Dashboards:** Stylists do not log in. All reviews and approvals are handled by the Admin/Owner. Do not implement complex Role-Based Access Control (RBAC).
 4. **NO Automated SMS Notifications:** Do not integrate Twilio or SMS APIs. Communication is strictly via Email.

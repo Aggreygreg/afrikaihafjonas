@@ -1,13 +1,32 @@
 # Afrikai Hajfonás — Architectural Principles: Business-Managed Content & Configuration
 
-**Last Updated:** August 12, 2026
-**Status:** Principle document — implementation tasks queued (see PROGRESS_HISTORY.md)
+**Last Updated:** August 12, 2026 (Revision 2 — major architectural refinement)
+**Status:** Specification complete. Implementation tasks queued (Phase 7A–7E). NOT STARTED.
 
 ---
 
-## Core Principle
+## Table of Contents
+
+1. [Core Principle](#1-core-principle)
+2. [Scope Boundary — Not a CMS](#2-scope-boundary--not-a-cms)
+3. [Three Content Categories](#3-three-content-categories-the-foundation)
+4. [Multilingual Content Strategy](#4-multilingual-content-strategy)
+5. [Business Information (Phase 7A)](#5-business-information-phase-7a)
+6. [Payment Methods + Historical Snapshots (Phase 7B)](#6-payment-methods--historical-snapshots-phase-7b)
+7. [Editable Email Templates (Phase 7C)](#7-editable-email-templates-phase-7c)
+8. [Customer-Facing Content (Phase 7D)](#8-customer-facing-content-phase-7d)
+9. [SEO Configuration (Phase 7E)](#9-seo-configuration-phase-7e)
+10. [Appointment Language Persistence](#10-appointment-language-persistence-cross-cutting)
+11. [Email Templates vs Newsletters](#11-email-templates-vs-newsletters)
+12. [Open Architectural Decisions](#12-open-architectural-decisions)
+
+---
+
+## 1. Core Principle
 
 Business-owned content and configuration must **not be hardcoded in application code**. Developers define the system structure, validation rules, business logic, and supported data/placeholder types; the **site administrator manages business-specific content and configuration through Django Admin**.
+
+> **The developer controls how the system works. The admin controls what the business currently says, displays, and accepts.**
 
 ### Separation of Responsibilities
 
@@ -21,48 +40,392 @@ Business-owned content and configuration must **not be hardcoded in application 
 | Supported email placeholders | SEO metadata (titles, descriptions, OG tags) |
 | Technical SEO (sitemap, robots.txt, hreflang) | Marketing & promotional content |
 | Email-sending logic (when/where/trigger) | Homepage & static-page content |
+| Payment snapshot logic (what gets frozen) | Payment method current configuration |
 
 ### The Litmus Test
 
-> A routine business change—such as moving the salon, changing a phone number, replacing a bank account, adding a new payment service, changing payment instructions, updating an email, or changing SEO metadata—should **not require a developer to modify application code or redeploy the site**.
+> A routine business change — such as moving the salon, changing a phone number, replacing a bank account, adding a new payment service, changing payment instructions, updating an email, or changing SEO metadata — should **not require a developer to modify application code or redeploy the site**.
 
 ---
 
-## 1. Business Information
+## 2. Scope Boundary — Not a CMS
+
+This project is a salon appointment system, **not a general-purpose content management system**. Only make business-owned information configurable where it is genuinely useful for the salon's operation, customer communication, marketing, or maintenance.
+
+**What this means in practice:**
+- FAQs, email templates, payment methods, business info, SEO metadata → admin-managed ✅
+- A drag-and-drop page builder, custom post types, arbitrary widget system → NOT building ❌
+- Static page content (About, Terms, Privacy) → admin-editable text ✅
+- New page creation (admin creates arbitrary new routes) → NOT building ❌
+
+---
+
+## 3. Three Content Categories — The Foundation
+
+All content in the system falls into exactly one of three categories. Each has a distinct translation/management strategy. This distinction must be respected everywhere.
+
+### Category A — Developer-Authored UI
+
+**What:** Static interface strings written by developers in templates and Python code.
+
+**Examples:** "Start Appointment Request", "Your request has been submitted", "Available Times", "Submit", form labels, button text.
+
+**Translation strategy:** Django i18n / `{% trans %}` / `{% blocktrans %}` / `.po` / `.mo` files.
+
+**Who controls:** Developer writes the English msgid and the translations in `.po` files. Administrator has no access.
+
+**Rule:** These strings pass through `{% trans %}`. They are part of the codebase and version-controlled.
+
+---
+
+### Category B — Administrator-Authored Reusable Content
+
+**What:** Business-owned content that is reused across the site or in transactional emails. Must support all three languages (HU/EN/DE).
+
+**Examples:** FAQs, static-page content (About, Terms, Privacy body text), announcements, email template subject/body, content blocks, SEO metadata (where appropriate).
+
+**Translation strategy:** **Language-specific records related to a shared content object.** Each content item has a parent record (for ordering, active state, shared slug) and child `Translation` records keyed by language code.
+
+**Who controls:** Administrator creates and edits translations through Django Admin.
+
+**Rule:** This content is **never** passed through `{% trans %}`. It is stored in the database in the language the admin typed. The system selects the correct language-specific record at render time based on the active language context.
+
+---
+
+### Category C — Appointment-Specific Free-Form Admin Content
+
+**What:** One-off content created by an admin for a specific appointment or customer interaction. Not reusable.
+
+**Examples:** `admin_notes` (visible to the client on Guest Lookup), `internal_notes` (admin-only).
+
+**Translation strategy:** **None.** Do NOT auto-translate. Do NOT create per-language versions.
+
+**How it works instead:**
+- The appointment stores `customer_language` (see §10).
+- Django Admin displays the customer's language prominently (🇭🇺 HU / 🇬🇧 EN / 🇩🇪 DE).
+- The admin reads the language indicator and writes the note in the appropriate language themselves.
+
+**Rule:** The admin knows which language the customer selected and writes accordingly. No complex multilingual system for free-form notes.
+
+---
+
+### Quick Reference Table
+
+| Category | Example | Where Managed | Translation Method |
+|---|---|---|---|
+| **A** Developer UI | "Start Appointment Request" | `.po` files (code) | Django i18n `{% trans %}` |
+| **B** Admin reusable | FAQ "How much is the deposit?" | Django Admin (DB) | Language-specific DB records |
+| **C** Appointment-specific | "Please send a clearer photo of the back" | Django Admin per appointment | None — admin writes in customer's language |
+
+---
+
+## 4. Multilingual Content Strategy
+
+The site supports three languages: **HU (Hungarian, base/default), EN (English), DE (German)**.
+
+### Why not `{% trans %}` for admin content?
+
+Django's `{% trans %}` system translates *developer-authored* strings at template-render time. It requires `.po`/`.mo` files maintained by developers. Admin-managed content is created at runtime and cannot be inserted into `.po` files. Mixing the two is architecturally incoherent.
+
+### Chosen Design: Language-Specific Translation Records
+
+For every admin-managed multilingual content type (FAQ, ContentBlock, EmailTemplate, SEO metadata), we use a **parent + translations** pattern:
+
+```
+ContentObject (parent)
+├── ordering, active state, shared slug/key
+│
+├── Translation (language='hu')
+│   └── title, body, etc.
+├── Translation (language='en')
+│   └── title, body, etc.
+└── Translation (language='de')
+    └── title, body, etc.
+```
+
+### Shared Language Enum
+
+```python
+class LanguageChoices(models.TextChoices):
+    HUNGARIAN = 'hu', '🇭🇺 Magyar'
+    ENGLISH = 'en', '🇬🇧 English'
+    GERMAN = 'de', '🇩🇪 Deutsch'
+```
+
+This lives in a shared location (e.g., `apps/site_config/models.py` or a `constants` module) and is imported by all models that need language keys.
+
+### Reusable Translation Record Pattern
+
+Every multilingual content type follows this pattern:
+
+```python
+class Something(models.Model):
+    """Parent: ordering, active state, slug. No language-specific fields."""
+    # ... fields common to all languages
+
+class SomethingTranslation(models.Model):
+    """One per language. Linked to parent."""
+    parent = models.ForeignKey(Something, related_name='translations',
+                               on_delete=models.CASCADE)
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+
+    class Meta:
+        unique_together = ('parent', 'language')
+```
+
+### Language Selection at Render Time
+
+The system resolves content using this fallback chain:
+
+1. **Active language** — the language currently active for the request (from URL prefix, session, or cookie), OR the appointment's `customer_language` for transactional emails.
+2. **Base language (HU)** — if no translation exists for the active language, fall back to Hungarian.
+3. **First available** — if somehow neither exists, return the first translation found (safety net).
+
+This logic lives in a **reusable utility function** or manager method, e.g.:
+
+```python
+def get_translation(parent, language):
+    """Return the best available translation for a content object."""
+    return (
+        parent.translations.filter(language=language).first()
+        or parent.translations.filter(language='hu').first()
+        or parent.translations.first()
+    )
+```
+
+### Admin UX for Translations
+
+Django Admin uses **StackedInline** for translations. The admin sees one form per language within the parent object's change page:
+
+```python
+class SomethingTranslationInline(admin.StackedInline):
+    model = SomethingTranslation
+    extra = 3  # Show HU, EN, DE by default
+```
+
+---
+
+## 5. Business Information (Phase 7A)
 
 **Goal:** All customer-facing business information centrally configurable via the existing `SiteConfiguration` singleton model.
 
-**Required Fields (extending current model):**
+**Multilingual?** Business info (name, address, phone, hours) is **primarily operational data**, not prose. A phone number is a phone number in every language. However, **address description/directions** and **working hours descriptions** may benefit from per-language variants.
 
-| Field | Type | Current State |
-|---|---|---|
-| Salon/business name | CharField | ❌ Hardcoded in templates |
-| Address | CharField | ✅ Exists |
-| Address description/directions | TextField | ❌ Missing |
-| Phone number | CharField | ✅ Exists |
-| Email address | EmailField | ✅ Exists |
-| Business/working hours | TextField or structured | ❌ Hardcoded in contact page |
-| Google Maps/location link | URLField | ❌ Missing |
-| Website URL | URLField | ❌ Missing |
-| Logo | ImageField | ❌ Missing |
-| Favicon | ImageField | ❌ Missing |
-| Instagram URL | URLField | ✅ Exists |
-| Facebook URL | URLField | ✅ Exists |
-| TikTok URL | URLField | ✅ Exists |
+**Decision:** `SiteConfiguration` remains a singleton with single-language fields. If address descriptions or hours descriptions need translation, use ContentBlocks (Phase 7D) keyed by slug. This keeps the singleton simple and avoids over-engineering.
+
+**Required Fields (extending current `SiteConfiguration`):**
+
+| Field | Type | Multilingual? | Current State |
+|---|---|---|---|
+| Business name | CharField | No | ❌ Hardcoded in templates |
+| Address | CharField | No | ✅ Exists |
+| Address description/directions | TextField | Optional (via ContentBlock) | ❌ Missing |
+| Phone number | CharField | No | ✅ Exists |
+| Email address | EmailField | No | ✅ Exists |
+| Business/working hours | TextField | Optional (via ContentBlock) | ❌ Hardcoded |
+| Google Maps/location link | URLField | No | ❌ Missing |
+| Website URL | URLField | No | ❌ Missing |
+| Logo | ImageField | No | ❌ Missing |
+| Favicon | ImageField | No | ❌ Missing |
+| Instagram URL | URLField | No | ✅ Exists |
+| Facebook URL | URLField | No | ✅ Exists |
+| TikTok URL | URLField | No | ✅ Exists |
+| Global SEO fields (title, description, OG) | Various | Handled in Phase 7E | ❌ Missing |
 
 **Rule:** Changes automatically reflect everywhere the data is used — templates AND email templates (via placeholder system).
 
 ---
 
-## 2. Editable Email Templates
+## 6. Payment Methods + Historical Snapshots (Phase 7B)
 
-**Goal:** Separate email logic (when to send) from email content (subject + body). Administrator controls content via Django Admin.
+This is the most architecturally critical phase. It has **two layers** that must be kept strictly separate: the **current admin-managed configuration** and the **historical frozen snapshot** per appointment.
 
-**Model Design:**
+### 6.1 Current Payment Configuration (Admin-Managed)
+
+The current state of what payment methods the salon accepts, with their current account details.
+
+```python
+class PaymentMethod(models.Model):
+    """Admin-managed payment method. Admin can add, edit, disable, reorder.
+
+    These are SEED DATA, not architectural constants. The four initial methods
+    (Revolut, Wise, TransferGo, Bank Transfer) are seeded at migration time.
+    The admin may delete them and create entirely different ones.
+    """
+    name = models.CharField(max_length=100)          # e.g., "Revolut", "Wise"
+    slug = models.SlugField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    icon = models.ImageField(upload_to='payment_icons/', blank=True)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+
+
+class PaymentDetailField(models.Model):
+    """Admin-defined field for a payment method (IBAN, account holder, QR code, etc.).
+
+    This is the CURRENT configuration. When an appointment is created,
+    these values are SNAPSHOTTED into the appointment's payment snapshot.
+    Editing this record later does NOT change historical appointments.
+    """
+    FIELD_TYPES = [
+        ('text', 'Text'),
+        ('textarea', 'Text Area'),
+        ('number', 'Number'),
+        ('email', 'Email'),
+        ('url', 'URL'),
+        ('image', 'Image'),
+    ]
+
+    payment_method = models.ForeignKey(
+        PaymentMethod, related_name='detail_fields', on_delete=models.CASCADE
+    )
+    label = models.CharField(max_length=100)          # e.g., "Account Holder"
+    field_type = models.CharField(max_length=20, choices=FIELD_TYPES)
+    value = models.TextField(blank=True)               # The actual current data
+    image_value = models.ImageField(
+        upload_to='payment_details/', blank=True      # For image type (QR codes)
+    )
+    display_order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+        unique_together = ('payment_method', 'label')
+```
+
+**Admin capabilities:** Add, edit, enable/disable, reorder, remove (if no FK references). All without code changes.
+
+**Seed data, not architecture:** The current four methods are **initial seed data**. The admin may delete them and create entirely different ones.
+
+### 6.2 Historical Payment Snapshot (Frozen at Appointment Creation)
+
+When a customer submits an appointment request, the payment configuration that was active **at that moment** is **frozen** into the appointment record. This snapshot is permanent and immutable.
+
+**Why this is mandatory:** An administrator may later change a payment method's IBAN, disable a method, or replace it entirely. Historical appointments must continue to represent the payment configuration that was valid when the customer submitted their request.
+
+**Example scenario:**
+
+| Date | Wise IBAN | What happens |
+|---|---|---|
+| August 2026 | `HU12 3456...` | Customer A submits appointment → snapshot records `HU12...` |
+| October 2026 | `HU99 8888...` | Admin changes Wise's IBAN → `PaymentDetailField.value` updated |
+| November 2026 | `HU99 8888...` | Customer B submits appointment → snapshot records `HU99...` |
+| — | — | Customer A's Guest Lookup still shows `HU12...` (frozen) |
+
+#### Snapshot Model Design
+
+```python
+class AppointmentPaymentSnapshot(models.Model):
+    """Frozen copy of the payment configuration at the time of appointment submission.
+
+    Created when the customer selects a payment method and submits (Step 4).
+    NEVER updated after creation. Changes to PaymentMethod or PaymentDetailField
+    do not affect existing snapshots.
+
+    This is distinct from the live PaymentMethod/PaymentDetailField tables:
+      - Live tables    = what the admin CURRENTLY configures (mutable, shared)
+      - This snapshot  = what was configured WHEN this customer submitted (immutable, per-appointment)
+    """
+    appointment = models.OneToOneField(
+        'bookings.AppointmentRequest',
+        related_name='payment_snapshot',
+        on_delete=models.CASCADE
+    )
+    payment_method_name = models.CharField(max_length=100)  # e.g., "Wise"
+    payment_method_slug = models.SlugField(max_length=100)   # e.g., "wise"
+    # Full detail fields frozen as JSON.
+    # Format: [{"label": "IBAN", "value": "HU12...", "field_type": "text"},
+    #          {"label": "QR Code", "value": "/media/...", "field_type": "image"}, ...]
+    detail_fields_snapshot = models.JSONField(default=list)
+    snapshot_created_at = models.DateTimeField(auto_now_add=True)
+
+    def get_detail(self, label):
+        """Retrieve a frozen detail value by label."""
+        for field in self.detail_fields_snapshot:
+            if field['label'] == label:
+                return field['value']
+        return None
+```
+
+#### What Gets Frozen
+
+When the snapshot is created, the system copies:
+1. `PaymentMethod.name` → `payment_method_name`
+2. `PaymentMethod.slug` → `payment_method_slug`
+3. All **active** `PaymentDetailField` records for that method → `detail_fields_snapshot` (JSON array of `{label, value, field_type}`)
+
+#### When is the Snapshot Created?
+
+At **Step 4** (payment submission), when the customer selects a payment method and uploads proof of payment. The snapshot is created in the same transaction as the Step 4 record update.
+
+> **Design note:** `AppointmentRequest.payment_method` (FK to live `PaymentMethod`) is kept for **admin querying/filtering convenience** (e.g., "show all Wise appointments"). But the **authoritative payment details** shown to the customer in Guest Lookup come from the **snapshot**, never from the live tables.
+
+#### What the Customer Sees vs What Admin Sees
+
+| View | Source | Mutable? |
+|---|---|---|
+| Guest Lookup (customer) — payment instructions | `AppointmentPaymentSnapshot.detail_fields_snapshot` | ❌ Frozen |
+| Django Admin — appointment payment details | `AppointmentPaymentSnapshot` (read-only inline) | ❌ Frozen |
+| Django Admin — current payment methods config | `PaymentMethod` / `PaymentDetailField` tables | ✅ Editable |
+| Wizard Step 4 (new customer) — payment options | `PaymentMethod` (active) / `PaymentDetailField` (active) | ✅ Current config |
+
+#### Migration Strategy (from TextChoices)
+
+1. Create `PaymentMethod` and `PaymentDetailField` models.
+2. **Seed migration:** create 4 methods (Revolut, Wise, TransferGo, Bank Transfer) with appropriate detail fields. These are seed data — the admin can modify or delete them later.
+3. Add `payment_method_fk` FK to `AppointmentRequest` (nullable initially).
+4. Add `AppointmentPaymentSnapshot` model.
+5. **Data migration:** for each existing `AppointmentRequest`:
+   a. Set `payment_method_fk` based on old TextChoices value → matching `PaymentMethod` slug.
+   b. Create `AppointmentPaymentSnapshot` from the current `PaymentDetailField` values for that method. (Historical records get the current config snapshotted — this is the best we can do for pre-existing records.)
+6. Remove old `payment_method` TextChoices CharField.
+
+### 6.3 Corrected Anti-Pattern Wording
+
+The old master spec said "All payments are Manual Bank Transfers." This is inaccurate and misleading — the salon accepts Revolut, Wise, TransferGo, and Bank Transfer, and the method set is admin-configurable.
+
+**New anti-pattern wording (master spec §7.1):**
+
+> **No automated third-party payment gateway integrations.** Payments are manually verified using administrator-configured payment methods and instructions. The admin defines which methods are available and their account details. No Stripe, PayPal, Barion, or similar automated processing.
+
+---
+
+## 7. Editable Email Templates (Phase 7C)
+
+**Goal:** Separate email logic (when to send, what triggers it) from email content (subject + body). Administrator controls content; developer controls the placeholder vocabulary and send triggers.
+
+### 7.1 Transactional vs Marketing Emails (Strictly Separate)
+
+**Transactional emails** are event-triggered by application logic. The developer controls the trigger; the admin controls the wording.
+
+| Trigger Event | Email Type Key |
+|---|---|
+| Appointment request submitted | `request_received` |
+| Payment pending verification | `verification_pending` |
+| Admin verifies payment | `payment_verified` |
+| Admin approves appointment | `appointment_approved` |
+| Admin rejects appointment | `appointment_rejected` |
+| Appointment expires (auto) | `appointment_expired` |
+| Expiry reminder (2h / 1h before) | `expiry_reminder` |
+| Refund issued | `refund_notification` |
+
+**Marketing/newsletter emails** are intentionally created and sent by the admin. They are a **separate system** from transactional emails — different workflow, different model, different triggers.
+
+> Do NOT treat newsletters as just another transactional `email_type`. If/when newsletters are built, they get their own model (`Newsletter`), their own send workflow (admin composition → preview → send to filtered audience), and their own permission scope. This is explicitly out of scope for Phase 7.
+
+### 7.2 Email Template Model (Multilingual — Category B)
+
+Email templates follow the **Category B multilingual pattern** (parent + translations). The parent defines the email type; each translation provides subject + body in one language.
 
 ```python
 class EmailTemplate(models.Model):
-    """Admin-managed email content with developer-defined placeholders."""
+    """Parent: defines the email type and active state.
+
+    EMAIL_TYPES is a developer-controlled enum — NOT admin-extensible.
+    Adding a new email type requires code changes (new trigger logic).
+    """
     EMAIL_TYPES = [
         ('request_received', 'Request Received'),
         ('verification_pending', 'Payment Verification Pending'),
@@ -72,213 +435,384 @@ class EmailTemplate(models.Model):
         ('appointment_expired', 'Appointment Expired'),
         ('expiry_reminder', 'Expiry Reminder'),
         ('refund_notification', 'Refund Notification'),
-        # Future types added here
+        # New types added by developer only — this is a code-level enum, not admin-extensible
     ]
 
     email_type = models.CharField(max_length=50, choices=EMAIL_TYPES, unique=True)
+    is_active = models.BooleanField(default=True)
+
+
+class EmailTemplateTranslation(models.Model):
+    """One per language. Subject + body text/HTML."""
+    template = models.ForeignKey(
+        EmailTemplate, related_name='translations', on_delete=models.CASCADE
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
     subject = models.CharField(max_length=200)
     body_text = models.TextField(help_text="Plain text body. Use {{ placeholders }}.")
     body_html = models.TextField(blank=True, help_text="Optional HTML body.")
-    is_active = models.BooleanField(default=True)
-    language = models.CharField(max_length=5, default='hu')  # Per-language templates
 
     class Meta:
-        unique_together = ('email_type', 'language')
+        unique_together = ('template', 'language')
 ```
 
-**Developer-Controlled Placeholder Vocabulary:**
+### 7.3 Language Selection for Transactional Emails
 
-The system renders templates with a controlled context dict. Admins can use any of these in their templates:
+**Critical rule:** Transactional emails are sent using the **appointment's stored `customer_language`** (see §10), NOT the admin's current session language, NOT the customer's current browser language.
+
+**Resolution:**
+1. Look up `EmailTemplate` by `email_type`.
+2. Look up `EmailTemplateTranslation` by `(template, appointment.customer_language)`.
+3. If no translation exists for `customer_language`, fall back to HU (base).
+4. Render with context dict (placeholder substitution).
+5. Send.
+
+### 7.4 Developer-Controlled Placeholder Vocabulary
+
+The system renders templates with a controlled context dict. Admins can use any of these placeholders. Unsupported variables render as empty strings (no crashes).
 
 **Client:** `{{ client_name }}`, `{{ client_email }}`, `{{ client_phone }}`, `{{ client_age }}`
 
-**Appointment:** `{{ appointment_date }}`, `{{ appointment_time }}`, `{{ appointment_status }}`, `{{ held_until }}`
+**Appointment:** `{{ appointment_date }}`, `{{ appointment_time }}`, `{{ appointment_status }}`, `{{ held_until }}`, `{{ payment_reference }}`
 
 **Service:** `{{ service_name }}`, `{{ service_description }}`, `{{ service_duration }}`, `{{ service_price }}`, `{{ selected_options }}`
 
 **Provider:** `{{ provider_name }}`
 
-**Payment:** `{{ deposit_amount }}`, `{{ payment_method }}`, `{{ payment_reference }}`
+**Payment:** `{{ deposit_amount }}`, `{{ payment_method_name }}`, `{{ payment_details }}` (from snapshot)
 
-**Business:** `{{ salon_name }}`, `{{ salon_address }}`, `{{ salon_address_description }}`, `{{ salon_phone }}`, `{{ salon_email }}`, `{{ business_hours }}`, `{{ google_maps_link }}`, `{{ website_url }}`
+**Business:** `{{ salon_name }}`, `{{ salon_address }}`, `{{ salon_phone }}`, `{{ salon_email }}`, `{{ business_hours }}`, `{{ google_maps_link }}`, `{{ website_url }}`
 
 **Social:** `{{ instagram_url }}`, `{{ facebook_url }}`, `{{ tiktok_url }}`
 
 **Useful Links:** `{{ guest_lookup_url }}`, `{{ privacy_policy_url }}`, `{{ terms_url }}`
 
-**Rendering:** Developer builds a context dict → renders template via Django's string template engine → sends email. Unsupported variables render as empty strings (no crashes).
+**Rendering:** Developer builds a context dict → renders template via Django's string template engine (`django.template.Template`) → sends email via Django's email backend.
 
 ---
 
-## 3. Administrator-Managed Payment Methods
+## 8. Customer-Facing Content (Phase 7D)
 
-**Goal:** Payment methods stored as database records, not hardcoded `TextChoices`.
+**Goal:** Business-owned reusable content editable from Django Admin, with full multilingual support.
 
-**Model Design:**
-
-```python
-class PaymentMethod(models.Model):
-    """Admin-managed payment method."""
-    name = models.CharField(max_length=100)          # e.g., "Revolut", "Wise"
-    slug = models.SlugField(max_length=100, unique=True)
-    description = models.TextField(blank=True)         # Instructions shown to client
-    display_order = models.PositiveSmallIntegerField(default=0)
-    is_active = models.BooleanField(default=True)
-    icon = models.ImageField(upload_to='payment_icons/', blank=True)
-
-    class Meta:
-        ordering = ['display_order', 'name']
-```
-
-**Migration Strategy:**
-- Seed the 4 current methods (Revolut, Wise, TransferGo, Bank Transfer) as initial records.
-- `AppointmentRequest.payment_method` changes from TextChoices CharField to FK `PaymentMethod`.
-- This is a **data migration** — existing AppointmentRequest records must be mapped to new PaymentMethod records.
-
-**Admin Capabilities:** Add, edit, enable/disable, reorder, remove (if no FK references) — all without code changes.
-
----
-
-## 4. Dynamic Payment Details
-
-**Goal:** Each payment method supports admin-defined detail fields (bank name, IBAN, account holder, etc.).
-
-**Model Design:**
+### 8.1 FAQ (Multilingual — Category B)
 
 ```python
-class PaymentDetailField(models.Model):
-    """Admin-defined field for a payment method."""
-    FIELD_TYPES = [
-        ('text', 'Text'),
-        ('textarea', 'Text Area'),
-        ('number', 'Number'),
-        ('email', 'Email'),
-        ('url', 'URL'),
-        ('image', 'Image Upload'),
-    ]
-
-    payment_method = models.ForeignKey(PaymentMethod, related_name='detail_fields',
-                                        on_delete=models.CASCADE)
-    label = models.CharField(max_length=100)          # e.g., "Account Holder"
-    field_type = models.CharField(max_length=20, choices=FIELD_TYPES)
-    value = models.TextField(blank=True)               # The actual data (text/number/etc.)
-    image_value = models.ImageField(upload_to='payment_details/', blank=True)  # For image type
+class FAQ(models.Model):
+    """Parent: ordering, active state."""
     display_order = models.PositiveSmallIntegerField(default=0)
-    is_required = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ['display_order']
-        unique_together = ('payment_method', 'label')
+
+
+class FAQTranslation(models.Model):
+    """One per language."""
+    faq = models.ForeignKey(FAQ, related_name='translations', on_delete=models.CASCADE)
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    question = models.CharField(max_length=300)
+    answer = models.TextField()
+
+    class Meta:
+        unique_together = ('faq', 'language')
 ```
 
-**Examples:** Bank Name, Account Holder, Account Number, IBAN, SWIFT/BIC, Routing Number, Username, Phone Number, Email Address, Payment Reference Instructions, QR Code/Image, Additional Notes.
+### 8.2 Content Block (Multilingual — Category B)
 
-**Rendering:** The client-facing payment step dynamically renders active fields for the selected method. No template changes needed when admin adds/removes fields.
+For static page content (About, Terms, Privacy body text), announcements, and other reusable text.
+
+```python
+class ContentBlock(models.Model):
+    """Parent: identified by slug, ordered, active state."""
+    slug = models.SlugField(max_length=100, unique=True)  # e.g., 'about_page', 'terms_page'
+    display_order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+
+
+class ContentBlockTranslation(models.Model):
+    """One per language."""
+    content_block = models.ForeignKey(
+        ContentBlock, related_name='translations', on_delete=models.CASCADE
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    title = models.CharField(max_length=200, blank=True)
+    body = models.TextField()  # Markdown or HTML — admin types content here
+
+    class Meta:
+        unique_together = ('content_block', 'language')
+```
+
+**Usage:** Templates reference `ContentBlock` by slug: `{% get_content_block 'about_page' as block %}` then render `{{ block.title }}` / `{{ block.body|markdown }}`.
+
+### 8.3 Announcement / Banner System (Multilingual — Category B)
+
+```python
+class Announcement(models.Model):
+    """Site-wide banner. Admin controls message, active state, dismissibility."""
+    slug = models.SlugField(max_length=100, unique=True)
+    is_active = models.BooleanField(default=True)
+    is_dismissible = models.BooleanField(default=True)
+    display_order = models.PositiveSmallIntegerField(default=0)
+    starts_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['display_order']
+
+
+class AnnouncementTranslation(models.Model):
+    """One per language."""
+    announcement = models.ForeignKey(
+        Announcement, related_name='translations', on_delete=models.CASCADE
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    message = models.CharField(max_length=500)
+    link_url = models.URLField(blank=True)
+    link_text = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        unique_together = ('announcement', 'language')
+```
+
+### 8.4 Static Page Content Migration
+
+The current static pages (About, Contact, Terms, Privacy) have content hardcoded in templates. Phase 7D moves the **prose content** into `ContentBlock` records, while the template structure (layout, sections, headings) remains developer-controlled.
+
+**What stays in templates:** Page layout, section structure, CSS classes, non-prose elements (maps, contact form).
+
+**What moves to ContentBlocks:** Body text, policy text, about text — anything the admin should be able to edit without a developer.
 
 ---
 
-## 5. Customer-Facing Content
+## 9. SEO Configuration (Phase 7E)
 
-**Goal:** Business-owned content editable from Django Admin.
+**Goal:** SEO metadata administrator-editable, with global defaults and per-page overrides. All customer-facing SEO text is multilingual (Category B).
 
-**Areas:**
+### 9.1 Global SEO (Dedicated Model)
 
-| Content Area | Current State | Target |
-|---|---|---|
-| FAQs | Hardcoded/missing | CMS model (FAQ items with question + answer, reorderable) |
-| Policies & customer instructions | Hardcoded in templates | Admin-editable content blocks |
-| Announcements | Missing | Banner/announcement system (dismissible) |
-| Homepage marketing content | Hardcoded in templates | Editable via SiteConfiguration / content blocks |
-| Static page content (About, Contact, Terms, Privacy) | Hardcoded in templates | Admin-editable rich text |
-| Newsletter content | Not implemented | Future — when newsletter system introduced |
+```python
+class GlobalSEO(models.Model):
+    """Singleton: global SEO defaults used when no page-level override exists."""
+    # Translatable fields handled via GlobalSEOTranslation
+    canonical_site_url = models.URLField()
+    og_image_default = models.ImageField(upload_to='seo/', blank=True)
+    google_verification = models.CharField(max_length=200, blank=True)
+    bing_verification = models.CharField(max_length=200, blank=True)
+    # Singleton enforcement (same pattern as SiteConfiguration)
 
-**Approach:** A generic `ContentBlock` model (key-value pairs with optional HTML) for simple cases, and dedicated models for structured content like FAQs.
 
----
+class GlobalSEOTranslation(models.Model):
+    """Per-language global SEO text."""
+    global_seo = models.ForeignKey(
+        GlobalSEO, related_name='translations', on_delete=models.CASCADE
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    default_meta_title = models.CharField(max_length=200)
+    default_meta_description = models.TextField()
+    default_og_title = models.CharField(max_length=200, blank=True)
+    default_og_description = models.TextField(blank=True)
 
-## 6. SEO & Marketing Configuration
+    class Meta:
+        unique_together = ('global_seo', 'language')
+```
 
-**Goal:** SEO metadata administrator-editable.
-
-**Two Layers:**
-
-**Global SEO (in SiteConfiguration or dedicated model):**
-
-| Field | Type |
-|---|---|
-| Site title | CharField |
-| Default meta title | CharField |
-| Default meta description | TextField |
-| Default keywords | TextField (comma-separated, if used) |
-| Canonical site URL | URLField |
-| Default OG title | CharField |
-| Default OG description | TextField |
-| Default OG image | ImageField |
-| Search-engine verification (Google, Bing) | TextField (meta tag content) |
-| Marketing/analytics identifiers | TextField (future) |
-
-**Page-Level SEO:**
+### 9.2 Page-Level SEO (Multilingual — Category B)
 
 ```python
 class PageSEO(models.Model):
-    """Per-page SEO metadata with global fallback."""
-    url_path = models.CharField(max_length=200, unique=True)  # e.g., '/', '/services/', '/about/'
+    """Per-page SEO metadata. Targets either a URL path (static pages)
+    or a Service object (dynamic service pages).
+
+    Exactly one of url_path / service must be set (enforced by constraint).
+    """
+    url_path = models.CharField(max_length=200, null=True, blank=True)
+    service = models.OneToOneField(
+        'services.Service', related_name='seo',
+        on_delete=models.CASCADE, null=True, blank=True
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(url_path__isnull=False, service__isnull=True)
+                    | models.Q(url_path__isnull=True, service__isnull=False)
+                ),
+                name='pageseo_exactly_one_target'
+            )
+        ]
+
+
+class PageSEOTranslation(models.Model):
+    """Per-language SEO metadata for a page."""
+    page_seo = models.ForeignKey(
+        PageSEO, related_name='translations', on_delete=models.CASCADE
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
     meta_title = models.CharField(max_length=200, blank=True)
     meta_description = models.TextField(blank=True)
     og_title = models.CharField(max_length=200, blank=True)
     og_description = models.TextField(blank=True)
-    og_image = models.ImageField(upload_to='seo/', blank=True)
-    # Blank fields fall back to global defaults
+
+    class Meta:
+        unique_together = ('page_seo', 'language')
 ```
 
-**Developer-Managed (Technical SEO):** sitemap.xml generation, robots.txt, canonical tag logic, structured data (JSON-LD), URL handling, multilingual hreflang implementation. These remain in code.
+### 9.3 SEO-Capable Pages
+
+| Page | Type | SEO Managed Via |
+|---|---|---|
+| Homepage (`/`) | Static route | `PageSEO(url_path='/')` |
+| Services listing (`/services/`) | Static route | `PageSEO(url_path='/services/')` |
+| **Individual service (`/services/<id>/`)** | Dynamic — FK to Service | `PageSEO(service=...)` |
+| About (`/about/`) | Static route | `PageSEO(url_path='/about/')` |
+| Contact (`/contact/`) | Static route | `PageSEO(url_path='/contact/')` |
+| Terms (`/terms/`) | Static route | `PageSEO(url_path='/terms/')` |
+| Privacy (`/privacy/`) | Static route | `PageSEO(url_path='/privacy/')` |
+| Consultation wizard (`/consult/`) | Static route | `PageSEO(url_path='/consult/')` |
+
+**Individual Service pages (`/services/<id>/`) are first-class SEO targets.** They are major customer-facing landing pages — customers search for specific services (e.g., "knotless box braids Budapest"). Each service gets its own SEO metadata (title, description, OG tags) per language.
+
+### 9.4 Fallback Logic
+
+For any page, SEO resolution follows this chain:
+
+1. **Page-level override** — if a `PageSEOTranslation` exists for this page + active language, use it.
+2. **Global default** — fall back to `GlobalSEOTranslation` for the active language.
+3. **Hardcoded dev fallback** — if no admin SEO config exists at all, use a sensible default from settings (developer-controlled safety net).
+
+### 9.5 Developer-Managed Technical SEO (NOT admin-editable)
+
+These remain in code, maintained by developers:
+
+- `sitemap.xml` generation (Django sitemap framework)
+- `robots.txt`
+- Canonical tag logic
+- Structured data (JSON-LD schema for LocalBusiness, Service)
+- Multilingual `hreflang` tags
+- URL/routing implementation (i18n URL patterns)
 
 ---
 
-## Implementation Roadmap (Queued Tasks)
+## 10. Appointment Language Persistence (Cross-Cutting)
 
-These are planned for future phases. Not started yet. See PROGRESS_HISTORY.md for current status.
+This requirement affects Phase 7B, 7C, and all appointment-related views. It is documented here as a cross-cutting concern.
 
-### Phase 7A: Business Information Expansion
-- Extend `SiteConfiguration` with all missing fields
-- Update all templates to use `{{ config.* }}` instead of hardcoded values
-- Update context processor if needed
+### Requirement
 
-### Phase 7B: Dynamic Payment Methods + Details
-- Create `PaymentMethod` and `PaymentDetailField` models
-- Data migration: convert `AppointmentRequest.payment_method` from TextChoices to FK
-- Seed initial 4 methods with their detail fields
-- Update Wizard Step 4 template to render dynamic fields
-- Update Guest Lookup to display payment details
+Every `AppointmentRequest` must store the customer's selected language at the time of submission as a **permanent field**. This language is used for all future communication with that customer.
 
-### Phase 7C: Editable Email Templates
-- Create `EmailTemplate` model
-- Build email rendering service (context dict → template engine → send)
-- Migrate existing hardcoded emails to admin-managed templates
-- Support per-language templates (HU/EN/DE)
+```python
+class AppointmentRequest(models.Model):
+    # ... existing fields ...
+    customer_language = models.CharField(
+        max_length=2,
+        choices=LanguageChoices.choices,
+        default=LanguageChoices.HUNGARIAN,  # HU is the base language
+        help_text="Language captured at submission. Used for all appointment communication."
+    )
+```
 
-### Phase 7D: Customer-Facing Content
-- FAQ model (question, answer, order, active)
-- ContentBlock model for static page content
-- Update static page templates to use admin-managed content
-- Announcement/banner system
+### Capture Point
 
-### Phase 7E: SEO Configuration
-- Add global SEO fields to SiteConfiguration
-- Create PageSEO model for per-page metadata
-- Build meta tag rendering (template tag or middleware)
-- Fallback logic: page-level → global defaults
+The language is captured when the customer submits the appointment request (Step 3 creation / Step 4 update). The value comes from the **active language at the time of form submission** — derived from Django's `get_language()` at the view level, NOT from a cookie or session that might change later.
+
+### Immutability
+
+Once saved, `customer_language` does **not** change. If the customer later visits the site in a different language, their appointment communication remains in the originally submitted language.
+
+### Admin Display
+
+Django Admin shows the customer's language prominently in the appointment detail view:
+
+- 🇭🇺 **HU** (Magyar)
+- 🇬🇧 **EN** (English)
+- 🇩🇪 **DE** (Deutsch)
+
+This informs the admin which language to use when writing `admin_notes` (Category C content).
+
+### Email System Integration
+
+The email rendering system (Phase 7C) reads `appointment.customer_language` to select the correct `EmailTemplateTranslation`. See §7.3.
+
+---
+
+## 11. Email Templates vs Newsletters
+
+| Aspect | Transactional Email Templates | Newsletter / Marketing Emails |
+|---|---|---|
+| **Trigger** | Application event (appointment submitted, verified, etc.) | Admin manually creates and sends |
+| **Audience** | One specific customer (the appointment owner) | Filtered group or all customers |
+| **Model** | `EmailTemplate` + `EmailTemplateTranslation` (Phase 7C) | Separate `Newsletter` model (future, out of scope) |
+| **Language** | Appointment's `customer_language` | Recipient's stored language or default |
+| **Placeholder system** | Developer-controlled vocab, event context | Admin-authored, may use simpler tokens |
+
+**Rule:** Do not collapse newsletters into the transactional `email_type` choices. If/when a newsletter system is needed, it gets its own architecture.
+
+---
+
+## 12. Open Architectural Decisions
+
+These decisions should be made before implementation begins:
+
+### 12.1 Rich Text Editor for Admin Content
+
+**Question:** Should admin-managed text fields (FAQ answers, content blocks, email HTML) use a rich-text editor?
+
+**Options:**
+- (a) Markdown text + template `|markdown` filter — lightweight, no heavy dependencies.
+- (b) WYSIWYG editor (django-summernote, django-ckeditor, tinymce) — visual editing.
+- (c) Plain text only — no formatting.
+
+**Recommendation:** (a) Markdown for content blocks and FAQs; plain text for email bodies (emails should be simple). WYSIWYG adds dependency complexity. Markdown is sufficient for a salon site.
+
+### 12.2 Global SEO Model Design — DECIDED
+
+**Decision:** Dedicated `GlobalSEO` model with translations (§9.1), NOT in `SiteConfiguration`. Keeps `SiteConfiguration` focused on business contact info. SEO is a distinct concern.
+
+### 12.3 Payment Snapshot Timing — DECIDED
+
+**Decision:** Snapshot created at **Step 4** (payment submission), in the same transaction. See §6.2.
+
+### 12.4 Content Block vs Dedicated Models — DECIDED
+
+**Decision:** Generic `ContentBlock` with slug keys (§8.2). Pages share the same structure (title + body), so one generic model is sufficient.
+
+### 12.5 App Placement for New Models
+
+**Recommendation:**
+
+| Model(s) | App | Rationale |
+|---|---|---|
+| `PaymentMethod`, `PaymentDetailField`, `AppointmentPaymentSnapshot` | `apps/bookings/` | Payment is part of the booking lifecycle |
+| `SiteConfiguration` extensions | `apps/site_config/` (existing) | Already there |
+| `EmailTemplate`, `EmailTemplateTranslation` | `apps/site_config/` | All admin-managed content in one app |
+| `FAQ`, `ContentBlock`, `Announcement` + translations | `apps/site_config/` | Same rationale |
+| `GlobalSEO`, `PageSEO` + translations | `apps/site_config/` | Same rationale |
+
+> **Alternative considered:** A new `apps/admin_content/` app for all Category B content. Decided against for now — `site_config` keeps things simple. Can be refactored later if it grows.
+
+### 12.6 `customer_language` Migration for Existing Records
+
+**Question:** When adding `customer_language` to existing `AppointmentRequest` records, what default value?
+
+**Recommendation:** Default to `hu` (base language). Existing records are historical and we cannot retroactively know what language the customer was using. HU is the safest default since it's the base language and the salon is in Hungary.
 
 ---
 
 ## Relationship to Existing Specs
 
-This document extends (does not replace) MASTER_CONTEXT_AND_SPECS.md. Where this document specifies a new architecture for a system that already exists (e.g., payment methods), the implementation must preserve all existing business rules from the master spec:
-- Deposit math remains unchanged (≥45k→20k, <45k→10k)
+This document extends (does not replace) `MASTER_CONTEXT_AND_SPECS.md`. Where this document specifies a new architecture for a system that already exists (e.g., payment methods), the implementation must preserve all existing business rules from the master spec:
+
+- Deposit math remains unchanged (>=45k -> 20k, <45k -> 10k)
 - 12-hour hold timer remains unchanged
 - Photo upload rules remain unchanged
 - Age validation remains unchanged
-- Anti-patterns from Section 7 of the master spec remain in force
+- Anti-patterns from Section 7 of the master spec remain in force (with corrected payment wording per §6.3)
 
 The core principle simply moves **where configuration lives** (from code to admin), not **what the rules are**.
