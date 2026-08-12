@@ -19,10 +19,21 @@ from django.urls import path, include
 from django.conf import settings 
 from django.conf.urls.static import static 
 from .views import homepage_view
+from apps.site_config.views import (
+    about_page,
+    contact_page,
+    terms_page,
+    privacy_page,
+)
 from . import admin_dashboard  # noqa: F401 — patches AdminSite.index on import
 
 urlpatterns = [
     path('', homepage_view, name='homepage'),
+    # Static site pages
+    path('about/', about_page, name='about'),
+    path('contact/', contact_page, name='contact'),
+    path('terms/', terms_page, name='terms'),
+    path('privacy/', privacy_page, name='privacy'),
     path('services/', include('apps.services.urls', namespace='services')),
     path('bookings/', include('apps.bookings.urls', namespace='bookings')),
     path('admin/', admin.site.urls),
