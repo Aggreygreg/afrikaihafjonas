@@ -48,6 +48,30 @@
 - If you need to restart or kill ANY process, **stop and ask the user first** — no exceptions
 - The QwenPaw Python process IS the parent process running this agent. Killing it = killing yourself AND every other agent in the fleet
 
+### 4.6. 🔀 Isolated Worktrees for Parallel Builders
+
+**When multiple builder agents work on the same repo simultaneously, each MUST use its own git worktree.**
+
+The main project directory (`C:\Users\Sabiedu\Projects\afrikai-hajfonas`) is shared across all agents. If two agents run `git checkout` in the same working tree, they clobber each other's uncommitted changes and commits land on the wrong branch.
+
+**Standard workflow for every builder dispatch:**
+1. Manager assigns a feature branch name (e.g., `feature/expiry-reminders`)
+2. Builder creates an isolated worktree:
+   ```
+   git worktree add C:\Users\Sabiedu\Projects\<short-name> main4qp
+   cd C:\Users\Sabiedu\Projects\<short-name>
+   git checkout -b feature/<name>
+   ```
+3. All work happens inside the worktree — never in the main project dir
+4. The venv (`.venv`) is shared — reference it from the main project dir
+5. After merge, manager removes the worktree:
+   ```
+   git worktree remove C:\Users\Sabiedu\Projects\<short-name>
+   ```
+6. **NEVER** `git checkout` or `git stash` in the main project dir when another agent might be working — use your own worktree instead
+
+**The main project dir is reserved for the manager's own work and the final `main4qp` checkout.**
+
 ---
 
 ## Business Logic Restraints
@@ -162,9 +186,18 @@
 **The Repo:** `https://github.com/Aggreygreg/afrikaihafjonas` (public)
 **Branch:** `main4qp` (integration branch). Feature branches fork from here.
 **Local path:** `C:\Users\Sabiedu\Projects\afrikai-hajfonas`
-**Venv:** `.venv` (Python 3.12.12, Django 4.2.25)
+**Venv:** `.venv` (Python 3.12.12, Django 4.2.25) — shared, always at the main project dir
 **Database:** SQLite (dev)
 **Superuser:** admin / admin123
+
+**MANDATORY: Worktree isolation (see Rule 4.6)**
+When dispatched, your manager will give you a worktree path. Work ONLY inside your worktree. NEVER run `git checkout` in the main project dir.
+```
+git worktree add C:\Users\Sabiedu\Projects\<short-name> main4qp
+cd C:\Users\Sabiedu\Projects\<short-name>
+git checkout -b feature/<name>
+# Use the shared venv: C:\Users\Sabiedu\Projects\afrikai-hajfonas\.venv\Scripts\python.exe
+```
 
 **Before starting any task:**
 1. Read `MASTER_CONTEXT_AND_SPECS.md` — the full spec
