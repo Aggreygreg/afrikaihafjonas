@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load content_tags %}
 
 {% block content %}
 <!-- HERO -->
@@ -22,12 +23,19 @@
     <div class="order-2 md:order-1">
       <span class="text-pink-600 font-semibold uppercase tracking-wider text-sm">{% trans "Our Story" %}</span>
       <h2 class="mt-2 text-3xl md:text-4xl font-bold text-gray-800">{% trans "Tradition you can feel in every strand" %}</h2>
+      {# Phase 7D: editable prose comes from the 'about_page' ContentBlock (HU default).
+         Falls back to this hardcoded copy if the block is missing or inactive. #}
+      {% get_content_block 'about_page' as about_block %}
+      {% if about_block %}
+        <div class="prose prose-pink mt-5 max-w-none text-gray-600">{{ about_block.body|safe }}</div>
+      {% else %}
       <p class="mt-5 text-gray-600 leading-relaxed">
         {% trans "Afrikai Hajfonás was founded on a simple belief: that African braiding is an art form, passed down through generations and deserving of a true home in Hungary. What began as a passion for sharing authentic styles has grown into Budapest's destination for knotless box braids, cornrows, twists, and intricate protective styling." %}
       </p>
       <p class="mt-4 text-gray-600 leading-relaxed">
         {% trans "Every appointment begins with a personal consultation. We take the time to understand your hair, your lifestyle, and the look you dream of — because beautiful, long-lasting braids start with understanding." %}
       </p>
+      {% endif %}
     </div>
     <div class="order-1 md:order-2">
       <div class="rounded-2xl overflow-hidden shadow-xl aspect-[4/3] bg-gray-200">
