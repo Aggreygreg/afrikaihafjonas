@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load content_tags %}
 
 {% block content %}
 <!-- HEADER -->
@@ -16,6 +17,14 @@
 <!-- DOCUMENT -->
 <article class="bg-gray-100 py-16">
   <div class="max-w-3xl mx-auto px-6">
+    {# Phase 7D: legal body comes from the 'terms_page' ContentBlock (HU default).
+       Falls back to this hardcoded copy if the block is missing or inactive. #}
+    {% get_content_block 'terms_page' as terms_block %}
+    {% if terms_block %}
+      <div class="bg-white rounded-2xl shadow-md p-8 md:p-12 prose prose-pink max-w-none">
+        {{ terms_block.body|safe }}
+      </div>
+    {% else %}
     <div class="bg-white rounded-2xl shadow-md p-8 md:p-12 space-y-12">
 
       <!-- 1. Overview -->
@@ -102,6 +111,7 @@
       </section>
 
     </div>
+    {% endif %}
   </div>
 </article>
 {% endblock %}
