@@ -141,6 +141,14 @@ INTERNAL_IPS = [ "127.0.0.1", ]
 
 # Path to npm executable for Django Tailwind
 NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
+# ── django_summernote migration fix ───────────────────────────
+# django_summernote 0.8.20 ships with old AutoField but our project uses
+# BigAutoField. Override the migration module to a project-controlled dir
+# so the generated migration is tracked in git, not lost in the venv.
+MIGRATION_MODULES = {
+    'django_summernote': 'config.summernote_migrations',
+}
+
 # Custom user model
 AUTH_USER_MODEL = 'users.CustomUser'
 
