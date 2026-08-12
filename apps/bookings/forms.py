@@ -126,6 +126,10 @@ class WizardStep3Form(forms.ModelForm):
         # Needed for server-side age enforcement in clean_client_age().
         self.target_audience = target_audience
 
+        # Remove any auto-added blank choice so the template's choice loop
+        # doesn't render a stray '---------' radio card.
+        self.fields["hair_length"].choices = AppointmentRequest.HairLength.choices
+
         hair_accept = "image/jpeg,image/png,image/webp"
         for field_name in ("photo_front", "photo_side", "photo_back"):
             self.fields[field_name].widget.attrs.update(
@@ -209,6 +213,10 @@ class WizardStep4Form(forms.ModelForm):
         # payment_method is blank=True on the model (set in Step 4 only), so
         # make it explicitly required here.
         self.fields["payment_method"].required = True
+        # Remove the blank '---------' choice that Django auto-adds because
+        # the model field is blank=True. The template iterates over choices
+        # directly, so the blank entry would render as a stray radio card.
+        self.fields["payment_method"].choices = AppointmentRequest.PaymentMethod.choices
         self.fields["payment_method"].widget.attrs.update({"class": "sr-only peer"})
         self.fields["proof_of_payment"].widget.attrs.update(
             {
