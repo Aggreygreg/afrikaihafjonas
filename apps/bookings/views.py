@@ -201,9 +201,143 @@ def load_available_slots_view(request):
     return render(request, 'bookings/partials/time_slots.html', context)
 
 
-def booking_status_placeholder_view(request):
-    """Placeholder for the Guest Lookup Page — real implementation in Phase 4."""
-    return render(request, "bookings/booking_status_placeholder.html")
+# ── Guest Lookup Page (Journey 4) ─────────────────────────────
+# Per-status display configuration (Decision #15). The headline message and
+# badge colour are presentation concerns; the show/hide flags encode the
+# client-visibility rules for each status.
+_STATUS_DISPLAY = {
+    AppointmentRequest.Status.PENDING_VERIFICATION: {
+        "badge": "bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-200",
+        "accent": "bg-amber-500",
+        "headline": _(
+            "We received your request and are verifying your deposit."
+        ),
+        "show_admin_notes": False,
+        "show_provider": False,
+        "show_verified_badge": False,
+        "show_refund": False,
+        "show_new_request_link": False,
+    },
+    AppointmentRequest.Status.PENDING_REVIEW: {
+        "badge": "bg-blue-100 text-blue-800 ring-1 ring-inset ring-blue-200",
+        "accent": "bg-blue-500",
+        "headline": _(
+            "Your deposit is verified! We're now reviewing your hair photos."
+        ),
+        "show_admin_notes": True,
+        "show_provider": False,
+        "show_verified_badge": True,
+        "show_refund": False,
+        "show_new_request_link": False,
+    },
+    AppointmentRequest.Status.APPROVED: {
+        "badge": "bg-green-100 text-green-800 ring-1 ring-inset ring-green-200",
+        "accent": "bg-green-600",
+        "headline": _("Your appointment is confirmed!"),
+        "show_admin_notes": True,
+        "show_provider": True,
+        "show_verified_badge": False,
+        "show_refund": False,
+        "show_new_request_link": False,
+    },
+    AppointmentRequest.Status.REJECTED: {
+        "badge": "bg-red-100 text-red-800 ring-1 ring-inset ring-red-200",
+        "accent": "bg-red-600",
+        "headline": _("Unfortunately, your request was not approved."),
+        "show_admin_notes": True,
+        "show_provider": False,
+        "show_verified_badge": False,
+        "show_refund": True,
+        "show_new_request_link": False,
+    },
+    AppointmentRequest.Status.EXPIRED: {
+        "badge": "bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-300",
+        "accent": "bg-gray-500",
+        "headline": _(
+            "Your request has expired. Your hold on this time slot has ended."
+        ),
+        "show_admin_notes": True,
+        "show_provider": False,
+        "show_verified_badge": False,
+        "show_refund": False,
+        "show_new_request_link": True,
+    },
+}
+
+
+def _lookup_appointment(email, reference):
+    """
+    Run the guest lookup and build the template context.
+
+    Returns a dict with either ``lookup_error`` (not found / missing input) or
+    the full display context for a found ``AppointmentRequest``. Formatting
+    only — no business logic.
+    """
+    from django.utils.formats import date_format
+
+    if not email or not reference:
+        return {
+            "lookup_error": _(
+                "Please enter both your email address and AFH reference code."
+            )
+        }
+
+    appointment = (
+        AppointmentRequest.objects.select_related("service", "provider").filter(
+            client_email__iexact=email,
+            payment_reference__iexact=reference,
+        ).first()
+    )
+
+    if appointment is None:
+        return {
+            "lookup_error": _(
+                "No request found. Please check your email and reference code "
+                "and try again."
+            )
+        }
+
+    return {
+        "appointment": appointment,
+        "status_cfg": _STATUS_DISPLAY[appointment.status],
+        "deposit_formatted": _format_huf(appointment.deposit_amount),
+        "payment_method_display": (
+            appointment.get_payment_method_display()
+            if appointment.payment_method
+            else None
+        ),
+        "target_date_display": date_format(appointment.target_date, "l, j F Y"),
+        "target_time_display": appointment.target_time.strftime("%H:%M"),
+    }
+
+
+def guest_lookup_view(request):
+    """
+    Guest Lookup Page (``/bookings/status/``).
+
+    GET:  render the lookup form (email + AFH reference code).
+    POST: query ``AppointmentRequest`` by case-insensitive email + reference.
+          HTMX POST returns just the result partial (swapped into
+          ``#lookup-results``); a non-HTMX POST re-renders the full page with
+          the result inlined.
+
+    Proof-of-payment images and internal notes are NEVER rendered to clients
+    (Decision #15).
+    """
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip()
+        reference = request.POST.get("payment_reference", "").strip()
+        context = _lookup_appointment(email, reference)
+
+        if request.htmx:
+            return render(
+                request,
+                "bookings/partials/guest_lookup_result.html",
+                context,
+            )
+        return render(request, "bookings/guest_lookup.html", context)
+
+    return render(request, "bookings/guest_lookup.html")
 
 
 # ── Wizard Step 3: Client Details & Hair Data ─────────────────
