@@ -3,13 +3,13 @@ from datetime import date, datetime, timedelta
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import get_language, gettext_lazy as _
 
 from apps.providers.models import Provider
 from apps.services.models import Service
 
 from .forms import WizardStep3Form, WizardStep4Form
-from .models import AppointmentRequest
+from .models import AppointmentRequest, PaymentMethod
 from .utils import calculate_deposit, get_available_slots
 
 
@@ -283,7 +283,9 @@ def _lookup_appointment(email, reference):
         }
 
     appointment = (
-        AppointmentRequest.objects.select_related("service", "provider").filter(
+        AppointmentRequest.objects
+        .select_related("service", "provider", "payment_snapshot", "payment_method_fk")
+        .filter(
             client_email__iexact=email,
             payment_reference__iexact=reference,
         ).first()
@@ -297,15 +299,20 @@ def _lookup_appointment(email, reference):
             )
         }
 
+    # Payment method name comes from the snapshot (frozen) — not live data.
+    # Per Decision #31, detail_fields_snapshot is NEVER shown to customers.
+    payment_method_display = None
+    snapshot = getattr(appointment, "payment_snapshot", None)
+    if snapshot:
+        payment_method_display = snapshot.payment_method_name
+    elif appointment.payment_method_fk:
+        payment_method_display = appointment.payment_method_fk.name
+
     return {
         "appointment": appointment,
         "status_cfg": _STATUS_DISPLAY[appointment.status],
         "deposit_formatted": _format_huf(appointment.deposit_amount),
-        "payment_method_display": (
-            appointment.get_payment_method_display()
-            if appointment.payment_method
-            else None
-        ),
+        "payment_method_display": payment_method_display,
         "target_date_display": date_format(appointment.target_date, "l, j F Y"),
         "target_time_display": appointment.target_time.strftime("%H:%M"),
     }
@@ -384,8 +391,9 @@ def wizard_step_3(request, service_pk):
                 service.discounted_price
             )
             appointment.status = AppointmentRequest.Status.PENDING_VERIFICATION
-            # proof_of_payment + payment_method intentionally left blank —
-            # they are set in Step 4 (Decision #14, draft approach).
+            # Capture customer language at submission — immutable afterwards.
+            # Per Decision #28, this drives all future email communication.
+            appointment.customer_language = get_language()[:2]
             appointment.save()
 
             state["appointment_request_id"] = appointment.id
@@ -447,6 +455,10 @@ def wizard_step_4(request, service_pk):
             appointment.held_until = timezone.now() + timedelta(hours=12)
             appointment.save()
 
+            # Create the historical payment snapshot (Decision #27/#31).
+            # Image-type fields are physically copied to payment_snapshots/<ref>/.
+            appointment.create_payment_snapshot()
+
             # Hand off to the confirmation page via the reference code.
             return redirect(
                 "bookings:confirmation",
@@ -490,3 +502,34 @@ def confirmation(request, reference):
         "target_time_display": appointment.target_time.strftime("%H:%M"),
     }
     return render(request, "bookings/confirmation.html", context)
+
+
+# ── HTMX: Payment Detail Fields ──────────────────────────────
+def payment_detail_fields(request):
+    """
+    HTMX endpoint — returns active PaymentDetailField records for a given
+    payment method ID. Used by Step 4 to show live payment instructions
+    (IBAN, account holder, QR codes) when the customer selects a method.
+
+    Per Decision #15/#31, these detail fields are shown ONLY here at Step 4
+    payment time. They are NEVER shown in Guest Lookup or confirmation page.
+    """
+    if not request.htmx:
+        return HttpResponse(status=403)
+
+    method_id = request.GET.get("method_id")
+    if not method_id:
+        return HttpResponse("")
+
+    method = get_object_or_404(PaymentMethod, pk=method_id, is_active=True)
+    fields = method.detail_fields.filter(is_active=True).order_by("display_order")
+
+    context = {
+        "payment_method": method,
+        "detail_fields": fields,
+    }
+    return render(
+        request,
+        "bookings/partials/_payment_detail_fields.html",
+        context,
+    )

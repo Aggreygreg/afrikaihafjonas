@@ -1,0 +1,32 @@
+{% load i18n %}
+{% if detail_fields %}
+<div id="payment-detail-fields" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+  <h4 class="font-semibold text-gray-700 mb-3">{{ payment_method.name }} — {% trans "Payment Details" %}</h4>
+  <dl class="space-y-2">
+    {% for field in detail_fields %}
+      <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+        <dt class="text-sm font-medium text-gray-600 sm:w-40 sm:flex-shrink-0">{{ field.label }}:</dt>
+        <dd class="text-sm text-gray-900">
+          {% if field.field_type == 'image' and field.image_value %}
+            <img src="{{ field.image_value.url }}"
+                 alt="{{ field.label }}"
+                 class="max-w-xs rounded-lg border border-gray-300 shadow-sm"
+                 loading="lazy">
+          {% elif field.field_type == 'url' and field.value %}
+            <a href="{{ field.value }}" target="_blank" rel="noopener noreferrer"
+               class="text-blue-600 hover:text-blue-800 underline">
+              {{ field.value }}
+            </a>
+          {% else %}
+            <span class="font-mono">{{ field.value }}</span>
+          {% endif %}
+        </dd>
+      </div>
+    {% endfor %}
+  </dl>
+</div>
+{% else %}
+<div id="payment-detail-fields" class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+  <p class="text-sm text-gray-500 italic">{% trans "No additional payment details configured for this method." %}</p>
+</div>
+{% endif %}

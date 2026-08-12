@@ -64,17 +64,28 @@
                     <h3 class="text-lg font-bold text-gray-900 border-b pb-3">{% trans "Payment Method" %}</h3>
                     <p class="text-sm text-gray-500">{% trans "Transfer your deposit using one of the methods below." %}</p>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {% for value, label in form.payment_method.field.choices %}
+                        {% for choice in form.payment_method_fk %}
                             <label class="relative flex flex-col items-center justify-center p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 hover:border-blue-500 transition-all focus-within:ring-2 focus-within:ring-blue-500/20 text-center">
-                                <input type="radio" name="payment_method" value="{{ value }}" required
-                                       {% if form.payment_method.value|stringformat:"s" == value %}checked{% endif %}
-                                       class="sr-only peer">
+                                {{ choice.tag }}
                                 <span class="absolute inset-0 rounded-xl peer-checked:border-2 peer-checked:border-blue-600 peer-checked:bg-blue-50/30 pointer-events-none"></span>
-                                <span class="relative text-sm font-semibold text-gray-700 peer-checked:text-blue-700">{{ label }}</span>
+                                <span class="relative text-sm font-semibold text-gray-700 peer-checked:text-blue-700">{{ choice.choice_label }}</span>
                             </label>
                         {% endfor %}
                     </div>
-                    {{ form.payment_method.errors }}
+                    {{ form.payment_method_fk.errors }}
+
+                    <!-- HTMX: Live payment detail fields (IBAN, QR, etc.) -->
+                    <div id="payment-detail-container"></div>
+                    <script>
+                      document.addEventListener('change', function(e) {
+                        if (e.target.name === 'payment_method_fk') {
+                          htmx.ajax('GET',
+                            "{% url 'bookings:payment_detail' %}?method_id=" + e.target.value,
+                            { target: '#payment-detail-container', swap: 'innerHTML' }
+                          );
+                        }
+                      });
+                    </script>
                 </div>
 
                 <!-- Proof of payment -->
