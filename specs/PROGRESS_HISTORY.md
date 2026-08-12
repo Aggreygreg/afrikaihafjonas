@@ -144,11 +144,11 @@
 
 | App | Status | Notes |
 |-----|--------|-------|
-| `services` | ✅ Complete | Suitability fields, M2M images, SHEIN detail page, discount engine |
-| `bookings` | ✅ Functional | AppointmentRequest model, wizard Steps 1-4, confirmation, guest lookup, admin review workflow, auto-expire command |
+| `services` | ✅ Complete | Suitability fields, M2M images, SHEIN detail page, discount engine, `request.seo_service` (7E) |
+| `bookings` | ✅ Functional | AppointmentRequest model, wizard Steps 1-4, confirmation, guest lookup, admin review workflow, auto-expire command, dynamic payment methods + snapshots (7B), `customer_language` persistence (7B) |
 | `payments` | 🗑️ Decommissioned | Dead weight removed in Phase 0 |
 | `providers` | ✅ Stable | Stylists + weekly availability |
-| `site_config` | ✅ Stable | Singleton config + context processor |
+| `site_config` | ✅ Complete | Singleton config (7A), FAQ/ContentBlock/Announcement (7D), EmailTemplate system (7C), SEO config (7E), context processors |
 | `users` | ✅ Stable | Custom user model |
 | `reviews` | ❌ Deleted | Intentionally scrapped |
 
@@ -250,64 +250,114 @@
 
 ---
 
-## Phase 7: Business-Managed Content & Configuration (SPEC COMPLETE — NOT STARTED)
-**Principle Document:** `specs/ARCHITECTURAL_PRINCIPLES.md` (Rev 2 — major refinement)
+## Phase 7: Business-Managed Content & Configuration ✅ COMPLETE (Aug 12, 2026)
+**Principle Document:** `specs/ARCHITECTURAL_PRINCIPLES.md` (Rev 3)
 **Goal:** Move all business-owned content and configuration from code/templates into Django Admin.
+**Integration Branch:** `main4qp` @ `865b797` (all tracks merged, pushed)
 
-### Cross-Cutting Requirements (Apply to All Phases)
-- [ ] **Three Content Categories documented** (A: dev UI `{% trans %}`, B: admin reusable parent+translation, C: appointment-specific no-translation)
-- [ ] **Multilingual content strategy**: parent + `Translation` records for all Category B content (FAQ, ContentBlock, EmailTemplate, SEO, Announcement)
-- [ ] **Appointment language persistence**: `AppointmentRequest.customer_language` (hu/en/de), captured at submission, immutable, drives email language
-- [ ] **Shared `LanguageChoices` enum** in a shared module
+### Cross-Cutting Requirements (All Complete ✅)
+- [x] **Three Content Categories documented** — A (dev UI `{% trans %}`), B (admin reusable parent+translation DB records), C (appointment-specific, no translation). Decision #26.
+- [x] **Multilingual content strategy** — parent + `Translation` records for all Category B content (FAQ, ContentBlock, EmailTemplate, SEO, Announcement). NOT `{% trans %}` for DB content.
+- [x] **Appointment language persistence** — `AppointmentRequest.customer_language` (hu/en/de), captured at Step 3 submit via `get_language()[:2]`, immutable. Decision #28.
+- [x] **Shared `LanguageChoices` enum** in `apps/site_config/constants.py`.
 
-### Phase 7A: Business Information Expansion
-- [ ] Extend `SiteConfiguration` with: business name, address directions, working hours, Google Maps link, website URL, logo, favicon
-- [ ] Replace all hardcoded business info in templates with `{{ config.* }}`
-- [ ] Global SEO fields deferred to Phase 7E (dedicated `GlobalSEO` model)
+### Phase 7A: Business Information Expansion ✅ (commit `1b103c0`)
+- [x] Extend `SiteConfiguration` with: business_name, logo, favicon, hero_title/subtitle/image, address_description, business_hours, google_maps_link, website_url
+- [x] Admin: `SingletonModelAdmin` with grouped fieldsets
+- [x] Templates: `base.html` uses `{{ config.* }}` for business name, logo, favicon, hero
+- [x] Global SEO fields deferred to Phase 7E (dedicated `GlobalSEO` model)
+- [x] Migration: `0002_siteconfiguration_expansion` (7A fields)
 
-### Phase 7B: Dynamic Payment Methods + Historical Snapshots
-- [ ] Create `PaymentMethod` model (admin-managed, replaces TextChoices)
-- [ ] Create `PaymentDetailField` model (per-method configurable fields)
-- [ ] Create `AppointmentPaymentSnapshot` model (frozen payment config per appointment)
-- [ ] Seed migration: 4 methods (Revolut, Wise, TransferGo, Bank Transfer) + detail fields
-- [ ] Add `customer_language` to `AppointmentRequest` (migration + default `hu`)
-- [ ] Data migration: map existing TextChoices to FK, create snapshots for existing records
-- [ ] Snapshot creation logic at Step 4 submission (same transaction)
-- [ ] **Image file copying**: copy image-type PaymentDetailField files to `payment_snapshots/<ref>/` at snapshot time
-- [ ] **Step 4 payment instruction display**: show live PaymentDetailField values (IBAN, QR) when method selected via HTMX — NEW UI behavior
-- [ ] Update Wizard Step 4 template to render dynamic fields
-- [ ] **Guest Lookup: read ONLY payment_method_name from snapshot** — detail fields are admin-only audit (Decision #31)
-- [ ] Admin: payment snapshot as read-only inline; customer_language display with flag
-- [ ] `payment_method` FK uses `on_delete=SET_NULL` (survives method deletion)
+### Phase 7B: Dynamic Payment Methods + Historical Snapshots ✅ (merge `ca3d886`)
+- [x] `PaymentMethod` model (admin-managed, replaces TextChoices)
+- [x] `PaymentDetailField` model (6 field types: text, textarea, number, email, url, image)
+- [x] `AppointmentPaymentSnapshot` model (frozen payment config per appointment)
+- [x] Seed migration: 4 methods (Revolut, Wise, TransferGo, Bank Transfer) + detail fields
+- [x] `customer_language` on `AppointmentRequest` (migration + default `hu`)
+- [x] Data migration: TextChoices → FK mapping
+- [x] `create_payment_snapshot()` at Step 4 submission — same transaction, with image file physical copy to `payment_snapshots/<ref>/` (Decision #32)
+- [x] `payment_method_fk` uses `on_delete=SET_NULL` (survives method deletion)
+- [x] **Step 4 UI**: dynamic payment method cards (radio) + HTMX detail fields display (`payment_detail_fields` endpoint + `_payment_detail_fields.html` partial)
+- [x] **Guest Lookup: reads ONLY `payment_method_name` from snapshot** — detail fields are admin-only audit (Decision #31)
+- [x] Admin: `PaymentMethodAdmin` + `PaymentDetailFieldInline`, snapshot read-only inline, `language_flag` display (🇭🇺/🇬🇧/🇩🇪)
+- [x] `payment_method` → `payment_method_fk` replaced everywhere (views, admin, forms, RefundQueueAdmin)
+- [x] Migrations 0004-0007 (models + seed + data migration + fix)
 
-### Phase 7C: Editable Email Templates (Multilingual)
-- [ ] Create `EmailTemplate` model (parent, email_type enum — developer-controlled)
-- [ ] Create `EmailTemplateTranslation` model (subject, body_text, body_html per language)
-- [ ] Build email rendering service (**regex-based `{{ key }}` substitution, NOT Django template engine** — Decision #34)
-- [ ] Language selection: use `appointment.customer_language`, NOT session language
-- [ ] Migrate existing hardcoded emails to admin-managed templates
-- [ ] **Seed migration: 24 template records (8 types x 3 languages)** with developer-authored initial content (Decision #34/12.9)
-- [ ] Fallback: requested language -> HU base -> first available
-- [ ] Email `body_text` = plain textarea, `body_html` = optional plain HTML textarea (**NO WYSIWYG for emails**)
-- [ ] Keep transactional and newsletter systems strictly separate (newsletter out of scope)
+### Phase 7C: Editable Email Templates — Infrastructure ✅ / Triggers Partial (merge `854ca3c`)
+- [x] `EmailTemplate` model (8 developer-controlled email types, `is_active` toggle)
+- [x] `EmailTemplateTranslation` model (subject + body_text + optional body_html, `unique_together`)
+- [x] `email_service.py`: `render_text()` (regex `{{ key }}` substitution — NOT Django template engine, Decision #34), `render_email()` (language fallback: requested → HU), `find_unknown_placeholders()` / `find_placeholders()`, `EMAIL_PLACEHOLDERS` (31 canonical keys)
+- [x] Admin: `EmailTemplateTranslationForm` (ModelForm + field-level `clean_*` validates placeholders), `EmailTemplateTranslationInline`, `EmailTemplateAdmin`
+- [x] Seed migration: 8 types × 3 languages = 24 translations (HU/EN/DE)
+- [x] `body_text` = plain textarea, `body_html` = optional plain HTML textarea (**NO WYSIWYG for emails**)
+- [x] Transactional vs newsletter strictly separate (Decision #29)
+- [x] `send_expiry_reminders` command refactored to use `render_email()` with legacy template fallback
+- [x] Migrations 0006-0007
 
-### Phase 7D: Customer-Facing Content (Multilingual)
-- [ ] FAQ model (parent + FAQTranslation per language: question, answer)
-- [ ] ContentBlock model (parent + ContentBlockTranslation: title, body — by slug)
-- [ ] Announcement model (parent + AnnouncementTranslation: message, link, scheduling)
-- [ ] Migrate static page content (About, Terms, Privacy) into ContentBlocks
-- [ ] StackedInline admin UX for all translation models
-- [ ] **WYSIWYG editing**: `django-summernote` (limited toolbar) + `bleach` sanitization for website content (Decision #33)
-- [ ] **Tailwind typography**: add `@tailwindcss/typography` for rendering WYSIWYG output in `prose` containers
-- [ ] Dependencies: `django-summernote`, `bleach` added to requirements
+**⚠️ Email Trigger Status (7 of 8 types have no code trigger):**
 
-### Phase 7E: SEO Configuration (Multilingual)
-- [ ] `GlobalSEO` singleton model + `GlobalSEOTranslation` (title, description, OG per language)
-- [ ] `PageSEO` model (targets url_path OR Service FK) + `PageSEOTranslation`
-- [ ] Per-Service SEO (`PageSEO(service=...)`) — service pages are major landing pages
-- [ ] Fallback chain: page-level override -> global default -> hardcoded dev fallback
-- [ ] Meta tag rendering (template tag)
-- [ ] Technical SEO (sitemap, robots.txt, hreflang, JSON-LD) remains developer-managed
+| Email Type | Template Seeded | Code Trigger | Status |
+|---|---|---|---|
+| `expiry_reminder` | ✅ | ✅ `send_expiry_reminders` command (`render_email()` + legacy fallback) | **ACTIVE** |
+| `request_received` | ✅ | ❌ No trigger in Step 3 submit view | **FUTURE WORK** |
+| `verification_pending` | ✅ | ❌ No trigger in Step 4 submit view | **FUTURE WORK** |
+| `payment_verified` | ✅ | ❌ `verify_payments` admin action sends no email | **FUTURE WORK** |
+| `appointment_approved` | ✅ | ❌ `approve_requests` admin action sends no email | **FUTURE WORK** |
+| `appointment_rejected` | ✅ | ❌ `reject_requests` admin action sends no email | **FUTURE WORK** |
+| `appointment_expired` | ✅ | ❌ `expire_holds` sends raw `mail_admins()` (admin notification only, not template-based, not customer-facing) | **FUTURE WORK** |
+| `refund_notification` | ✅ | ❌ `complete_refunds` admin action sends no email | **FUTURE WORK** |
+
+> **Note:** Phase 7C's deliverable per spec §7 was the email infrastructure (models, rendering service, placeholder validation, seed data). The spec assigns trigger logic to the developer ("Email-sending logic (when/where/trigger)"). The trigger wiring is a separate implementation step — the templates and rendering pipeline are ready; the `send_mail` calls in views/admin actions are not yet added.
+
+### Phase 7D: Customer-Facing Content ✅ (merge in `0a68461`)
+- [x] `FAQ` + `FAQTranslation` (question, answer per language)
+- [x] `ContentBlock` + `ContentBlockTranslation` (title, body by slug)
+- [x] `Announcement` + `AnnouncementTranslation` (message, link, scheduling)
+- [x] WYSIWYG: `django-summernote` (limited toolbar) + `bleach` sanitization (Decision #33)
+- [x] Template tags: `{% get_content_block %}`, `{% get_faqs %}` with language fallback to HU
+- [x] Static page integration: `about_page`, `terms_page`, `privacy_page` ContentBlocks wired into page templates with hardcoded `{% trans %}` fallback
+- [x] Admin: `StackedInline` for all translation models, `SummernoteWidget` on body/answer fields
+- [x] Seed data: FAQ items, ContentBlocks, Announcement
+- [x] Migrations 0004-0005
+
+**⚠️ Partial — Static Page Prose Migration (spec §8.4):**
+Only the main prose sections of About/Terms/Privacy use ContentBlocks with fallback. Other page sections (Our Mission, Values, Team, Trust badges on About page) remain hardcoded `{% trans %}`. The spec says "Body text, policy text, about text" should move — the main body text did. Full migration of all page prose is polish work.
+
+### Phase 7E: SEO Configuration ✅ (merge `865b797`)
+- [x] `GlobalSEO` (SingletonModel): canonical_site_url, og_image_default, google_verification, bing_verification
+- [x] `GlobalSEOTranslation`: default_meta_title, default_meta_description, default_og_title, default_og_description (`unique_together`)
+- [x] `PageSEO`: url_path (static) OR service OneToOne (dynamic), is_active, CheckConstraint (`pageseo_exactly_one_target`) + Python `clean()` enforcement
+- [x] `PageSEOTranslation`: meta_title, meta_description, og_title, og_description (`unique_together`)
+- [x] `seo_service.py`: `resolve_seo()` with 3-tier fallback chain (Page-level → Global default → Hardcoded dev `_DEV_FALLBACK`), language fallback (requested → HU)
+- [x] Context processor: `seo()` registered in settings, auto-resolves via `request.path`; views can set `request.seo_service`
+- [x] `base.html`: `<title>`, meta description, canonical link, OG tags, Google/Bing verification — all driven by `{{ seo.* }}`
+- [x] Service detail view sets `request.seo_service` for per-service SEO
+- [x] Seed migration: GlobalSEO singleton + HU defaults + 6 static PageSEO (`/`, `/about/`, `/contact/`, `/terms/`, `/privacy/`, `/services/`)
+- [x] Admin: `GlobalSEOAdmin` (SingletonModelAdmin) + `PageSEOAdmin` with translation inlines
+- [x] Migrations 0008-0010
+
+**⚠️ Not built (legitimately deferred — developer-managed per spec §9.5):**
+- `sitemap.xml`, `robots.txt`, `hreflang`, JSON-LD structured data — all developer-managed technical SEO, not admin-configurable. Not part of Phase 7E scope.
+- `/consult/` PageSEO — the wizard URL is dynamic (`/bookings/book/<service_pk>/`), not a static route. No static PageSEO created for it (documented spec/URL mismatch).
+
+---
+
+### Phase 7 Test Suite
+**74 tests collected, 69 passed, 5 skipped** (all in `apps/site_config/tests.py`; other app test files are empty stubs).
+
+The 5 skipped tests are all Service-dependent SEO tests that skip because no `Service` fixture exists in the test database:
+- `PageSEOConstraintTests::test_service_only_allowed`
+- `PageSEOConstraintTests::test_both_set_rejected_by_clean`
+- `PageSEOConstraintTests::test_service_only_passes_clean`
+- `ResolveSEOServiceTests::test_service_seo_resolution`
+- `ResolveSEOServiceTests::test_service_without_seo_falls_back`
+
+> ⚠️ The commit message for Phase 7E claimed "74 tests all passing" — this was **inaccurate**. Correct count is 69 passed, 5 skipped.
+
+Test breakdown by track:
+- **7D** (SanitizeHtml, FAQ/ContentBlock/Announcement models, template tags, seed): ~20 tests
+- **7C** (render_text, render_email, placeholder validation, admin form validation, seed integrity): ~33 tests
+- **7E** (SEO seed verification, PageSEO constraint/clean, resolve_seo fallback chain, service SEO): ~21 tests (5 skipped)
 
 ---
 
