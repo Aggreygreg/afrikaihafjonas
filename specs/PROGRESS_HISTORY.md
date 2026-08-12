@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Progress History
 
-**Last Updated:** August 11, 2026
+**Last Updated:** August 12, 2026
 
 ---
 
@@ -145,7 +145,7 @@
 | App | Status | Notes |
 |-----|--------|-------|
 | `services` | ✅ Complete | Suitability fields, M2M images, SHEIN detail page, discount engine |
-| `bookings` | ✅ Functional | AppointmentRequest model, wizard Steps 1-4, confirmation, guest lookup all working |
+| `bookings` | ✅ Functional | AppointmentRequest model, wizard Steps 1-4, confirmation, guest lookup, admin review workflow, auto-expire command |
 | `payments` | 🗑️ Decommissioned | Dead weight removed in Phase 0 |
 | `providers` | ✅ Stable | Stylists + weekly availability |
 | `site_config` | ✅ Stable | Singleton config + context processor |
@@ -169,11 +169,45 @@
 
 ---
 
-## What's Left After Phase 4
+### Phase 5: Admin Dashboard ✅ COMPLETE (Aug 12, 2026)
+**Status:** Built, merged to main4qp, tested and verified by HICLAW Manager.
+**Merge commit:** `dd4d78d` → merged to main4qp
 
-- **Phase 5:** Admin dashboard customization (queues, approval workflow, refund processing)
-- **Phase 6:** Background tasks + polish (expiry reminders, console email, management commands)
-- **Final Polish:** Static pages (About, etc.), language preference popup, full i18n translation files
+**Built by:** HICLAW Manager (direct build — deeply interconnected admin work)
+
+**1. Custom Admin Dashboard (templates/admin/index.html + config/admin_dashboard.py):**
+- Operational dashboard replacing Django's default admin index
+- Widgets: Pending Deposit Verification, Pending Photo Review, Expiring Soon (2h), Today's Confirmed, Refund Queue, Approved Deposit Revenue
+- Urgent "Expiring Soon" table, Today's Schedule table, Pending Action Queue table
+- Quick action buttons to all admin sections + public site
+- AdminSite.index patched at class level (clean, no custom AdminSite subclass needed)
+
+**2. Appointment Review Workflow (apps/bookings/admin.py):**
+- Custom fieldsets with emoji headers for daily review flow
+- Inline photo previews (front/side/back) in change view
+- Proof of payment: images inline, PDFs as clickable link
+- Color-coded status badges + live hold timer with urgency coloring
+- Admin actions: Approve, Reject (→Refund Queue), Verify Payment (→Pending Review)
+
+**3. Auto-Expire Management Command (expire_holds.py):**
+- Finds requests past 12-hour hold window, marks as expired
+- --dry-run flag, admin email notification, cron-ready
+
+**4. Seasonal Discount (apps/services/admin.py):**
+- list_editable discount_percentage, bulk apply/clear actions, display column
+
+**Known Limitation — Dynamic M2M Admin Form:**
+- Grouped option dropdowns require StackedInline (TabularInline can't render dynamic fields)
+- linked_options editable via individual ServiceImage change form
+- Code preserved in git history for future activation
+
+---
+
+## What's Left After Phase 5
+
+- **Phase 6:** Background tasks + polish (expiry reminder emails, full i18n translation files, static pages)
+- **Dynamic M2M Form:** Switch ServiceImage inline to StackedInline to enable grouped dropdowns
+- **Final Polish:** Static pages (About, etc.), language preference popup
 
 ---
 
