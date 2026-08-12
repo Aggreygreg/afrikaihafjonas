@@ -9,7 +9,8 @@ for lang in ('hu', 'de', 'en'):
         continue
     po = polib.pofile(po_path)
     mo_path = po_path.replace('.po', '.mo')
-    po.save(mo_path)
+    # CRITICAL: save_as_mofile, NOT save() which writes .po format
+    po.save_as_mofile(mo_path)
     translated = len(po.translated_entries())
     total = len(po)
     print(f"  Compiled {mo_path}: {translated}/{total} translated")
