@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.bookings.models import AppointmentRequest
+from apps.site_config.email_service import render_email
 from apps.site_config.models import SiteConfiguration
 
 
@@ -25,6 +26,10 @@ REMINDER_WINDOWS = (
     (1, "reminder_1h_sent"),
 )
 
+# The expiry reminder is an ADMIN-facing notification (sent to the salon owner,
+# not the customer). Admin emails use Hungarian (base language).
+ADMIN_LANGUAGE = "hu"
+
 
 def get_admin_email():
     """
@@ -40,6 +45,14 @@ def get_admin_email():
         # SiteConfiguration table not ready / app not installed — stay safe.
         salon_email = ""
     return salon_email or settings.DEFAULT_FROM_EMAIL
+
+
+def get_salon_name():
+    """Return the salon business name for email context."""
+    try:
+        return SiteConfiguration.get_solo().business_name or "Afrikai Hajfonás"
+    except Exception:
+        return "Afrikai Hajfonás"
 
 
 def get_admin_change_url(req):
@@ -89,25 +102,52 @@ class Command(BaseCommand):
             )
 
             for req in qs:
-                subject = (
-                    f"[Afrikai Hajfonás] ⏰ {hours}h until expiry: "
-                    f"{req.payment_reference}"
-                )
+                # Build context using canonical placeholder vocabulary
                 context = {
                     "hours": hours,
-                    "reference": req.payment_reference,
+                    "payment_reference": req.payment_reference,
                     "client_name": req.client_name,
-                    "service_title": req.service.title,
+                    "service_name": req.service.title,
                     "provider_name": req.provider.display_name,
-                    "target_date": req.target_date,
-                    "target_time": req.target_time,
-                    "status": req.get_status_display(),
+                    "appointment_date": req.target_date,
+                    "appointment_time": req.target_time,
+                    "appointment_status": req.get_status_display(),
                     "held_until": timezone.localtime(req.held_until),
                     "admin_url": get_admin_change_url(req),
+                    "salon_name": get_salon_name(),
                 }
-                body = render_to_string(
-                    "bookings/emails/expiry_reminder.txt", context
-                )
+
+                # Render via DB-backed email template system (Phase 7C)
+                rendered = render_email("expiry_reminder", context, language=ADMIN_LANGUAGE)
+
+                if rendered is not None:
+                    subject, body_text, _body_html = rendered
+                else:
+                    # Fallback: no DB template configured — use old hardcoded format
+                    self.stdout.write(self.style.WARNING(
+                        f"  [FALLBACK] No DB email template for 'expiry_reminder'. "
+                        f"Using legacy template for {req.payment_reference}."
+                    ))
+                    subject = (
+                        f"[{context['salon_name']}] ⏰ {hours}h until expiry: "
+                        f"{req.payment_reference}"
+                    )
+                    body = render_to_string(
+                        "bookings/emails/expiry_reminder.txt",
+                        {
+                            "hours": hours,
+                            "reference": req.payment_reference,
+                            "client_name": req.client_name,
+                            "service_title": req.service.title,
+                            "provider_name": req.provider.display_name,
+                            "target_date": req.target_date,
+                            "target_time": req.target_time,
+                            "status": req.get_status_display(),
+                            "held_until": timezone.localtime(req.held_until),
+                            "admin_url": get_admin_change_url(req),
+                        },
+                    )
+                    body_text = body
 
                 if dry_run:
                     self.stdout.write(
@@ -119,7 +159,7 @@ class Command(BaseCommand):
 
                 send_mail(
                     subject=subject,
-                    message=body,
+                    message=body_text,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[recipient],
                     fail_silently=False,

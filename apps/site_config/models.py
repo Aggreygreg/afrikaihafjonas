@@ -223,3 +223,75 @@ class AnnouncementTranslation(models.Model):
 
     def __str__(self):
         return f"{self.announcement.slug} ({self.get_language_display()})"
+
+
+# ──────────────────────────────────────────────────────────────
+# Phase 7C — Email Templates (Category B: admin-managed, multilingual)
+# ──────────────────────────────────────────────────────────────
+
+
+class EmailTemplate(models.Model):
+    """Parent: defines an email type and its active state.
+
+    EMAIL_TYPES is a developer-controlled enum — NOT admin-extensible.
+    Adding a new email type requires code changes (new trigger logic).
+    The admin controls the subject/body content via EmailTemplateTranslation.
+    """
+
+    EMAIL_TYPES = [
+        ('request_received', 'Request Received'),
+        ('verification_pending', 'Payment Verification Pending'),
+        ('payment_verified', 'Payment Verified'),
+        ('appointment_approved', 'Appointment Approved'),
+        ('appointment_rejected', 'Appointment Rejected'),
+        ('appointment_expired', 'Appointment Expired'),
+        ('expiry_reminder', 'Expiry Reminder'),
+        ('refund_notification', 'Refund Notification'),
+    ]
+
+    email_type = models.CharField(
+        max_length=50, choices=EMAIL_TYPES, unique=True,
+        help_text="Developer-controlled identifier. Adding new types requires code changes.",
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="If unchecked, no email will be sent for this type.",
+    )
+
+    class Meta:
+        verbose_name = "Email template"
+        verbose_name_plural = "Email templates"
+
+    def __str__(self):
+        return self.get_email_type_display()
+
+
+class EmailTemplateTranslation(models.Model):
+    """One translation per language for an EmailTemplate.
+
+    Provides subject + body_text + optional body_html.
+    No WYSIWYG — email HTML is fragile, plain text is primary.
+    """
+
+    template = models.ForeignKey(
+        EmailTemplate, related_name='translations', on_delete=models.CASCADE
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    subject = models.CharField(max_length=200)
+    body_text = models.TextField(
+        help_text="Plain text body. Use {{ placeholders }}. "
+                  "No WYSIWYG — email plain text is the primary format.",
+    )
+    body_html = models.TextField(
+        blank=True,
+        help_text="Optional HTML body. Plain HTML textarea only (no WYSIWYG). "
+                  "Email HTML is fragile — use simple inline styles only.",
+    )
+
+    class Meta:
+        unique_together = ('template', 'language')
+        verbose_name = "Email template translation"
+        verbose_name_plural = "Email template translations"
+
+    def __str__(self):
+        return f"{self.template.get_email_type_display()} ({self.get_language_display()})"
