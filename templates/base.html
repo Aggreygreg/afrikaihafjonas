@@ -5,7 +5,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Afrikai Hajfonás Budapest</title>
+  <title>{% if config.business_name %}{{ config.business_name }}{% else %}Afrikai Hajfonás{% endif %}</title>
+
+  {% if config.favicon %}
+    <link rel="icon" type="image/png" href="{{ config.favicon.url }}">
+  {% endif %}
 
   <!-- Tailwind CDN custom config -->
   <script>
@@ -46,7 +50,12 @@
   <header class="bg-white shadow-md sticky top-0 z-50">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center relative" aria-label="{% trans 'Primary navigation' %}">
       <!-- Logo -->
-      <a href="/" class="text-xl font-bold text-gray-800">Afrikai Hajfonás Budapest</a>
+      <a href="/" class="text-xl font-bold text-gray-800 flex items-center gap-2">
+        {% if config.logo %}
+          <img src="{{ config.logo.url }}" alt="{% if config.business_name %}{{ config.business_name }}{% endif %}" class="h-10 w-auto">
+        {% endif %}
+        {% if config.business_name %}{{ config.business_name }}{% else %}Afrikai Hajfonás{% endif %}
+      </a>
 
       <!-- Desktop nav (visible md and up) -->
       <div class="hidden md:flex space-x-6 items-center">
