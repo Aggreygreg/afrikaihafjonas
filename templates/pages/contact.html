@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<!-- HEADER -->
+<section class="text-white" style="background-color: #272e4b;">
+  <div class="max-w-5xl mx-auto px-6 py-16 text-center">
+    <span class="inline-block bg-pink-500/90 text-white text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full">{% trans "Get in touch" %}</span>
+    <h1 class="mt-4 text-4xl md:text-5xl font-extrabold">{% trans "Contact Afrikai Hajfonás" %}</h1>
+    <p class="mt-4 text-gray-300 max-w-2xl mx-auto">{% trans "Questions about a style, an appointment, or your deposit? We're here to help — reach us any of the ways below." %}</p>
+  </div>
+</section>
+
+<!-- CONTACT CARDS -->
+<section class="bg-gray-100 -mt-10 pb-4">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Address -->
+      <div class="bg-white rounded-2xl shadow-md p-8 text-center">
+        <div class="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-pink-100 text-pink-600"><i data-lucide="map-pin" class="w-7 h-7"></i></div>
+        <h2 class="mt-4 text-lg font-semibold text-gray-800">{% trans "Visit our salon" %}</h2>
+        <p class="mt-2 text-gray-500">
+          {% if config and config.salon_address %}
+            {{ config.salon_address }}
+          {% else %}
+            {% trans "Budapest, Hungary" %}
+            <!-- TODO: set salon address in Site Configuration -->
+          {% endif %}
+        </p>
+      </div>
+      <!-- Phone -->
+      <div class="bg-white rounded-2xl shadow-md p-8 text-center">
+        <div class="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-pink-100 text-pink-600"><i data-lucide="phone" class="w-7 h-7"></i></div>
+        <h2 class="mt-4 text-lg font-semibold text-gray-800">{% trans "Call us" %}</h2>
+        <p class="mt-2 text-gray-500">
+          {% if config and config.salon_phone %}
+            <a href="tel:{{ config.salon_phone }}" class="hover:text-pink-600 transition">{{ config.salon_phone }}</a>
+          {% else %}
+            {% trans "Phone coming soon" %}
+            <!-- TODO: set salon phone in Site Configuration -->
+          {% endif %}
+        </p>
+      </div>
+      <!-- Email -->
+      <div class="bg-white rounded-2xl shadow-md p-8 text-center">
+        <div class="mx-auto w-14 h-14 flex items-center justify-center rounded-full bg-pink-100 text-pink-600"><i data-lucide="mail" class="w-7 h-7"></i></div>
+        <h2 class="mt-4 text-lg font-semibold text-gray-800">{% trans "Email us" %}</h2>
+        <p class="mt-2 text-gray-500">
+          {% if config and config.salon_email %}
+            <a href="mailto:{{ config.salon_email }}" class="hover:text-pink-600 transition break-all">{{ config.salon_email }}</a>
+          {% else %}
+            {% trans "Email coming soon" %}
+            <!-- TODO: set salon email in Site Configuration -->
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOURS + SOCIAL + MAP -->
+<section class="bg-gray-100 py-16">
+  <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <!-- LEFT: hours + socials -->
+    <div class="space-y-8">
+      <div class="bg-white rounded-2xl shadow-md p-8">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-600"><i data-lucide="clock" class="w-5 h-5"></i></div>
+          <h2 class="text-xl font-semibold text-gray-800">{% trans "Business hours" %}</h2>
+        </div>
+        <!-- TODO: confirm actual opening hours with the salon -->
+        <dl class="mt-6 divide-y divide-gray-100 text-sm">
+          <div class="flex justify-between py-3"><dt class="font-medium text-gray-700">{% trans "Monday" %}</dt><dd class="text-gray-500">{% trans "10:00 – 19:00" %}</dd></div>
+          <div class="flex justify-between py-3"><dt class="font-medium text-gray-700">{% trans "Tuesday" %}</dt><dd class="text-gray-500">{% trans "10:00 – 19:00" %}</dd></div>
+          <div class="flex justify-between py-3"><dt class="font-medium text-gray-700">{% trans "Wednesday" %}</dt><dd class="text-gray-500">{% trans "10:00 – 19:00" %}</dd></div>
+          <div class="flex justify-between py-3"><dt class="font-medium text-gray-700">{% trans "Thursday" %}</dt><dd class="text-gray-500">{% trans "10:00 – 19:00" %}</dd></div>
+          <div class="flex justify-between py-3"><dt class="font-medium text-gray-700">{% trans "Friday" %}</dt><dd class="text-gray-500">{% trans "10:00 – 20:00" %}</dd></div>
+          <div class="flex justify-between py-3"><dt class="font-medium text-gray-700">{% trans "Saturday" %}</dt><dd class="text-gray-500">{% trans "09:00 – 20:00" %}</dd></div>
+          <div class="flex justify-between py-3"><dt class="font-medium text-gray-700">{% trans "Sunday" %}</dt><dd class="text-gray-500">{% trans "Closed" %}</dd></div>
+        </dl>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-md p-8">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-600"><i data-lucide="share-2" class="w-5 h-5"></i></div>
+          <h2 class="text-xl font-semibold text-gray-800">{% trans "Follow us" %}</h2>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-4">
+          {% if config and config.social_instagram %}
+            <a href="{{ config.social_instagram }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition font-medium">
+              <i data-lucide="instagram" class="w-5 h-5"></i> {% trans "Instagram" %}
+            </a>
+          {% endif %}
+          {% if config and config.social_facebook %}
+            <a href="{{ config.social_facebook }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition font-medium">
+              <i data-lucide="facebook" class="w-5 h-5"></i> {% trans "Facebook" %}
+            </a>
+          {% endif %}
+          {% if config and config.social_tiktok %}
+            <a href="{{ config.social_tiktok }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-pink-50 text-pink-600 hover:bg-pink-100 transition font-medium">
+              <i data-lucide="video" class="w-5 h-5"></i> {% trans "TikTok" %}
+            </a>
+          {% endif %}
+          {% if not config or not config.social_instagram and not config.social_facebook and not config.social_tiktok %}
+            <p class="text-sm text-gray-400">{% trans "Social links coming soon." %}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: map -->
+    <div class="bg-white rounded-2xl shadow-md overflow-hidden flex flex-col">
+      <div class="p-8 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-600"><i data-lucide="navigation" class="w-5 h-5"></i></div>
+          <h2 class="text-xl font-semibold text-gray-800">{% trans "Find us" %}</h2>
+        </div>
+      </div>
+      <div class="flex-1 min-h-[340px]">
+        <!-- TODO: replace src with the salon's exact Google Maps embed once the address is confirmed -->
+        <iframe
+          title="{% trans 'Salon location map' %}"
+          src="https://www.google.com/maps?q=Budapest,Hungary&output=embed"
+          width="100%" height="100%" style="border:0; min-height: 340px;"
+          allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="bg-white py-14 border-t border-gray-100">
+  <div class="max-w-3xl mx-auto px-6 text-center">
+    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">{% trans "Prefer to book right now?" %}</h2>
+    <p class="mt-3 text-gray-500">{% trans "Browse our styles and submit an appointment request online." %}</p>
+    <a href="{% url 'services:service_list' %}" class="mt-6 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-7 rounded-lg text-lg transition duration-300">
+      {% trans "View Services" %}
+    </a>
+  </div>
+</section>
+{% endblock %}
