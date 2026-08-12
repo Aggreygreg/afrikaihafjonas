@@ -10,8 +10,10 @@ def service_list_view(request):
     gender_name = request.GET.get('gender', "Women's Braids")
     active_parent = parent_categories.filter(name__icontains=gender_name).first()
     
-    # 3. Base Queryset (optimized loading of foreign keys)
-    services = Service.objects.all().select_related('category__parent')
+    # 3. Base Queryset (optimized loading of foreign keys + images)
+    services = Service.objects.all().select_related(
+        'category__parent'
+    ).prefetch_related('images')
     
     # 4. Filter by Gender (Parent Category)
     if active_parent:
@@ -48,6 +50,11 @@ def service_list_view(request):
     if duration_max and duration_max.isdigit():
         services = services.filter(duration_minutes__lte=int(duration_max))
 
+    # 8b. Discounted Only Filter
+    discounted_only = request.GET.get('discounted_only', '')
+    if discounted_only:
+        services = services.filter(discount_percentage__gt=0)
+
     # 9. Sort Options
     sort_by = request.GET.get('sort_by', 'popular')
     if sort_by == 'popular':
@@ -58,6 +65,8 @@ def service_list_view(request):
         services = services.order_by('-base_price')
     elif sort_by == 'newest':
         services = services.order_by('-id')
+    elif sort_by == 'discount':
+        services = services.filter(discount_percentage__gt=0).order_by('-discount_percentage')
 
     context = {
         'services': services,
@@ -70,6 +79,7 @@ def service_list_view(request):
         'selected_price_max': price_max,
         'selected_duration_max': duration_max,
         'selected_sort_by': sort_by,
+        'selected_discounted': discounted_only,
     }
 
     # If it's an HTMX request, render only the partial template

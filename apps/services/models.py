@@ -125,6 +125,16 @@ class Service(models.Model):
             return self.base_price - discount_amount
         return self.base_price
 
+    @property
+    def formatted_base_price(self):
+        """Zero-decimal HUF: '55,000 Ft'."""
+        return "{:,} Ft".format(int(self.base_price))
+
+    @property
+    def formatted_discounted_price(self):
+        """Zero-decimal HUF after discount: '46,750 Ft'."""
+        return "{:,} Ft".format(int(self.discounted_price))
+
     def get_options_grouped(self):
         """
         Returns a list of dicts, one per option group:
