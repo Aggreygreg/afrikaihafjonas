@@ -310,3 +310,33 @@
 **Rationale:** The salon accepts multiple methods (Revolut, Wise, TransferGo, Bank Transfer), not just bank transfers. The method set is admin-configurable. The prohibition is on automated gateway integrations (Stripe, PayPal, etc.), not on having multiple payment methods.
 
 **Impact:** Anti-pattern wording updated in MASTER_CONTEXT_AND_SPECS.md §7.1 and apps.payments decommission note.
+
+---
+
+### 31. Payment Snapshot is Admin-Only Audit — NOT Guest Lookup Data
+**Decision:** `AppointmentPaymentSnapshot.detail_fields_snapshot` (IBAN, account holder, QR codes) is an admin-only audit record. It is NEVER shown to customers. Guest Lookup reads ONLY `payment_method_name` from the snapshot (to survive later method deletion). This corrects a specification error in ARCHITECTURAL_PRINCIPLES.md Rev 2.
+
+**Rationale:** Decision #15 explicitly states "Bank transfer details from admin side — Always Hidden from Clients." The snapshot's purpose is to preserve what payment configuration existed at submission time for admin verification and dispute resolution — not to re-display payment instructions to customers. Customers see payment instructions ONLY at Step 4 (from live data), then the method name + deposit + reference in Guest Lookup.
+
+**Impact:** ARCHITECTURAL_PRINCIPLES.md §6.2 updated. Guest Lookup view reads `snapshot.payment_method_name` only. Snapshot inline in Django Admin is read-only.
+
+### 32. Historical Image Preservation in Payment Snapshots
+**Decision:** Image-type `PaymentDetailField` values are physically copied to `payment_snapshots/<reference>/` at snapshot creation time via Django's storage API. The new immutable path is stored in the snapshot JSON.
+
+**Rationale:** Storing just the media path is fragile — admin file replacement/deletion or storage migration would break the audit record. Copying guarantees immutability. Storage overhead is negligible (~50KB per appointment at salon volume).
+
+**Impact:** Snapshot creation logic includes a file-copy step for image-type fields. Text values stored directly in JSON (no file dependency).
+
+### 33. WYSIWYG for Website Content, Plain Text for Emails
+**Decision:** Limited WYSIWYG editor (`django-summernote` with restricted toolbar) for website content (FAQ, ContentBlock, Announcement). Bleach sanitization on save with strict tag whitelist. Email templates use plain textarea (`body_text`) — NO WYSIWYG. Optional `body_html` is plain HTML textarea only.
+
+**Rationale:** Salon owner is not a developer — Markdown syntax is a learning barrier. WYSIWYG with limited toolbar + bleach is intuitive and secure. Email HTML is too fragile for WYSIWYG (email clients render inconsistently, inline styles required). Different content types need different editing mechanisms.
+
+**Impact:** `django-summernote` + `bleach` added to requirements. `@tailwindcss/typography` added to Tailwind config for rendering WYSIWYG output in `prose` containers.
+
+### 34. Email Placeholder Security — Regex Substitution Only
+**Decision:** Admin-authored email templates use regex-based `{{ key }}` string substitution for rendering, NOT Django's `django.template.Template` engine. This prevents template tag injection (`{% load %}`, `{% include %}`).
+
+**Rationale:** Admin-authored content must not have access to Django's template tag system. Regex substitution limits the admin to simple `{{ placeholder }}` replacement.
+
+**Impact:** Email rendering service uses `re.sub(r'\{\{(\w+)\}\}', ...)` instead of `django.template.Template().render()`.

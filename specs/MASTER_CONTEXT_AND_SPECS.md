@@ -299,7 +299,9 @@ Intentionally scrapped. No star ratings, comments, or review system.
 **Always Hidden from Clients:**
 - Proof of payment image (bank screenshot — sensitive account/transaction info)
 - Internal payment notes (admin may write "check if amount matches" etc.)
-- Bank transfer details from admin side
+- Bank transfer details from admin side (IBAN, account holder, QR codes — these are shown ONLY at Step 4 payment time, NEVER in Guest Lookup)
+
+> **Phase 7B note:** The `AppointmentPaymentSnapshot` preserves frozen payment details for admin audit only. Its `detail_fields_snapshot` is NEVER rendered to customers. Guest Lookup reads ONLY the frozen `payment_method_name` from the snapshot (to survive later method deletion). See `ARCHITECTURAL_PRINCIPLES.md` §6.2 and Decision #31.
 
 **Always Shown (if present):**
 - Admin notes (labeled "Admin note: ...") — transparent; admin writes professionally knowing clients see them

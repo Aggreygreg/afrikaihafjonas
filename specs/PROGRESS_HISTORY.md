@@ -273,17 +273,22 @@
 - [ ] Add `customer_language` to `AppointmentRequest` (migration + default `hu`)
 - [ ] Data migration: map existing TextChoices to FK, create snapshots for existing records
 - [ ] Snapshot creation logic at Step 4 submission (same transaction)
+- [ ] **Image file copying**: copy image-type PaymentDetailField files to `payment_snapshots/<ref>/` at snapshot time
+- [ ] **Step 4 payment instruction display**: show live PaymentDetailField values (IBAN, QR) when method selected via HTMX — NEW UI behavior
 - [ ] Update Wizard Step 4 template to render dynamic fields
-- [ ] Update Guest Lookup to display payment details from SNAPSHOT (not live tables)
+- [ ] **Guest Lookup: read ONLY payment_method_name from snapshot** — detail fields are admin-only audit (Decision #31)
 - [ ] Admin: payment snapshot as read-only inline; customer_language display with flag
+- [ ] `payment_method` FK uses `on_delete=SET_NULL` (survives method deletion)
 
 ### Phase 7C: Editable Email Templates (Multilingual)
 - [ ] Create `EmailTemplate` model (parent, email_type enum — developer-controlled)
 - [ ] Create `EmailTemplateTranslation` model (subject, body_text, body_html per language)
-- [ ] Build email rendering service (context dict -> Django template engine -> send)
+- [ ] Build email rendering service (**regex-based `{{ key }}` substitution, NOT Django template engine** — Decision #34)
 - [ ] Language selection: use `appointment.customer_language`, NOT session language
 - [ ] Migrate existing hardcoded emails to admin-managed templates
+- [ ] **Seed migration: 24 template records (8 types x 3 languages)** with developer-authored initial content (Decision #34/12.9)
 - [ ] Fallback: requested language -> HU base -> first available
+- [ ] Email `body_text` = plain textarea, `body_html` = optional plain HTML textarea (**NO WYSIWYG for emails**)
 - [ ] Keep transactional and newsletter systems strictly separate (newsletter out of scope)
 
 ### Phase 7D: Customer-Facing Content (Multilingual)
@@ -292,6 +297,9 @@
 - [ ] Announcement model (parent + AnnouncementTranslation: message, link, scheduling)
 - [ ] Migrate static page content (About, Terms, Privacy) into ContentBlocks
 - [ ] StackedInline admin UX for all translation models
+- [ ] **WYSIWYG editing**: `django-summernote` (limited toolbar) + `bleach` sanitization for website content (Decision #33)
+- [ ] **Tailwind typography**: add `@tailwindcss/typography` for rendering WYSIWYG output in `prose` containers
+- [ ] Dependencies: `django-summernote`, `bleach` added to requirements
 
 ### Phase 7E: SEO Configuration (Multilingual)
 - [ ] `GlobalSEO` singleton model + `GlobalSEOTranslation` (title, description, OG per language)

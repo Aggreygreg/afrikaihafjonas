@@ -324,9 +324,14 @@ class AppointmentPaymentSnapshot(models.Model):
     NEVER updated after creation. Changes to PaymentMethod or PaymentDetailField
     do not affect existing snapshots.
 
-    This is distinct from the live PaymentMethod/PaymentDetailField tables:
-      - Live tables    = what the admin CURRENTLY configures (mutable, shared)
-      - This snapshot  = what was configured WHEN this customer submitted (immutable, per-appointment)
+    VISIBILITY:
+      - payment_method_name: used by Guest Lookup (customer-visible, read-only)
+      - detail_fields_snapshot: ADMIN-ONLY audit record. NEVER shown to customers.
+        Per Decision #15, bank transfer details are always hidden from clients.
+
+    Image-type detail fields are physically copied to payment_snapshots/<ref>/
+    at snapshot creation time to guarantee the audit record survives later
+    file deletion/replacement.
     """
     appointment = models.OneToOneField(
         'bookings.AppointmentRequest',
@@ -356,20 +361,33 @@ When the snapshot is created, the system copies:
 2. `PaymentMethod.slug` → `payment_method_slug`
 3. All **active** `PaymentDetailField` records for that method → `detail_fields_snapshot` (JSON array of `{label, value, field_type}`)
 
+**Image-type fields are physically copied** to `payment_snapshots/<reference>/<label_slug>.<ext>` via Django's storage API (`default_storage.save()`). The new immutable path is stored in the JSON. This ensures that later deletion/replacement of the original image does not break the historical audit record. Text-type fields store their value directly in the JSON (no file dependency).
+
 #### When is the Snapshot Created?
 
 At **Step 4** (payment submission), when the customer selects a payment method and uploads proof of payment. The snapshot is created in the same transaction as the Step 4 record update.
 
-> **Design note:** `AppointmentRequest.payment_method` (FK to live `PaymentMethod`) is kept for **admin querying/filtering convenience** (e.g., "show all Wise appointments"). But the **authoritative payment details** shown to the customer in Guest Lookup come from the **snapshot**, never from the live tables.
+> **Design note:** `AppointmentRequest.payment_method` (FK to live `PaymentMethod`, `on_delete=SET_NULL`) is kept for **admin querying/filtering convenience** (e.g., "show all Wise appointments"). If the admin later deletes a method, the FK becomes null but the snapshot preserves the frozen name and details.
+
+#### Snapshot Visibility Rules (Critical — Corrects Previous Revision)
+
+**The snapshot is an admin-only audit record.** Its `detail_fields_snapshot` (IBAN, account holder, QR codes, etc.) is **NEVER** shown to customers. This is consistent with Decision #15 and the master spec, which explicitly state: *"Bank transfer details from admin side — Always Hidden from Clients."*
+
+Guest Lookup reads **only** `snapshot.payment_method_name` (the method name, e.g., "Wise") so that the display survives later method deletion/renaming. It does NOT read `detail_fields_snapshot`.
+
+**Where customers see payment instructions:** On the **Step 4 wizard page** (from **live** `PaymentDetailField` records), so they can make the transfer. After submission, Guest Lookup shows only the method name + deposit + reference — never the detail fields.
 
 #### What the Customer Sees vs What Admin Sees
 
-| View | Source | Mutable? |
-|---|---|---|
-| Guest Lookup (customer) — payment instructions | `AppointmentPaymentSnapshot.detail_fields_snapshot` | ❌ Frozen |
-| Django Admin — appointment payment details | `AppointmentPaymentSnapshot` (read-only inline) | ❌ Frozen |
-| Django Admin — current payment methods config | `PaymentMethod` / `PaymentDetailField` tables | ✅ Editable |
-| Wizard Step 4 (new customer) — payment options | `PaymentMethod` (active) / `PaymentDetailField` (active) | ✅ Current config |
+| View | Source | Mutable? | Customer? |
+|---|---|---|---|
+| Guest Lookup — payment method **name** | `AppointmentPaymentSnapshot.payment_method_name` | ❌ Frozen | ✅ Shown |
+| Guest Lookup — deposit amount | `AppointmentRequest.deposit_amount` | ❌ | ✅ Shown |
+| Guest Lookup — payment reference | `AppointmentRequest.payment_reference` | ❌ | ✅ Shown |
+| Guest Lookup — payment **detail fields** (IBAN, QR) | — | — | ❌ **NEVER** |
+| Django Admin — appointment payment audit | `AppointmentPaymentSnapshot` (read-only inline) | ❌ Frozen | Admin only |
+| Django Admin — current payment methods config | `PaymentMethod` / `PaymentDetailField` tables | ✅ Editable | Admin only |
+| Wizard Step 4 — payment instructions | `PaymentMethod` (active) / `PaymentDetailField` (active) | ✅ Current config | ✅ At payment time only |
 
 #### Migration Strategy (from TextChoices)
 
@@ -381,6 +399,22 @@ At **Step 4** (payment submission), when the customer selects a payment method a
    a. Set `payment_method_fk` based on old TextChoices value → matching `PaymentMethod` slug.
    b. Create `AppointmentPaymentSnapshot` from the current `PaymentDetailField` values for that method. (Historical records get the current config snapshotted — this is the best we can do for pre-existing records.)
 6. Remove old `payment_method` TextChoices CharField.
+
+### 6.4 Step 4 Payment Instruction Display (New Phase 7B UI Requirement)
+
+The current Step 4 page shows only payment method names (radio buttons) — no IBAN, account details, or QR codes. Customers are told to "transfer your deposit" but never shown where.
+
+With dynamic `PaymentDetailField` records, Step 4 must:
+
+1. Show available methods as selectable cards (from live `PaymentMethod` where `is_active=True`).
+2. When a method is selected (via HTMX), display its active `PaymentDetailField` values from **live** records:
+   - Text fields: label + value (e.g., "IBAN: HU12 3456...")
+   - Image fields: label + `<img>` (e.g., QR code for mobile payment)
+3. Customer makes the payment using the displayed instructions.
+4. Customer uploads proof of payment.
+5. On submit: snapshot is created from the live detail fields at that moment (with image files copied to immutable paths).
+
+**These payment instructions are shown to the customer ONLY at Step 4 (payment time).** They are NOT shown again in Guest Lookup, confirmation page, or any other customer-facing view. Per Decision #15, bank transfer details are always hidden from clients outside the payment step.
 
 ### 6.3 Corrected Anti-Pattern Wording
 
@@ -449,12 +483,21 @@ class EmailTemplateTranslation(models.Model):
     )
     language = models.CharField(max_length=2, choices=LanguageChoices.choices)
     subject = models.CharField(max_length=200)
-    body_text = models.TextField(help_text="Plain text body. Use {{ placeholders }}.")
-    body_html = models.TextField(blank=True, help_text="Optional HTML body.")
+    body_text = models.TextField(
+        help_text="Plain text body. Use {{ placeholders }}. NO WYSIWYG — "
+                  "email plain text is the primary format."
+    )
+    body_html = models.TextField(
+        blank=True,
+        help_text="Optional HTML body. Plain HTML textarea only (no WYSIWYG). "
+                  "Email HTML is fragile — use simple inline styles only."
+    )
 
     class Meta:
         unique_together = ('template', 'language')
 ```
+
+**Why no WYSIWYG for email templates:** Email HTML is notoriously fragile — every email client renders differently, inline styles are required, and CSS support is fragmented. A WYSIWYG editor generates generic HTML that looks broken in Gmail/Outlook. Transactional email bodies should be primarily plain text. The optional `body_html` field is for advanced users who understand email HTML constraints — it's a plain HTML textarea, not a visual editor.
 
 ### 7.3 Language Selection for Transactional Emails
 
@@ -487,13 +530,34 @@ The system renders templates with a controlled context dict. Admins can use any 
 
 **Useful Links:** `{{ guest_lookup_url }}`, `{{ privacy_policy_url }}`, `{{ terms_url }}`
 
-**Rendering:** Developer builds a context dict → renders template via Django's string template engine (`django.template.Template`) → sends email via Django's email backend.
+**Rendering:** Developer builds a context dict → performs **safe string substitution** (regex-based `{{ key }}` replacement, NOT Django's template engine) → sends email via Django's email backend. Unsupported variables render as empty strings (no crashes).
+
+> **Security — Placeholder Substitution Method (Critical):**
+> Do NOT use Django's `django.template.Template` engine to render admin-authored email templates. If an admin writes `{% load %}` or `{% include %}`, they could inject template tags. Instead, use simple regex-based `{{ key }}` replacement (e.g., `re.sub(r'\{\{(\w+)\}\}', lambda m: context.get(m.group(1), ''), body)`). This eliminates template tag injection entirely — admins get only `{{ placeholder }}` syntax, nothing more.
 
 ---
 
 ## 8. Customer-Facing Content (Phase 7D)
 
 **Goal:** Business-owned reusable content editable from Django Admin, with full multilingual support.
+
+### 8.0 Content Editing Strategy (Decided)
+
+**Website content** (FAQ answers, ContentBlock body, Announcement message) uses a **limited WYSIWYG editor** — not Markdown, not plain text.
+
+**Rationale:**
+- The admin is a salon owner, not a developer. They will not learn Markdown syntax.
+- Terms/Privacy pages need headings, bold, numbered lists — plain text can't express these.
+- A limited WYSIWYG (bold/italic/headings/lists/links — no script/style/iframe) is intuitive.
+- Security is handled by `bleach` sanitization with a strict tag whitelist.
+
+**Implementation:**
+- **Editor:** `django-summernote` with a deliberately limited toolbar (bold, italic, h2, h3, ul, ol, link, unlink). No image insert, no HTML source view, no format painter.
+- **Sanitization:** `bleach` (or `django-bleach`) strips everything except whitelisted tags: `<p>`, `<strong>`, `<em>`, `<h2>`, `<h3>`, `<ul>`, `<ol>`, `<li>`, `<a>`, `<br>`. Applied on save.
+- **Rendering:** WYSIWYG output rendered inside `<div class="prose">` using `@tailwindcss/typography` plugin. Templates use `{{ block.body|safe }}` (output is pre-sanitized by bleach on save).
+- **Dependencies:** `django-summernote`, `bleach` added to requirements. `@tailwindcss/typography` added to Tailwind config (build-time, not Python).
+
+**Email templates are DIFFERENT** — see §7.2. Email `body_text` is plain textarea, `body_html` is optional plain HTML textarea. NO WYSIWYG for emails.
 
 ### 8.1 FAQ (Multilingual — Category B)
 
@@ -540,13 +604,13 @@ class ContentBlockTranslation(models.Model):
     )
     language = models.CharField(max_length=2, choices=LanguageChoices.choices)
     title = models.CharField(max_length=200, blank=True)
-    body = models.TextField()  # Markdown or HTML — admin types content here
+    body = models.TextField()  # WYSIWYG (django-summernote) + bleach-sanitized HTML
 
     class Meta:
         unique_together = ('content_block', 'language')
 ```
 
-**Usage:** Templates reference `ContentBlock` by slug: `{% get_content_block 'about_page' as block %}` then render `{{ block.title }}` / `{{ block.body|markdown }}`.
+**Usage:** Templates reference `ContentBlock` by slug: `{% get_content_block 'about_page' as block %}` then render inside a prose container: `<div class="prose">{{ block.body|safe }}</div>` (output is pre-sanitized by bleach on save).
 
 ### 8.3 Announcement / Banner System (Multilingual — Category B)
 
@@ -764,12 +828,11 @@ These decisions should be made before implementation begins:
 
 **Question:** Should admin-managed text fields (FAQ answers, content blocks, email HTML) use a rich-text editor?
 
-**Options:**
-- (a) Markdown text + template `|markdown` filter — lightweight, no heavy dependencies.
-- (b) WYSIWYG editor (django-summernote, django-ckeditor, tinymce) — visual editing.
-- (c) Plain text only — no formatting.
+### 12.1 Rich Text Editor for Admin Content — DECIDED
 
-**Recommendation:** (a) Markdown for content blocks and FAQs; plain text for email bodies (emails should be simple). WYSIWYG adds dependency complexity. Markdown is sufficient for a salon site.
+**Decision:** Limited WYSIWYG (`django-summernote`) for website content (FAQ, ContentBlock, Announcement). Plain textarea for email templates (`body_text`). Optional plain HTML textarea for email `body_html`. NO Markdown. See §8.0 for full rationale.
+
+**Rationale:** The admin is a salon owner, not a developer. Markdown syntax (`**bold**`) is a learning barrier that undermines the "admin controls content independently" principle. A limited WYSIWYG toolbar with bleach sanitization is intuitive and safe. Email HTML is too fragile for WYSIWYG — emails stay plain text.
 
 ### 12.2 Global SEO Model Design — DECIDED
 
@@ -802,6 +865,20 @@ These decisions should be made before implementation begins:
 **Question:** When adding `customer_language` to existing `AppointmentRequest` records, what default value?
 
 **Recommendation:** Default to `hu` (base language). Existing records are historical and we cannot retroactively know what language the customer was using. HU is the safest default since it's the base language and the salon is in Hungary.
+
+### 12.7 Email Placeholder Rendering Security — DECIDED
+
+**Decision:** Use regex-based `{{ key }}` string substitution for admin-authored email templates, NOT Django's `django.template.Template` engine. See §7.4.
+
+**Rationale:** Django's template engine would allow admins to inject `{% load %}` or `{% include %}` tags. Regex substitution limits admins to `{{ placeholder }}` only — no template tag injection possible.
+
+### 12.8 Step 4 Payment Instruction Display — DECIDED
+
+**Decision:** Step 4 wizard page shows live `PaymentDetailField` values (IBAN, QR codes, instructions) when a payment method is selected, via HTMX. These are shown ONLY at payment time, never in Guest Lookup. See §6.4.
+
+### 12.9 Seed Email Templates — DECIDED
+
+**Decision:** The Phase 7C data migration must seed all 8 email types x 3 languages = 24 template records with developer-authored initial content. The admin can edit them later. Without seeded templates, the email system has nothing to send.
 
 ---
 
