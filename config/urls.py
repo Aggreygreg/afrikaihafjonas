@@ -37,6 +37,7 @@ urlpatterns = [
     path('services/', include('apps.services.urls', namespace='services')),
     path('bookings/', include('apps.bookings.urls', namespace='bookings')),
     path('admin/', admin.site.urls),
+    path('summernote/', include('django_summernote.urls')),
     path('i18n/', include('django.conf.urls.i18n')),
 ]
 

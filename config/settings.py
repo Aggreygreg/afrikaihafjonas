@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'theme', # Tailwind theme app
     'django_htmx',
     'solo', # For site configuration
+    'django_summernote', # WYSIWYG editor for admin content (Decision #33)
 
     # Local Apps
     'apps.users',
@@ -142,3 +143,20 @@ INTERNAL_IPS = [ "127.0.0.1", ]
 NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
 # Custom user model
 AUTH_USER_MODEL = 'users.CustomUser'
+
+# ── Summernote WYSIWYG (Decision #33) ──────────────────────────
+# Limited toolbar — salon owner is not a web developer.
+# Used for: FAQ answers, ContentBlock bodies, Announcement messages.
+# NOT used for email templates (those are plain text / plain HTML).
+SUMMERNOTE_CONFIG = {
+    "summernote": {
+        "width": "100%",
+        "height": "300",
+        "toolbar": [
+            ["style", ["bold", "italic", "underline"]],
+            ["para", ["ul", "ol", "paragraph"]],
+            ["insert", ["link"]],
+            ["view", ["fullscreen", "codeview"]],
+        ],
+    },
+}
