@@ -14,6 +14,10 @@ from .models import (
     EmailTemplateTranslation,
     FAQ,
     FAQTranslation,
+    GlobalSEO,
+    GlobalSEOTranslation,
+    PageSEO,
+    PageSEOTranslation,
     SiteConfiguration,
 )
 
@@ -169,3 +173,50 @@ class EmailTemplateAdmin(admin.ModelAdmin):
         extra_context = extra_context or {}
         extra_context['placeholder_help'] = EMAIL_PLACEHOLDERS
         return super().changeform_view(request, object_id, form_url, extra_context)
+
+
+# ── SEO Configuration (Phase 7E) ──────────────────────────────
+
+class GlobalSEOTranslationInline(admin.StackedInline):
+    model = GlobalSEOTranslation
+    extra = 3  # one per language
+
+
+@admin.register(GlobalSEO)
+class GlobalSEOAdmin(SingletonModelAdmin):
+    fieldsets = (
+        ('Site Canonical', {
+            'fields': ('canonical_site_url',),
+        }),
+        ('Default OG Image', {
+            'fields': ('og_image_default',),
+        }),
+        ('Search Engine Verification', {
+            'fields': ('google_verification', 'bing_verification'),
+        }),
+    )
+    inlines = [GlobalSEOTranslationInline]
+
+
+class PageSEOTranslationInline(admin.StackedInline):
+    model = PageSEOTranslation
+    extra = 3  # one per language
+
+
+@admin.register(PageSEO)
+class PageSEOAdmin(admin.ModelAdmin):
+    list_display = ('target_display', 'is_active', 'translation_count')
+    list_filter = ('is_active',)
+    list_editable = ('is_active',)
+    search_fields = ('url_path', 'service__title')
+    inlines = [PageSEOTranslationInline]
+
+    def target_display(self, obj):
+        if obj.service_id:
+            return f"Service: {obj.service.title}"
+        return obj.url_path or '(empty)'
+    target_display.short_description = "Target"
+
+    def translation_count(self, obj):
+        return obj.translations.count()
+    translation_count.short_description = "Translations"

@@ -110,4 +110,8 @@ def service_detail_view(request, pk):
         'service': service,
         'grouped_options': options_grouped,
     }
+
+    # Allow the SEO context processor to resolve page-level SEO for this service
+    request.seo_service = service
+
     return render(request, 'services/service_detail.html', context)
