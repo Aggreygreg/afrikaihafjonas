@@ -197,3 +197,310 @@ class GetFaqsTagTests(TestCase):
     def test_skips_faq_with_no_translation(self):
         FAQ.objects.create(display_order=2)  # no translations at all
         self.assertEqual(len(get_faqs()), 2)
+
+
+# ──────────────────────────────────────────────────────────────
+# Phase 7C — Email Template Tests
+# ──────────────────────────────────────────────────────────────
+
+from apps.site_config.email_service import (
+    EMAIL_PLACEHOLDERS,
+    find_placeholders,
+    find_unknown_placeholders,
+    render_email,
+    render_text,
+)
+from apps.site_config.models import EmailTemplate, EmailTemplateTranslation
+
+
+class RenderTextTests(TestCase):
+    """Core regex-based placeholder substitution (Decision #33)."""
+
+    def test_basic_substitution(self):
+        result = render_text("Hello {{ client_name }}!", {"client_name": "Anna"})
+        self.assertEqual(result, "Hello Anna!")
+
+    def test_multiple_placeholders(self):
+        result = render_text(
+            "{{ client_name }} - {{ payment_reference }}",
+            {"client_name": "Anna", "payment_reference": "AFH-123"},
+        )
+        self.assertEqual(result, "Anna - AFH-123")
+
+    def test_unknown_key_renders_empty(self):
+        """Per spec §7.4: unsupported variables render as empty string."""
+        result = render_text("Hi {{ client_name }} {{ nonexistent }}!", {"client_name": "X"})
+        self.assertEqual(result, "Hi X !")
+
+    def test_missing_from_context_renders_empty(self):
+        """A known placeholder missing from context → empty string, no crash."""
+        result = render_text("Hi {{ client_name }}", {})
+        self.assertEqual(result, "Hi ")
+
+    def test_none_value_renders_empty(self):
+        result = render_text("[{{ client_name }}]", {"client_name": None})
+        self.assertEqual(result, "[]")
+
+    def test_empty_or_none_text(self):
+        self.assertEqual(render_text("", {"x": "y"}), "")
+        self.assertEqual(render_text(None, {"x": "y"}), "")
+
+    def test_whitespace_in_placeholder(self):
+        """{{  client_name  }} with spaces should still match."""
+        result = render_text("Hi {{  client_name  }}", {"client_name": "X"})
+        self.assertEqual(result, "Hi X")
+
+    def test_template_tag_injection_blocked(self):
+        """Django template tags must NOT be processed — they pass through as-is."""
+        result = render_text("{% load admin_list %}{{ client_name }}", {"client_name": "X"})
+        self.assertIn("{% load admin_list %}", result)
+        self.assertIn("X", result)
+
+
+class FindUnknownPlaceholdersTests(TestCase):
+    def test_detects_typo(self):
+        unknown = find_unknown_placeholders("Hi {{ client_nam }}")
+        self.assertIn("client_nam", unknown)
+
+    def test_valid_placeholders_not_flagged(self):
+        unknown = find_unknown_placeholders("Hi {{ client_name }} {{ payment_reference }}")
+        self.assertEqual(unknown, [])
+
+    def test_mixed_valid_and_invalid(self):
+        unknown = find_unknown_placeholders("{{ client_name }} {{ typo_key }} {{ hours }}")
+        self.assertEqual(unknown, ["typo_key"])
+
+    def test_empty_text(self):
+        self.assertEqual(find_unknown_placeholders(""), [])
+        self.assertEqual(find_unknown_placeholders(None), [])
+
+    def test_find_all_placeholders(self):
+        found = find_placeholders("{{ a }} {{ b }} {{ a }}")
+        self.assertEqual(found, {"a", "b"})
+
+
+class RenderEmailTests(TestCase):
+    """Full render_email() integration with DB templates."""
+
+    def test_renders_expiry_reminder_en(self):
+        ctx = {
+            "hours": 2,
+            "payment_reference": "AFH-TEST1",
+            "client_name": "Test Client",
+            "service_name": "Box Braids",
+            "provider_name": "Anna",
+            "appointment_date": "2026-08-15",
+            "appointment_time": "14:00",
+            "appointment_status": "Pending Verification",
+            "held_until": "2026-08-12 20:00",
+            "admin_url": "http://example.com/admin/1/",
+            "salon_name": "Afrikai Hajfonás",
+        }
+        result = render_email("expiry_reminder", ctx, language="en")
+        self.assertIsNotNone(result)
+        subject, body_text, body_html = result
+        self.assertIn("AFH-TEST1", subject)
+        self.assertIn("Test Client", body_text)
+        self.assertIn("http://example.com/admin/1/", body_text)
+
+    def test_renders_hu_default_language(self):
+        """When language='hu', should get the HU translation."""
+        result = render_email("request_received", {"client_name": "T"}, language="hu")
+        self.assertIsNotNone(result)
+        self.assertIn("T", result[1])  # body_text contains the name
+
+    def test_falls_back_to_hu_when_translation_missing(self):
+        """DE translation missing for a custom template → HU fallback."""
+        template = EmailTemplate.objects.get(email_type="request_received")
+        template.translations.filter(language="de").delete()
+
+        ctx = {"client_name": "Max", "payment_reference": "AFH-X"}
+        result = render_email("request_received", ctx, language="de")
+        self.assertIsNotNone(result)
+        # HU body should contain "Kedves" (Hungarian greeting)
+        self.assertIn("Kedves", result[1])
+
+    def test_returns_none_for_unknown_email_type(self):
+        result = render_email("nonexistent_type", {}, language="hu")
+        self.assertIsNone(result)
+
+    def test_returns_none_for_inactive_template(self):
+        template = EmailTemplate.objects.get(email_type="refund_notification")
+        template.is_active = False
+        template.save()
+        result = render_email("refund_notification", {}, language="hu")
+        self.assertIsNone(result)
+
+    def test_returns_none_when_no_translations_at_all(self):
+        """Template exists but has zero translations → None."""
+        EmailTemplate.objects.filter(email_type="payment_verified").delete()
+        # Re-create empty parent
+        EmailTemplate.objects.create(email_type="payment_verified", is_active=True)
+        result = render_email("payment_verified", {}, language="hu")
+        self.assertIsNone(result)
+
+    def test_unsupported_placeholder_renders_empty(self):
+        """Runtime: unsupported placeholder → empty string (no crash)."""
+        # Context deliberately omits 'salon_name' — should render empty
+        result = render_email("expiry_reminder", {"hours": 1}, language="en")
+        self.assertIsNotNone(result)
+        # Subject template has {{ salon_name }} — should render as empty
+        self.assertNotIn("{{ ", result[0])
+
+
+class SeedMigrationTestsEmail(TestCase):
+    """Verify the 0007 seed migration created all expected records."""
+
+    def test_eight_template_types_seeded(self):
+        expected = {
+            "request_received", "verification_pending", "payment_verified",
+            "appointment_approved", "appointment_rejected", "appointment_expired",
+            "expiry_reminder", "refund_notification",
+        }
+        actual = set(EmailTemplate.objects.values_list("email_type", flat=True))
+        self.assertEqual(actual, expected)
+
+    def test_twenty_four_translations_seeded(self):
+        self.assertEqual(EmailTemplateTranslation.objects.count(), 24)
+
+    def test_every_template_has_hu_translation(self):
+        for template in EmailTemplate.objects.all():
+            self.assertTrue(
+                template.translations.filter(language="hu").exists(),
+                f"Missing HU translation for {template.email_type}",
+            )
+
+    def test_every_template_has_en_de(self):
+        for template in EmailTemplate.objects.all():
+            for lang in ("en", "de"):
+                self.assertTrue(
+                    template.translations.filter(language=lang).exists(),
+                    f"Missing {lang} translation for {template.email_type}",
+                )
+
+    def test_all_templates_active_by_default(self):
+        self.assertTrue(EmailTemplate.objects.filter(is_active=True).count(), 8)
+        self.assertEqual(EmailTemplate.objects.filter(is_active=False).count(), 0)
+
+    def test_seeded_templates_use_only_known_placeholders(self):
+        """No seeded template body should contain unknown placeholders."""
+        for trans in EmailTemplateTranslation.objects.all():
+            for field_name in ("subject", "body_text"):
+                value = getattr(trans, field_name)
+                unknown = find_unknown_placeholders(value)
+                self.assertEqual(
+                    unknown, [],
+                    f"Unknown placeholder(s) {unknown} in "
+                    f"{trans.template.email_type} ({trans.language}) "
+                    f"{field_name}"
+                )
+
+
+class PlaceholderVocabularyTests(TestCase):
+    """Sanity checks on the canonical placeholder vocabulary."""
+
+    def test_core_placeholders_present(self):
+        for key in ("client_name", "payment_reference", "service_name",
+                     "salon_name", "deposit_amount", "admin_url", "hours"):
+            self.assertIn(key, EMAIL_PLACEHOLDERS)
+
+    def test_all_placeholders_match_regex(self):
+        """Every placeholder key must be a valid \\w+ identifier."""
+        import re
+        for key in EMAIL_PLACEHOLDERS:
+            self.assertTrue(
+                re.match(r"^\w+$", key),
+                f"Invalid placeholder key: {key!r}"
+            )
+
+
+class AdminFormValidationTests(TestCase):
+    """EmailTemplateTranslationForm must block unknown placeholders on save."""
+
+    def test_valid_placeholders_pass_validation(self):
+        from apps.site_config.admin import EmailTemplateTranslationForm
+        template = EmailTemplate.objects.get(email_type="request_received")
+        trans = template.translations.get(language='hu')
+        form = EmailTemplateTranslationForm(
+            instance=trans,
+            data={
+                'template': template.pk,
+                'language': 'hu',
+                'subject': 'Hi {{ client_name }}',
+                'body_text': 'Ref: {{ payment_reference }}',
+                'body_html': '',
+            },
+        )
+        self.assertTrue(form.is_valid(), f"Errors: {form.errors}")
+
+    def test_unknown_placeholder_in_subject_blocked(self):
+        from apps.site_config.admin import EmailTemplateTranslationForm
+        template = EmailTemplate.objects.get(email_type="request_received")
+        trans = template.translations.get(language='hu')
+        form = EmailTemplateTranslationForm(
+            instance=trans,
+            data={
+                'template': template.pk,
+                'language': 'hu',
+                'subject': 'Hi {{ clietn_name }}',  # typo
+                'body_text': 'Valid body',
+                'body_html': '',
+            },
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn('subject', form.errors)
+        self.assertIn('clietn_name', str(form.errors['subject']))
+
+    def test_unknown_placeholder_in_body_blocked(self):
+        from apps.site_config.admin import EmailTemplateTranslationForm
+        template = EmailTemplate.objects.get(email_type="expiry_reminder")
+        trans = template.translations.get(language='en')
+        form = EmailTemplateTranslationForm(
+            instance=trans,
+            data={
+                'template': template.pk,
+                'language': 'en',
+                'subject': 'Valid',
+                'body_text': 'Your {{ totally_made_up_key }} is ready',
+                'body_html': '',
+            },
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn('body_text', form.errors)
+
+    def test_empty_body_html_not_validated(self):
+        """Empty body_html should not trigger placeholder validation."""
+        from apps.site_config.admin import EmailTemplateTranslationForm
+        template = EmailTemplate.objects.get(email_type="request_received")
+        trans = template.translations.get(language='en')
+        form = EmailTemplateTranslationForm(
+            instance=trans,
+            data={
+                'template': template.pk,
+                'language': 'en',
+                'subject': 'Valid {{ client_name }}',
+                'body_text': 'Valid {{ payment_reference }}',
+                'body_html': '',
+            },
+        )
+        self.assertTrue(form.is_valid(), f"Errors: {form.errors}")
+
+    def test_error_message_lists_valid_placeholders(self):
+        """The validation error should mention valid placeholders for guidance."""
+        from apps.site_config.admin import EmailTemplateTranslationForm
+        template = EmailTemplate.objects.get(email_type="request_received")
+        trans = template.translations.get(language='hu')
+        form = EmailTemplateTranslationForm(
+            instance=trans,
+            data={
+                'template': template.pk,
+                'language': 'hu',
+                'subject': '{{ typo_thing }}',
+                'body_text': 'ok',
+                'body_html': '',
+            },
+        )
+        form.is_valid()
+        error_text = str(form.errors['subject'])
+        # Should mention at least some valid placeholder names
+        self.assertIn('client_name', error_text)
