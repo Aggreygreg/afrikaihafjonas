@@ -91,30 +91,52 @@
 - Internal notes hidden
 - No authentication required
 
-**Model Corrections Needed (Phase 4):**
-- `proof_of_payment` → add `blank=True` (currently NOT blank — would break Step 3 creation)
-- `payment_method` → add `blank=True` (same reason — Step 3 creates record before payment data exists)
-- Upload paths stay FLAT (no AFH subfolders — future optimization, not Phase 4)
+### Phase 4: Wizard Steps 3-4 + Guest Lookup ✅ COMPLETE (Aug 12, 2026)
+**Status:** Built, merged to main4qp, end-to-end tested and verified by HICLAW Manager.
 
-**Dispatch Plan:**
-- hack_3: Wizard Steps 3-4 + Confirmation Page (draft approach)
-- hack_1: Guest Lookup Page (parallel — independent, reads same AppointmentRequest model)
+**Built by:** hack_3 (Wizard Steps 3-4 + Confirmation) + hack_1 (Guest Lookup)
+**Merge commits:** `3269310` (wizard), `ccc97e7` (guest lookup) on main4qp
 
-**Phase 4 File Structure (what builders need to create/modify):**
+**Model Changes Applied:**
+- `proof_of_payment` → `blank=True`
+- `payment_method` → `blank=True`
+- Migration `0002_alter_appointmentrequest_payment_method_and_more.py`
 
-| File | Action | Owner |
-|------|--------|-------|
-| `apps/bookings/models.py` | Modify: `proof_of_payment` → `blank=True` | hack_3 |
-| `apps/bookings/migrations/000X_*.py` | New migration for blank=True change | hack_3 |
-| `apps/bookings/views.py` | Modify: Add Step 3 view, Step 4 view, confirmation view | hack_3 |
-| `apps/bookings/urls.py` | Modify: Add new URL patterns | hack_3 |
-| `apps/bookings/forms.py` | New: Step 3 form (client details + hair photos), Step 4 form (payment) | hack_3 |
-| `templates/bookings/wizard_step_3.html` | New: Client details + hair data form | hack_3 |
-| `templates/bookings/wizard_step_4.html` | New: Finances + submission form | hack_3 |
-| `templates/bookings/confirmation.html` | New: Confirmation page | hack_3 |
-| `apps/bookings/views.py` | Modify: Add guest_lookup_view | hack_1 |
-| `apps/bookings/urls.py` | Modify: Add `/bookings/status/` pattern | hack_1 |
-| `templates/bookings/guest_lookup.html` | New: Guest lookup form + status display | hack_1 |
+**Wizard Step 3 — Client Details & Hair Data (Built ✅):**
+- Client name, email, phone, age with age validation (client-side JS + server-side)
+- Hair length: radio selection (9 options Ear → Hip)
+- Photo uploads: front, side, back with `accept` attribute + file validation
+- Thin hair tension warning (hardcoded text)
+- GDPR consent checkbox (required)
+- Creates `AppointmentRequest` with `status=pending_verification`
+
+**Wizard Step 4 — Finances & Submission (Built ✅):**
+- Deposit amount display (20,000 Ft), AFH-XXXXXX reference with copy button
+- Payment method radios (Revolut, Wise, TransferGo, Bank Transfer)
+- Proof of payment upload (.jpg/.png/.pdf, max 5MB)
+- Policy review text + final consent checkbox
+- Updates `AppointmentRequest`, sets `held_until = now + 12h`
+
+**Confirmation Page (Built ✅):**
+- Success message, large copyable reference, next steps, Guest Lookup link
+
+**Guest Lookup Page (Built ✅):**
+- Email + AFH reference → status lookup (case-insensitive)
+- HTMX form submission with partial result swap
+- Show/hide rules per Decision #15 — verified for pending_verification status
+- Proof of payment images + internal notes hidden ✅
+- Admin notes visible for appropriate statuses ✅
+- Error handling for invalid lookups ✅
+
+**End-to-End Test (Aug 12):**
+- Full flow tested: Homepage → Detail → Step 1 (options) → Step 2 (scheduling) → Step 3 (details + photos) → Step 4 (payment + proof) → Confirmation → Guest Lookup
+- All data persisted correctly: reference AFH-BCECE7, status pending_verification, frozen options snapshot, all photos/proof stored, 12h hold set
+- `manage.py check` = 0 issues, `makemigrations --check` = clean
+
+**Known Cosmetic Issues (not blocking):**
+1. `---------` blank option in radio groups (hair_length, payment_method) — Django ChoiceField default empty label. Remove in polish phase.
+2. Double navigation/footer on Steps 3-4 pages — they extend base.html but also render wizard shell. Fix template inheritance in polish phase.
+3. "Coming soon" labels in wizard shell progress bar for Steps 3-4 — the step 3/4 pages show correct progress, but the wizard shell (steps 1-2) still says "Coming soon". Fix in polish phase.
 
 ---
 
@@ -123,7 +145,7 @@
 | App | Status | Notes |
 |-----|--------|-------|
 | `services` | ✅ Complete | Suitability fields, M2M images, SHEIN detail page, discount engine |
-| `bookings` | ⚠️ Partial | AppointmentRequest model exists, wizard Steps 1-2 built, Steps 3-4 pending |
+| `bookings` | ✅ Functional | AppointmentRequest model, wizard Steps 1-4, confirmation, guest lookup all working |
 | `payments` | 🗑️ Decommissioned | Dead weight removed in Phase 0 |
 | `providers` | ✅ Stable | Stylists + weekly availability |
 | `site_config` | ✅ Stable | Singleton config + context processor |
