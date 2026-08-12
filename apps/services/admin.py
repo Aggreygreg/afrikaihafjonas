@@ -1,5 +1,7 @@
+from django import forms
 from django.contrib import admin, messages
 from django.utils.html import format_html
+from django.utils.text import slugify
 
 from .models import (
     ParentCategory,
@@ -9,18 +11,106 @@ from .models import (
     ServiceOption,
 )
 
-# NOTE: The dynamic M2M admin form (grouped option dropdowns for
-# ServiceImage.linked_options) requires StackedInline to render.
-# Currently using TabularInline for compactness; linked_options is
-# editable via each ServiceImage's own change form. The dynamic
-# form code (DynamicServiceImageForm + ServiceImageInlineFormSet)
-# is preserved in git history for future activation.
+
+# ── Dynamic M2M Admin Form ──────────────────────────────────────
+# Generates a <select> dropdown for every ServiceOption group,
+# allowing the salon owner to map which options an image represents
+# without dealing with a raw M2M widget.
 
 
-class ServiceImageInline(admin.TabularInline):
+class DynamicServiceImageForm(forms.ModelForm):
+    """
+    Dynamic form that adds a dropdown for each ServiceOption group.
+
+    Instead of a raw M2M widget, the salon owner sees dropdowns like:
+        Color:    [--- Any Color ---] [Black] [Brown] ...
+        Length:   [--- Any Length ---] [Shoulder] [Waist] ...
+
+    On save, selected option IDs are collected and set on linked_options.
+    """
+
+    class Meta:
+        model = ServiceImage
+        fields = ["image", "order"]
+
+    def __init__(self, *args, parent_service=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._parent_service = parent_service
+        self._group_fields = []  # [(field_name, group_name), ...]
+
+        if parent_service and parent_service.pk:
+            grouped = parent_service.get_options_grouped()
+            for group in grouped:
+                group_name = group["group_name"]
+                field_name = f"_opt_{slugify(group_name)}"
+                if field_name in self.fields:
+                    continue  # skip duplicates from slug collisions
+
+                choices = [("", f"— Any {group_name} —")]
+                for opt in group["options"]:
+                    label = opt.value
+                    if opt.additional_price > 0:
+                        label += f" (+{int(opt.additional_price):,} Ft)"
+                    choices.append((opt.id, label))
+
+                self.fields[field_name] = forms.ChoiceField(
+                    choices=choices,
+                    required=False,
+                    label=group_name,
+                )
+                self._group_fields.append((field_name, group_name))
+
+                # Pre-populate current selection
+                if self.instance and self.instance.pk:
+                    current = (
+                        self.instance.linked_options.filter(
+                            group_name=group_name
+                        )
+                        .values_list("id", flat=True)
+                        .first()
+                    )
+                    if current:
+                        self.initial[field_name] = str(current)
+
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+        if commit and instance.pk and self._group_fields:
+            selected_ids = []
+            for field_name, _group_name in self._group_fields:
+                opt_id = self.cleaned_data.get(field_name)
+                if opt_id:
+                    selected_ids.append(int(opt_id))
+            instance.linked_options.set(selected_ids)
+        return instance
+
+
+class ServiceImageInlineFormSet(forms.BaseInlineFormSet):
+    """Passes the parent Service to each inline form for dynamic fields."""
+
+    def _construct_form(self, i, **kwargs):
+        kwargs["parent_service"] = self.instance
+        return super()._construct_form(i, **kwargs)
+
+
+class ServiceImageInline(admin.StackedInline):
     model = ServiceImage
     extra = 1
     ordering = ("order",)
+    form = DynamicServiceImageForm
+    formset = ServiceImageInlineFormSet
+
+    # Read-only preview of the uploaded image
+    readonly_fields = ("image_preview",)
+
+    def image_preview(self, obj):
+        if obj and obj.pk and obj.image:
+            return format_html(
+                '<img src="{}" style="max-height: 200px; '
+                'border-radius: 8px;" />',
+                obj.image.url,
+            )
+        return "—"
+    image_preview.short_description = "Preview"
 
 
 class ServiceOptionInline(admin.TabularInline):

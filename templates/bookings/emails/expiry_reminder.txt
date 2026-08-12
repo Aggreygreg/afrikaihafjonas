@@ -1,0 +1,22 @@
+Hello,
+
+This is an automated reminder that the appointment request below is nearing its
+hold expiry and still needs admin action.
+
+Reference:     {{ reference }}
+Client:        {{ client_name }}
+Service:       {{ service_title }}
+Provider:      {{ provider_name }}
+Target date:   {{ target_date }}
+Target time:   {{ target_time }}
+Status:        {{ status }}
+Hold expires:  {{ held_until|date:"Y-m-d H:i" }}
+
+{{ hours }} hour(s) remain before the hold window closes. If no action is taken
+by the expiry time above, the request will be auto-expired and the time slot
+released back to the calendar.
+
+Review this request now:
+{{ admin_url }}
+
+-- Afrikai Hajfonas Booking System
