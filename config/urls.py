@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.conf import settings 
 from django.conf.urls.static import static 
 from .views import homepage_view
+from . import admin_dashboard  # noqa: F401 — patches AdminSite.index on import
 
 urlpatterns = [
     path('', homepage_view, name='homepage'),
