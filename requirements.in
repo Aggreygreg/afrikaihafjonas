@@ -12,6 +12,7 @@ pillow
 # Frontend
 django-tailwind
 django-htmx
+pytailwindcss  # standalone Tailwind CLI — required by django-tailwind theme
 
 # Site Config
 django-solo
