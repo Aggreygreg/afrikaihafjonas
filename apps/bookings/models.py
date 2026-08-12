@@ -113,6 +113,16 @@ class AppointmentRequest(models.Model):
         max_length=30, choices=Status.choices,
         default=Status.PENDING_VERIFICATION,
     )
+    # Reminder tracking — set True once each reminder email has been sent,
+    # so the reminder command is idempotent across cron runs.
+    reminder_2h_sent = models.BooleanField(
+        default=False,
+        help_text="Set True once the 2-hour-before-expiry reminder email has been sent.",
+    )
+    reminder_1h_sent = models.BooleanField(
+        default=False,
+        help_text="Set True once the 1-hour-before-expiry reminder email has been sent.",
+    )
 
     # ── Admin Notes ────────────────────────────────────────────
     admin_notes = models.TextField(
