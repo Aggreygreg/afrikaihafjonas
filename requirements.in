@@ -20,3 +20,6 @@ django-solo
 # Testing
 pytest
 pytest-django
+
+# i18n tooling (po/mo file management without GNU gettext)
+polib

@@ -47,6 +47,8 @@ pip-tools==7.5.1
     # via -r requirements.in
 pluggy==1.6.0
     # via pytest
+polib==1.2.0
+    # via -r requirements.in
 psycopg2-binary==2.9.11
     # via -r requirements.in
 pygments==2.19.2
