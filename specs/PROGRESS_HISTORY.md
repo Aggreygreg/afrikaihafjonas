@@ -205,9 +205,83 @@
 
 ## What's Left After Phase 5
 
-- **Phase 6:** Background tasks + polish (expiry reminder emails, full i18n translation files, static pages)
-- **Dynamic M2M Form:** Switch ServiceImage inline to StackedInline to enable grouped dropdowns
-- **Final Polish:** Static pages (About, etc.), language preference popup
+- ~~**Phase 6:** Background tasks + polish~~ ✅ (see below)
+- ~~**Dynamic M2M Form:** Switch ServiceImage inline to StackedInline~~ ✅
+- ~~**Final Polish:** Static pages, language preference popup~~ ✅
+
+---
+
+### Phase 6: Polish, i18n, Static Pages ✅ COMPLETE (Aug 12, 2026)
+**Status:** Built, merged to main4qp, all pushed.
+**Branch:** `main4qp` @ `c4dc9db`
+
+**Track A — Expiry Reminder Emails ✅ (built by hack_1):**
+- `AppointmentRequest` model: `reminder_2h_sent` / `reminder_1h_sent` BooleanFields
+- Migration `0003_appointmentrequest_reminder_1h_sent_and_more`
+- `send_expiry_reminders` command: idempotent, `--dry-run`, 2h/1h windows
+- `expiry_reminder.txt` email template
+- E2E tested. Commit `242036e`.
+
+**Track B — Static Pages ✅ (built by hack_3):**
+- 4 pages: About (`/about/`), Contact (`/contact/`), Terms (`/terms/`), Privacy (`/privacy/`)
+- Views in `apps/site_config/views.py`, routes in `config/urls.py`
+- `href="#"` placeholder links replaced with real `{% url %}` tags
+- All strings wrapped in `{% trans %}`. Commits `e7c9437`, `ee79c9b`, `5be51e9`.
+
+**Track C — i18n Translations ✅ (built by HICLAW Manager):**
+- polib-based i18n workflow (no GNU gettext needed on Windows)
+- 323 strings extracted from templates + Python code
+- **HU: 323/323**, **DE: 323/323**, **EN: 323/323** (969 total)
+- Language preference popup (JS modal + Django i18n cookie, first-time visitors)
+- Mobile language switcher added to mobile menu
+- `save_as_mofile()` bug fixed (was using `save()` which writes .po format)
+- Commits: `3fbba49`, `7424508`, `f8d3c79`, `b8db076`, `c4dc9db`
+
+**Track D — UI Polish ✅ (built by HICLAW Manager):**
+- `WizardStep3Form` / `WizardStep4Form`: explicit `.choices` to remove blank `---------` options
+- Wizard progress bar: replaced stale "coming soon" 4-step bar with shared `wizard_progress.html`
+- Commit `c6abddd`.
+
+**Track E — Admin StackedInline ✅ (built by HICLAW Manager):**
+- `ServiceImageInline` → `StackedInline`
+- `DynamicServiceImageForm`: per-ServiceOption-group `<select>` dropdowns
+- `image_preview` read-only field for visual confirmation
+- Commit `0f8da37`.
+
+---
+
+## Phase 7: Business-Managed Content & Configuration (QUEUED — NOT STARTED)
+**Principle Document:** `specs/ARCHITECTURAL_PRINCIPLES.md`
+**Goal:** Move all business-owned content and configuration from code/templates into Django Admin.
+
+### Phase 7A: Business Information Expansion
+- [ ] Extend `SiteConfiguration` with: business name, address directions, working hours, Google Maps link, website URL, logo, favicon
+- [ ] Replace all hardcoded business info in templates with `{{ config.* }}`
+
+### Phase 7B: Dynamic Payment Methods + Details
+- [ ] Create `PaymentMethod` model (replaces TextChoices)
+- [ ] Create `PaymentDetailField` model (per-method configurable fields)
+- [ ] Data migration: map existing AppointmentRequest.payment_method to FK
+- [ ] Seed initial 4 methods with detail fields
+- [ ] Update Wizard Step 4 + Guest Lookup templates
+
+### Phase 7C: Editable Email Templates
+- [ ] Create `EmailTemplate` model (email_type, subject, body_text, body_html, language)
+- [ ] Build email rendering service (context dict → Django template engine → send)
+- [ ] Migrate hardcoded emails to admin-managed templates
+- [ ] Support per-language templates (HU/EN/DE)
+
+### Phase 7D: Customer-Facing Content
+- [ ] FAQ model (question, answer, order, active)
+- [ ] ContentBlock model for static page content
+- [ ] Update static page templates to use admin-managed content
+- [ ] Announcement/banner system
+
+### Phase 7E: SEO Configuration
+- [ ] Add global SEO fields to SiteConfiguration
+- [ ] Create `PageSEO` model for per-page metadata
+- [ ] Build meta tag rendering with fallback logic
+- [ ] Technical SEO (sitemap, robots.txt, hreflang) remains developer-managed
 
 ---
 

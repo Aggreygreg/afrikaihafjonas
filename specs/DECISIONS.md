@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Key Decisions & Rationale
 
-**Last Updated:** August 11, 2026
+**Last Updated:** August 12, 2026
 
 ---
 
@@ -242,3 +242,31 @@
 **Rationale:** Quality degrades on half-full contexts. Starting fresh is good practice, not failure. Specs are persistent in the repo — they survive session resets.
 
 **Impact:** Each new session should re-read: PROGRESS_HISTORY.md, MASTER_CONTEXT_AND_SPECS.md, and DECISIONS.md.
+
+---
+
+### 24. Business-Managed Content & Configuration (Architectural Principle)
+**Decision:** Business-owned content and configuration must be moved from hardcoded code/templates into Django Admin. Developers control system structure, logic, validation, and supported data types. Administrators control business information, email content, payment methods, payment details, SEO metadata, and customer-facing content.
+
+**Rationale:** A routine business change (new phone number, new bank account, updated email wording, new payment service, changed SEO metadata) should never require a developer to modify code or redeploy. The salon owner needs to operate independently once the system is live.
+
+**Scope (see ARCHITECTURAL_PRINCIPLES.md for full detail):**
+1. Business Information — extend `SiteConfiguration` with all fields
+2. Editable Email Templates — `EmailTemplate` model with developer-controlled placeholders
+3. Admin-Managed Payment Methods — dynamic `PaymentMethod` model (replaces TextChoices)
+4. Dynamic Payment Details — `PaymentDetailField` model per payment method
+5. Customer-Facing Content — FAQ, content blocks, announcements
+6. SEO Configuration — global + page-level SEO metadata
+
+**Implementation:** Phased as Phase 7 (A-E). Not started yet. All queued in ARCHITECTURAL_PRINCIPLES.md.
+
+**Preserved:** All existing business rules (deposit math, 12-hour hold, age validation, photo rules, anti-patterns) remain unchanged. This principle moves **where** config lives, not **what** the rules are.
+
+**Impact:** This is the most significant architectural evolution since Phase 0. It touches every app, every template, and the data layer. Each sub-phase must be carefully planned with data migrations and backward compatibility.
+
+### 25. i18n Without GNU gettext (polib-based workflow)
+**Decision:** Use Python `polib` package for .po/.mo file management instead of Django's `makemessages`/`compilemessages` (which require GNU gettext tools not available on this Windows machine).
+
+**Rationale:** GNU gettext could not be installed (no admin access for choco). `polib` provides full .po read/write and .mo compilation from Python. Custom scripts (`_build_po.py`, `_apply_translations.py`, `_compile_mo.py`) replicate the gettext workflow.
+
+**Impact:** Translation workflow is Python-based. JSON files serve as the translation source of truth; scripts apply them to .po files. .mo files are gitignored (build artifacts). After a fresh clone, run `_build_po.py` → `_apply_translations.py` → `_compile_mo.py` to regenerate catalogs.

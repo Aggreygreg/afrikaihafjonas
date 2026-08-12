@@ -1,7 +1,9 @@
 # AFRIKAI HAJFONÁS – MASTER PROJECT CONTEXT & SPECIFICATION
 
-**Last Updated:** August 11, 2026
+**Last Updated:** August 12, 2026
 **Role/Purpose:** This document is the absolute source of truth for all autonomous coding agents and developers working on this repository. If a feature or approach contradicts this document, this document wins.
+
+> **See also:** `ARCHITECTURAL_PRINCIPLES.md` — the principle that business-owned content and configuration must be admin-managed, not hardcoded. Implementation tasks for Phase 7 (A-E) are queued there and tracked in `PROGRESS_HISTORY.md`.
 
 ---
 
@@ -64,6 +66,8 @@ apps/
 
 **Fields:** Salon address, phone, email, Hero Title, Hero Subtitle, Hero Background Image, Instagram/TikTok/Facebook links.
 
+> **Planned Expansion (Phase 7A):** Per `ARCHITECTURAL_PRINCIPLES.md`, this model will be extended with: business name, address directions, working hours, Google Maps link, website URL, logo, favicon, and global SEO fields. All customer-facing business information should live here, not in templates.
+
 **Usage:** `{{ config.salon_phone }}` available in any template.
 
 ### apps.users & apps.providers
@@ -105,6 +109,8 @@ apps/
 | Client Data | `client_name`, `client_email`, `client_phone`, `client_age` |
 | Hair Data | `hair_length` (Choices: Ear, Chin, Neck, Shoulder, Armpit, Bra Strap, Mid Back, Waist, Hip), `photo_front`, `photo_side`, `photo_back` |
 | Financials | `deposit_amount`, `payment_method` (Revolut, Wise, TransferGo, Bank Transfer), `payment_reference` (Auto-generated `AFH-XXXXXX`), `proof_of_payment` (**blank=True** — created at Step 3, proof added at Step 4) |
+
+> **Planned Migration (Phase 7B):** Per `ARCHITECTURAL_PRINCIPLES.md`, `payment_method` will migrate from hardcoded TextChoices to a dynamic `PaymentMethod` model with admin-managed `PaymentDetailField` entries. Each method will support configurable detail fields (IBAN, account holder, QR codes, etc.). Existing records will be preserved via data migration.
 | Timers & State | `target_date`, `target_time`, `created_at`, `held_until` (default 12 hours from creation) |
 | Status | `pending_verification`, `pending_review`, `approved`, `rejected`, `expired` |
 | Payment Status | `pending_verification`, `verified`, `rejected` |
