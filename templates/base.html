@@ -5,10 +5,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>{% if config.business_name %}{{ config.business_name }}{% else %}Afrikai Hajfonás{% endif %}</title>
+  <title>{% if seo.meta_title %}{{ seo.meta_title }}{% elif config.business_name %}{{ config.business_name }}{% else %}Afrikai Hajfonás{% endif %}</title>
 
   {% if config.favicon %}
     <link rel="icon" type="image/png" href="{{ config.favicon.url }}">
+  {% endif %}
+
+  <!-- SEO Meta Tags (Phase 7E) -->
+  {% if seo.meta_description %}
+    <meta name="description" content="{{ seo.meta_description }}">
+  {% endif %}
+  {% if seo.canonical_url %}
+    <link rel="canonical" href="{{ seo.canonical_url }}{{ request.path }}">
+  {% endif %}
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="{{ seo.og_title }}">
+  <meta property="og:description" content="{{ seo.og_description }}">
+  {% if seo.og_image %}
+    <meta property="og:image" content="{{ seo.canonical_url }}{{ seo.og_image }}">
+  {% endif %}
+  <meta property="og:type" content="website">
+
+  <!-- Search Engine Verification -->
+  {% if seo.google_verification %}
+    <meta name="google-site-verification" content="{{ seo.google_verification }}">
+  {% endif %}
+  {% if seo.bing_verification %}
+    <meta name="msvalidate.01" content="{{ seo.bing_verification }}">
   {% endif %}
 
   <!-- Tailwind CDN custom config -->

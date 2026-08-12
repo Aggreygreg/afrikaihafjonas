@@ -504,3 +504,208 @@ class AdminFormValidationTests(TestCase):
         error_text = str(form.errors['subject'])
         # Should mention at least some valid placeholder names
         self.assertIn('client_name', error_text)
+
+
+# ──────────────────────────────────────────────────────────────
+# Phase 7E — SEO Configuration Tests
+# ──────────────────────────────────────────────────────────────
+
+from apps.site_config.seo_service import resolve_seo
+from apps.site_config.models import (
+    GlobalSEO,
+    GlobalSEOTranslation,
+    PageSEO,
+    PageSEOTranslation,
+)
+
+
+class SeedMigrationTestsSEO(TestCase):
+    """Verify the 0009 SEO seed migration."""
+
+    def test_global_seo_singleton_seeded(self):
+        self.assertTrue(GlobalSEO.objects.exists())
+
+    def test_six_static_pages_seeded(self):
+        paths = set(PageSEO.objects.values_list('url_path', flat=True))
+        expected = {'/', '/about/', '/contact/', '/terms/', '/privacy/', '/services/'}
+        self.assertEqual(paths, expected)
+
+    def test_all_pages_have_hu_translation(self):
+        for page in PageSEO.objects.all():
+            self.assertTrue(
+                page.translations.filter(language='hu').exists(),
+                f"Missing HU translation for {page.url_path}"
+            )
+
+    def test_all_seeded_pages_active(self):
+        self.assertTrue(PageSEO.objects.filter(is_active=True).count(), 6)
+
+    def test_global_seo_has_hu_defaults(self):
+        global_seo = GlobalSEO.get_solo()
+        self.assertTrue(
+            global_seo.translations.filter(language='hu').exists()
+        )
+
+
+class PageSEOConstraintTests(TestCase):
+    """CheckConstraint + clean(): exactly one of url_path/service must be set."""
+
+    def test_url_path_only_allowed(self):
+        page = PageSEO.objects.create(url_path='/test-path/', service=None)
+        self.assertIsNotNone(page.pk)
+
+    def test_service_only_allowed(self):
+        from apps.services.models import Service
+        svc = Service.objects.first()
+        if svc is None:
+            self.skipTest("No services in DB")
+        page = PageSEO.objects.create(url_path=None, service=svc)
+        self.assertIsNotNone(page.pk)
+
+    def test_both_null_rejected_by_clean(self):
+        """Neither url_path nor service set — clean() raises ValidationError."""
+        from django.core.exceptions import ValidationError
+        page = PageSEO(url_path=None, service=None)
+        with self.assertRaises(ValidationError):
+            page.clean()
+
+    def test_both_set_rejected_by_clean(self):
+        """Both url_path and service set — clean() raises ValidationError."""
+        from django.core.exceptions import ValidationError
+        from apps.services.models import Service
+        svc = Service.objects.first()
+        if svc is None:
+            self.skipTest("No services in DB")
+        page = PageSEO(url_path='/test/', service=svc)
+        with self.assertRaises(ValidationError):
+            page.clean()
+
+    def test_url_path_only_passes_clean(self):
+        page = PageSEO(url_path='/test/', service=None)
+        page.clean()  # Should not raise
+
+    def test_service_only_passes_clean(self):
+        from apps.services.models import Service
+        svc = Service.objects.first()
+        if svc is None:
+            self.skipTest("No services in DB")
+        page = PageSEO(url_path=None, service=svc)
+        page.clean()  # Should not raise
+
+
+class ResolveSEOTests(TestCase):
+    """SEO resolution fallback chain (spec §9.4)."""
+
+    def test_dev_fallback_when_no_config(self):
+        """When no GlobalSEO/PageSEO exists, dev fallback kicks in."""
+        # Delete all SEO data
+        PageSEOTranslation.objects.all().delete()
+        PageSEO.objects.all().delete()
+        GlobalSEOTranslation.objects.all().delete()
+        GlobalSEO.objects.all().delete()
+
+        result = resolve_seo(url_path='/', language='hu')
+        self.assertIn('meta_title', result)
+        self.assertIn('meta_description', result)
+        # Dev fallback should have a title
+        self.assertTrue(result['meta_title'])
+
+    def test_global_defaults_used(self):
+        """When no page-level override, global defaults apply."""
+        result = resolve_seo(url_path='/nonexistent/', language='hu')
+        global_trans = GlobalSEOTranslation.objects.get(language='hu')
+        self.assertEqual(result['meta_title'], global_trans.default_meta_title)
+        self.assertEqual(result['meta_description'], global_trans.default_meta_description)
+
+    def test_page_level_overrides_global(self):
+        """PageSEO should override GlobalSEO for matching url_path."""
+        page = PageSEO.objects.get(url_path='/')
+        page_trans = page.translations.get(language='hu')
+        page_trans.meta_title = "CUSTOM HOMEPAGE TITLE"
+        page_trans.save()
+
+        result = resolve_seo(url_path='/', language='hu')
+        self.assertEqual(result['meta_title'], "CUSTOM HOMEPAGE TITLE")
+
+    def test_page_level_empty_fields_fall_through(self):
+        """Empty page-level fields should fall through to global defaults."""
+        page = PageSEO.objects.get(url_path='/')
+        page_trans = page.translations.get(language='hu')
+        original_title = page_trans.meta_title
+        page_trans.meta_title = ""  # empty
+        page_trans.save()
+
+        result = resolve_seo(url_path='/', language='hu')
+        # Should fall through to global default
+        global_trans = GlobalSEOTranslation.objects.get(language='hu')
+        self.assertEqual(result['meta_title'], global_trans.default_meta_title)
+
+    def test_language_fallback_to_hu(self):
+        """Missing language translation → HU fallback."""
+        result = resolve_seo(url_path='/', language='de')
+        # No DE translations seeded → should fall back to HU
+        hu_trans = PageSEO.objects.get(url_path='/').translations.get(language='hu')
+        self.assertEqual(result['meta_title'], hu_trans.meta_title)
+
+    def test_canonical_url_in_result(self):
+        """GlobalSEO canonical_site_url should appear in result."""
+        result = resolve_seo(url_path='/', language='hu')
+        self.assertTrue(result['canonical_url'])
+
+    def test_verification_codes_in_result(self):
+        """Google/Bing verification codes should be present if configured."""
+        global_seo = GlobalSEO.get_solo()
+        global_seo.google_verification = "test_google_code"
+        global_seo.bing_verification = "test_bing_code"
+        global_seo.save()
+
+        result = resolve_seo(url_path='/', language='hu')
+        self.assertEqual(result['google_verification'], "test_google_code")
+        self.assertEqual(result['bing_verification'], "test_bing_code")
+
+    def test_inactive_page_seo_ignored(self):
+        """Inactive PageSEO should not override global defaults."""
+        page = PageSEO.objects.get(url_path='/about/')
+        page.is_active = False
+        page.save()
+
+        result = resolve_seo(url_path='/about/', language='hu')
+        global_trans = GlobalSEOTranslation.objects.get(language='hu')
+        self.assertEqual(result['meta_title'], global_trans.default_meta_title)
+
+
+class ResolveSEOServiceTests(TestCase):
+    """SEO resolution for dynamic service pages."""
+
+    def test_service_seo_resolution(self):
+        """PageSEO with service FK should resolve correctly."""
+        from apps.services.models import Service
+        svc = Service.objects.first()
+        if svc is None:
+            self.skipTest("No services in DB")
+
+        page = PageSEO.objects.create(
+            url_path=None, service=svc, is_active=True
+        )
+        PageSEOTranslation.objects.create(
+            page_seo=page, language='hu',
+            meta_title=f"Custom SEO for {svc.title}",
+            meta_description="Service-specific description",
+        )
+
+        result = resolve_seo(service=svc, language='hu')
+        self.assertEqual(result['meta_title'], f"Custom SEO for {svc.title}")
+
+    def test_service_without_seo_falls_back(self):
+        """Service with no PageSEO → global defaults."""
+        from apps.services.models import Service
+        svc = Service.objects.first()
+        if svc is None:
+            self.skipTest("No services in DB")
+
+        # Ensure no PageSEO for this service
+        PageSEO.objects.filter(service=svc).delete()
+
+        result = resolve_seo(service=svc, language='hu')
+        global_trans = GlobalSEOTranslation.objects.get(language='hu')
+        self.assertEqual(result['meta_title'], global_trans.default_meta_title)

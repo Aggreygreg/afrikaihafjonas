@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'apps.site_config.context_processors.site_config', # Custom context processor
+                'apps.site_config.context_processors.seo', # SEO metadata (Phase 7E)
             ],
         },
     },
