@@ -550,16 +550,22 @@ class SeedMigrationTestsSEO(TestCase):
 class PageSEOConstraintTests(TestCase):
     """CheckConstraint + clean(): exactly one of url_path/service must be set."""
 
+    @classmethod
+    def setUpTestData(cls):
+        from apps.services.models import Service
+        cls.service = Service.objects.create(
+            title="Test Braids",
+            description="Test description",
+            base_price=50000,
+            duration_minutes=240,
+        )
+
     def test_url_path_only_allowed(self):
         page = PageSEO.objects.create(url_path='/test-path/', service=None)
         self.assertIsNotNone(page.pk)
 
     def test_service_only_allowed(self):
-        from apps.services.models import Service
-        svc = Service.objects.first()
-        if svc is None:
-            self.skipTest("No services in DB")
-        page = PageSEO.objects.create(url_path=None, service=svc)
+        page = PageSEO.objects.create(url_path=None, service=self.service)
         self.assertIsNotNone(page.pk)
 
     def test_both_null_rejected_by_clean(self):
@@ -572,11 +578,7 @@ class PageSEOConstraintTests(TestCase):
     def test_both_set_rejected_by_clean(self):
         """Both url_path and service set — clean() raises ValidationError."""
         from django.core.exceptions import ValidationError
-        from apps.services.models import Service
-        svc = Service.objects.first()
-        if svc is None:
-            self.skipTest("No services in DB")
-        page = PageSEO(url_path='/test/', service=svc)
+        page = PageSEO(url_path='/test/', service=self.service)
         with self.assertRaises(ValidationError):
             page.clean()
 
@@ -585,11 +587,7 @@ class PageSEOConstraintTests(TestCase):
         page.clean()  # Should not raise
 
     def test_service_only_passes_clean(self):
-        from apps.services.models import Service
-        svc = Service.objects.first()
-        if svc is None:
-            self.skipTest("No services in DB")
-        page = PageSEO(url_path=None, service=svc)
+        page = PageSEO(url_path=None, service=self.service)
         page.clean()  # Should not raise
 
 
@@ -677,12 +675,19 @@ class ResolveSEOTests(TestCase):
 class ResolveSEOServiceTests(TestCase):
     """SEO resolution for dynamic service pages."""
 
+    @classmethod
+    def setUpTestData(cls):
+        from apps.services.models import Service
+        cls.service = Service.objects.create(
+            title="Test Braids",
+            description="Test description",
+            base_price=50000,
+            duration_minutes=240,
+        )
+
     def test_service_seo_resolution(self):
         """PageSEO with service FK should resolve correctly."""
-        from apps.services.models import Service
-        svc = Service.objects.first()
-        if svc is None:
-            self.skipTest("No services in DB")
+        svc = self.service
 
         page = PageSEO.objects.create(
             url_path=None, service=svc, is_active=True
@@ -698,10 +703,7 @@ class ResolveSEOServiceTests(TestCase):
 
     def test_service_without_seo_falls_back(self):
         """Service with no PageSEO → global defaults."""
-        from apps.services.models import Service
-        svc = Service.objects.first()
-        if svc is None:
-            self.skipTest("No services in DB")
+        svc = self.service
 
         # Ensure no PageSEO for this service
         PageSEO.objects.filter(service=svc).delete()

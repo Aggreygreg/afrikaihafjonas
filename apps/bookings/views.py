@@ -396,6 +396,10 @@ def wizard_step_3(request, service_pk):
             appointment.customer_language = get_language()[:2]
             appointment.save()
 
+            # Send 'request_received' confirmation email to the customer
+            from .notifications import send_appointment_email
+            send_appointment_email(appointment, "request_received", request)
+
             state["appointment_request_id"] = appointment.id
             state["step"] = 4
             request.session[session_key] = state
@@ -458,6 +462,11 @@ def wizard_step_4(request, service_pk):
             # Create the historical payment snapshot (Decision #27/#31).
             # Image-type fields are physically copied to payment_snapshots/<ref>/.
             appointment.create_payment_snapshot()
+
+            # Send 'verification_pending' email — payment proof uploaded,
+            # awaiting admin verification.
+            from .notifications import send_appointment_email
+            send_appointment_email(appointment, "verification_pending", request)
 
             # Hand off to the confirmation page via the reference code.
             return redirect(

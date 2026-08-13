@@ -10,6 +10,7 @@ from .models import (
     PaymentMethod,
     RefundQueue,
 )
+from .notifications import send_appointment_email
 
 
 # ──────────────────────────────────────────────────────────────
@@ -29,7 +30,11 @@ def approve_requests(modeladmin, request, queryset):
     if count == 0:
         messages.warning(request, "No eligible (pending) requests selected.")
         return
+    # Fetch instances BEFORE update() so we can send emails afterwards.
+    appointments = list(eligible.select_related("service", "provider", "payment_snapshot"))
     eligible.update(status=AppointmentRequest.Status.APPROVED)
+    for appt in appointments:
+        send_appointment_email(appt, "appointment_approved", request)
     messages.success(request, f"Approved {count} request(s). Slots are now permanent.")
 
 
@@ -47,7 +52,10 @@ def reject_requests(modeladmin, request, queryset):
     if count == 0:
         messages.warning(request, "No eligible (pending) requests selected.")
         return
+    appointments = list(eligible.select_related("service", "provider", "payment_snapshot"))
     eligible.update(status=AppointmentRequest.Status.REJECTED)
+    for appt in appointments:
+        send_appointment_email(appt, "appointment_rejected", request)
     messages.success(
         request,
         f"Rejected {count} request(s). They are now in the Refund Queue.",
@@ -68,10 +76,13 @@ def verify_payments(modeladmin, request, queryset):
         )
         return
     now = timezone.now()
+    appointments = list(eligible.select_related("service", "provider", "payment_snapshot"))
     eligible.update(
         payment_status=AppointmentRequest.PaymentStatus.VERIFIED,
         status=AppointmentRequest.Status.PENDING_REVIEW,
     )
+    for appt in appointments:
+        send_appointment_email(appt, "payment_verified", request)
     messages.success(
         request,
         f"Payment verified for {count} request(s). Moved to Pending Review.",
@@ -81,7 +92,10 @@ def verify_payments(modeladmin, request, queryset):
 @admin.action(description="💰 Mark refund completed")
 def complete_refunds(modeladmin, request, queryset):
     """Mark a refund as completed in the Refund Queue."""
-    count = queryset.count()
+    appointments = list(queryset.select_related("service", "provider", "payment_snapshot"))
+    count = len(appointments)
+    for appt in appointments:
+        send_appointment_email(appt, "refund_notification", request)
     messages.success(
         request,
         f"Marked {count} refund(s) as completed. "

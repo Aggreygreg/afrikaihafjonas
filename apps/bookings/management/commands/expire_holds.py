@@ -55,6 +55,11 @@ class Command(BaseCommand):
             req.save(update_fields=["status"])
             expired_refs.append(req.payment_reference)
 
+            # Send customer-facing 'appointment_expired' email.
+            # Uses appointment.customer_language for language selection.
+            from apps.bookings.notifications import send_appointment_email
+            send_appointment_email(req, "appointment_expired")
+
         # Notify admin
         refs_text = "\n".join(expired_refs)
         mail_admins(
