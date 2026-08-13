@@ -190,8 +190,10 @@ SUMMERNOTE_CONFIG = {
 # These activate automatically when DEBUG=False. In dev (DEBUG=True)
 # they are left at Django defaults so local HTTP development is unaffected.
 if not DEBUG:
-    # Force HTTPS for all requests
-    SECURE_SSL_REDIRECT = True
+    # Force HTTPS for all requests.
+    # Disable if your front proxy/CDN (Cloudflare, etc.) handles SSL redirect
+    # at the edge — set SECURE_SSL_REDIRECT=False in .env.
+    SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True").lower() == "true"
     SECURE_REDIRECT_EXEMPT = [r"^/health-check/?$"]
 
     # HSTS — tells browsers to always use HTTPS
