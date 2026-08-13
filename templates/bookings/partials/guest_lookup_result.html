@@ -1,0 +1,114 @@
+{% comment %}
+  Guest lookup result partial.
+
+  Returned by the HTMX POST (swapped into #lookup-results) and also included
+  inline on the full page so a non-HTMX POST works identically.
+
+  Proof-of-payment images and internal_notes are NEVER rendered here
+  (Decision #15). Status-specific show/hide flags come from status_cfg.
+{% endcomment %}
+{% load i18n %}
+
+{% if lookup_error %}
+    {# ── Error state ─────────────────────────────────────────── #}
+    <div class="bg-red-50 border border-red-200 rounded-xl p-5 flex items-start gap-3 animate-slideDown">
+        <svg class="w-5 h-5 text-red-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"></path>
+        </svg>
+        <div>
+            <p class="font-semibold text-red-900">{% trans "Request not found" %}</p>
+            <p class="text-sm text-red-700 mt-0.5">{{ lookup_error }}</p>
+        </div>
+    </div>
+
+{% elif appointment %}
+    {# ── Found state: status card ────────────────────────────── #}
+    <div class="bg-white rounded-2xl shadow-md border border-gray-150 overflow-hidden animate-slideDown">
+
+        {# Coloured accent bar #}
+        <div class="h-1.5 {{ status_cfg.accent }}"></div>
+
+        <div class="p-6 md:p-8 space-y-5">
+
+            {# Status badge + headline #}
+            <div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide {{ status_cfg.badge }}">
+                    {{ appointment.get_status_display }}
+                </span>
+                <p class="text-lg font-bold text-gray-900 mt-3">{{ status_cfg.headline }}</p>
+            </div>
+
+            {# Verified-deposit confirmation (pending_review) #}
+            {% if status_cfg.show_verified_badge %}
+            <div class="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2 text-sm text-green-800">
+                <svg class="w-5 h-5 text-green-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                <span class="font-medium">{% trans "Deposit verified" %}</span>
+            </div>
+            {% endif %}
+
+            {# Details grid #}
+            <dl class="divide-y divide-gray-100">
+                <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-sm text-gray-500">{% trans "Service" %}</dt>
+                    <dd class="text-sm font-semibold text-gray-900 text-right">{{ appointment.service.title }}</dd>
+                </div>
+                {% if status_cfg.show_provider %}
+                <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-sm text-gray-500">{% trans "Stylist" %}</dt>
+                    <dd class="text-sm font-semibold text-gray-900 text-right">{{ appointment.provider.display_name }}</dd>
+                </div>
+                {% endif %}
+                <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-sm text-gray-500">{% trans "Date" %}</dt>
+                    <dd class="text-sm font-semibold text-gray-900 text-right">{{ target_date_display }}</dd>
+                </div>
+                <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-sm text-gray-500">{% trans "Time" %}</dt>
+                    <dd class="text-sm font-semibold text-gray-900 text-right">{{ target_time_display }}</dd>
+                </div>
+                <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-sm text-gray-500">{% trans "Deposit" %}</dt>
+                    <dd class="text-sm font-semibold text-gray-900 text-right">{{ deposit_formatted }}</dd>
+                </div>
+                <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-sm text-gray-500">{% trans "Payment method" %}</dt>
+                    <dd class="text-sm font-semibold text-gray-900 text-right">
+                        {% if payment_method_display %}{{ payment_method_display }}{% else %}<span class="text-gray-400">{% trans "Not yet provided" %}</span>{% endif %}
+                    </dd>
+                </div>
+                <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-sm text-gray-500">{% trans "Reference" %}</dt>
+                    <dd class="text-sm font-mono font-semibold text-gray-900 text-right">{{ appointment.payment_reference }}</dd>
+                </div>
+            </dl>
+
+            {# Admin notes (status-dependent — never shown for pending_verification) #}
+            {% if status_cfg.show_admin_notes and appointment.admin_notes %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-xs font-bold text-blue-700 uppercase tracking-wide">{% trans "Admin note" %}</p>
+                <p class="text-sm text-blue-900 mt-1 whitespace-pre-line">{{ appointment.admin_notes }}</p>
+            </div>
+            {% endif %}
+
+            {# Refund instructions (rejected) #}
+            {% if status_cfg.show_refund %}
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-1.5">
+                <p class="text-sm font-bold text-amber-900">{% trans "Refund information" %}</p>
+                <p class="text-sm text-amber-800">{% trans "Your deposit will be refunded to your original payment method within 5 business days. Please keep your reference code handy. If you do not receive the refund, contact us quoting your reference." %}</p>
+            </div>
+            {% endif %}
+
+            {# New-request link (expired) #}
+            {% if status_cfg.show_new_request_link %}
+            <div class="text-center pt-2">
+                <p class="text-sm text-gray-600 mb-3">{% trans "Would you like to submit a new request?" %}</p>
+                <a href="{% url 'services:service_list' %}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-lg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    {% trans "Submit a new request" %}
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+{% endif %}

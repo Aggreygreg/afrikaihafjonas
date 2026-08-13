@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load content_tags %}
+
+{% block content %}
+<!-- HEADER -->
+<section class="text-white" style="background-color: #272e4b;">
+  <div class="max-w-4xl mx-auto px-6 py-16 text-center">
+    <span class="inline-block bg-pink-500/90 text-white text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full">{% trans "Legal" %}</span>
+    <h1 class="mt-4 text-4xl md:text-5xl font-extrabold">{% trans "Privacy Policy" %}</h1>
+    <p class="mt-4 text-gray-300">{% trans "How Afrikai Hajfonás collects, uses, and protects your personal data." %}</p>
+    <!-- TODO: confirm the exact effective date -->
+    <p class="mt-2 text-sm text-gray-400">{% trans "Last updated: August 2026" %}</p>
+  </div>
+</section>
+
+<!-- DOCUMENT -->
+<article class="bg-gray-100 py-16">
+  <div class="max-w-3xl mx-auto px-6">
+    {# Phase 7D: privacy body comes from the 'privacy_page' ContentBlock (HU default).
+       Falls back to this hardcoded copy if the block is missing or inactive. #}
+    {% get_content_block 'privacy_page' as privacy_block %}
+    {% if privacy_block %}
+      <div class="bg-white rounded-2xl shadow-md p-8 md:p-12 prose prose-pink max-w-none">
+        {{ privacy_block.body|safe }}
+      </div>
+    {% else %}
+    <div class="bg-white rounded-2xl shadow-md p-8 md:p-12 space-y-12">
+
+      <!-- Intro -->
+      <section>
+        <p class="text-gray-600 leading-relaxed">
+          {% trans "Afrikai Hajfonás (“we”, “us”) respects your privacy and is committed to protecting your personal data in line with the EU General Data Protection Regulation (GDPR). This policy explains what we collect, why, and the rights you have over your information." %}
+        </p>
+      </section>
+
+      <!-- 1. Data We Collect -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">1</span>
+          {% trans "Data we collect" %}
+        </h2>
+        <p class="mt-4 text-gray-600 leading-relaxed">{% trans "When you request an appointment, we collect only what is necessary to assess and confirm your booking:" %}</p>
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-start gap-3"><i data-lucide="user" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><div><p class="font-medium text-gray-800">{% trans "Contact details" %}</p><p class="text-sm text-gray-500">{% trans "Name, email address, phone number, and age." %}</p></div></div>
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-start gap-3"><i data-lucide="scissors" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><div><p class="font-medium text-gray-800">{% trans "Hair information" %}</p><p class="text-sm text-gray-500">{% trans "Hair length and three photos (front, side, back)." %}</p></div></div>
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-start gap-3"><i data-lucide="receipt" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><div><p class="font-medium text-gray-800">{% trans "Payment proof" %}</p><p class="text-sm text-gray-500">{% trans "A screenshot of your bank transfer as proof of deposit." %}</p></div></div>
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-start gap-3"><i data-lucide="settings" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><div><p class="font-medium text-gray-800">{% trans "Booking details" %}</p><p class="text-sm text-gray-500">{% trans "Chosen service, stylist, options, date, and time." %}</p></div></div>
+        </div>
+        <p class="mt-4 text-sm text-gray-500 leading-relaxed">{% trans "We do not require you to create an account, and we do not collect more data than is needed to process your request." %}</p>
+      </section>
+
+      <!-- 2. How We Use Your Data -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">2</span>
+          {% trans "How we use your data" %}
+        </h2>
+        <ul class="mt-4 space-y-3 text-gray-600 leading-relaxed">
+          <li class="flex items-start gap-3"><i data-lucide="check" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "To assess whether your hair is suited to the style you requested." %}</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="check" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "To verify your deposit and process your appointment request." %}</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="check" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "To communicate with you about your booking and any necessary follow-up." %}</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="check" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "To meet our legal and financial record-keeping obligations." %}</span></li>
+        </ul>
+        <p class="mt-4 text-gray-600 leading-relaxed">{% trans "We do not sell your data and do not use it for unrelated marketing without your consent." %}</p>
+      </section>
+
+      <!-- 3. Data Retention -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">3</span>
+          {% trans "Data retention" %}
+        </h2>
+        <p class="mt-4 text-gray-600 leading-relaxed">
+          {% trans "We keep your appointment information, hair photos, and payment proof for as long as needed to provide our service and meet legal requirements. Photos and booking records may be retained to support future consultations and to maintain accurate service history. You may request deletion at any time (see Your Rights below)." %}
+        </p>
+      </section>
+
+      <!-- 4. Your Rights -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">4</span>
+          {% trans "Your rights under GDPR" %}
+        </h2>
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-start gap-3"><i data-lucide="eye" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><div><p class="font-medium text-gray-800">{% trans "Access" %}</p><p class="text-sm text-gray-500">{% trans "Request a copy of the data we hold about you." %}</p></div></div>
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-start gap-3"><i data-lucide="pencil" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><div><p class="font-medium text-gray-800">{% trans "Rectification" %}</p><p class="text-sm text-gray-500">{% trans "Ask us to correct inaccurate information." %}</p></div></div>
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-start gap-3"><i data-lucide="trash-2" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><div><p class="font-medium text-gray-800">{% trans "Erasure" %}</p><p class="text-sm text-gray-500">{% trans "Request deletion of your data (the 'right to be forgotten')." %}</p></div></div>
+          <div class="rounded-xl bg-gray-50 border border-gray-100 p-4 flex items-start gap-3"><i data-lucide="download" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><div><p class="font-medium text-gray-800">{% trans "Portability" %}</p><p class="text-sm text-gray-500">{% trans "Receive your data in a portable format." %}</p></div></div>
+        </div>
+        <p class="mt-4 text-gray-600 leading-relaxed">{% trans "You also have the right to object to certain processing and to lodge a complaint with the relevant data protection authority." %}</p>
+      </section>
+
+      <!-- 5. Security -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">5</span>
+          {% trans "Data security" %}
+        </h2>
+        <p class="mt-4 text-gray-600 leading-relaxed">
+          {% trans "We apply reasonable technical and organisational measures to protect your data from unauthorised access, loss, or misuse. Access to your booking details and photos is restricted to our salon team and is handled confidentially." %}
+        </p>
+      </section>
+
+      <!-- Contact for Privacy -->
+      <section class="pt-4 border-t border-gray-100">
+        <h2 class="text-xl font-bold text-gray-800">{% trans "Contact for privacy concerns" %}</h2>
+        <p class="mt-3 text-gray-600 leading-relaxed">
+          {% trans "To exercise any of your rights or ask a question about your data, contact us using the details on our" %}
+          <a href="{% url 'contact' %}" class="text-pink-600 font-medium hover:underline">{% trans "Contact page" %}</a>.
+          {% trans "We will respond in accordance with applicable law." %}
+        </p>
+      </section>
+
+    </div>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

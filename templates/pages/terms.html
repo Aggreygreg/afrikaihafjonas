@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load content_tags %}
+
+{% block content %}
+<!-- HEADER -->
+<section class="text-white" style="background-color: #272e4b;">
+  <div class="max-w-4xl mx-auto px-6 py-16 text-center">
+    <span class="inline-block bg-pink-500/90 text-white text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full">{% trans "Legal" %}</span>
+    <h1 class="mt-4 text-4xl md:text-5xl font-extrabold">{% trans "Terms & Conditions" %}</h1>
+    <p class="mt-4 text-gray-300">{% trans "Please read these terms carefully before requesting an appointment." %}</p>
+    <!-- TODO: confirm the exact effective date -->
+    <p class="mt-2 text-sm text-gray-400">{% trans "Last updated: August 2026" %}</p>
+  </div>
+</section>
+
+<!-- DOCUMENT -->
+<article class="bg-gray-100 py-16">
+  <div class="max-w-3xl mx-auto px-6">
+    {# Phase 7D: legal body comes from the 'terms_page' ContentBlock (HU default).
+       Falls back to this hardcoded copy if the block is missing or inactive. #}
+    {% get_content_block 'terms_page' as terms_block %}
+    {% if terms_block %}
+      <div class="bg-white rounded-2xl shadow-md p-8 md:p-12 prose prose-pink max-w-none">
+        {{ terms_block.body|safe }}
+      </div>
+    {% else %}
+    <div class="bg-white rounded-2xl shadow-md p-8 md:p-12 space-y-12">
+
+      <!-- 1. Overview -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">1</span>
+          {% trans "About our booking process" %}
+        </h2>
+        <p class="mt-4 text-gray-600 leading-relaxed">
+          {% trans "Afrikai Hajfonás operates an Appointment Request & Hold system. Intricate braiding depends on your hair length, age, and thickness, so we do not offer instant bookings. Instead, you configure a style, submit hair photos, and send a deposit. Your slot is held temporarily while we review your request and approve or decline it." %}
+        </p>
+      </section>
+
+      <!-- 2. Deposit & Hold Policy -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">2</span>
+          {% trans "Deposit & Hold Policy" %}
+        </h2>
+        <div class="mt-4 space-y-4 text-gray-600 leading-relaxed">
+          <p>{% trans "A deposit is required to hold your requested time slot. The deposit amount depends on the service's base price:" %}</p>
+          <ul class="space-y-2 pl-1">
+            <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "Services of 45,000 Ft or more: a 20,000 Ft deposit." %}</span></li>
+            <li class="flex items-start gap-3"><i data-lucide="check-circle-2" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "Services under 45,000 Ft: a 10,000 Ft deposit." %}</span></li>
+          </ul>
+          <div class="rounded-xl bg-pink-50 border border-pink-100 p-5">
+            <p class="flex items-start gap-3 text-pink-800"><i data-lucide="clock" class="w-5 h-5 mt-0.5 flex-shrink-0"></i><span>{% trans "Once submitted, your slot is held for 12 hours. If we do not confirm within that window, the hold expires and the slot is released." %}</span></p>
+          </div>
+          <p>{% trans "Payments are made by manual bank transfer only (Revolut, Wise, TransferGo, or bank transfer). We do not accept card payments. Deposits are non-refundable except where required by law or where we decline your request — in which case a full refund is arranged via our refund queue." %}</p>
+        </div>
+      </section>
+
+      <!-- 3. Appointment Request Process -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">3</span>
+          {% trans "Appointment Request Process" %}
+        </h2>
+        <ol class="mt-4 space-y-3 text-gray-600 leading-relaxed">
+          <li class="flex items-start gap-3"><i data-lucide="package" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span><strong class="text-gray-800">{% trans "Choose your style" %}.</strong> {% trans "Select a service and configure your options." %}</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="calendar" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span><strong class="text-gray-800">{% trans "Pick a stylist, date & time" %}.</strong> {% trans "Choose from available slots based on the stylist's schedule." %}</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="camera" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span><strong class="text-gray-800">{% trans "Share your details & photos" %}.</strong> {% trans "Provide your contact details and clear hair photos so we can assess suitability." %}</span></li>
+          <li class="flex items-start gap-3"><i data-lucide="credit-card" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span><strong class="text-gray-800">{% trans "Send your deposit" %}.</strong> {% trans "Transfer the deposit and upload your proof of payment using your reference code (AFH-XXXXXX)." %}</span></li>
+        </ol>
+        <p class="mt-4 text-gray-600 leading-relaxed">{% trans "We then verify your deposit and review your hair photos. You will receive a confirmation once your appointment is approved. You can check your status anytime via the booking status lookup." %}</p>
+      </section>
+
+      <!-- 4. Photo Submission Policy -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">4</span>
+          {% trans "Photo Submission Policy" %}
+        </h2>
+        <div class="mt-4 space-y-4 text-gray-600 leading-relaxed">
+          <p>{% trans "To assess whether your hair suits the chosen style, we ask for three photos: front, side, and back. These help us confirm length, texture, and thickness before you commit." %}</p>
+          <p>{% trans "Accepted formats: JPG, JPEG, PNG, and WEBP, up to 5 MB per photo. Photos are reviewed only by our team and stored securely. See our Privacy Policy for how your images are handled." %}</p>
+          <p>{% trans "Proof of payment (a screenshot of your bank transfer) may be uploaded as JPG, JPEG, PNG, or PDF, up to 5 MB." %}</p>
+        </div>
+      </section>
+
+      <!-- 5. Cancellation Policy -->
+      <section>
+        <h2 class="flex items-center gap-3 text-2xl font-bold text-gray-800">
+          <span class="flex items-center justify-center w-9 h-9 rounded-full bg-pink-100 text-pink-600 text-sm">5</span>
+          {% trans "Cancellation Policy" %}
+        </h2>
+        <div class="mt-4 space-y-4 text-gray-600 leading-relaxed">
+          <p>{% trans "If you need to cancel, please contact us as early as possible. Because braiding appointments reserve several hours of a stylist's time, deposits help protect that commitment." %}</p>
+          <ul class="space-y-2 pl-1">
+            <li class="flex items-start gap-3"><i data-lucide="x-circle" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "If we decline your request, your deposit is refunded in full." %}</span></li>
+            <li class="flex items-start gap-3"><i data-lucide="x-circle" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "If your request expires (no action within 12 hours), it is moved to our refund queue for processing." %}</span></li>
+            <li class="flex items-start gap-3"><i data-lucide="x-circle" class="w-5 h-5 text-pink-500 mt-0.5 flex-shrink-0"></i><span>{% trans "No-shows or late cancellations of approved appointments may forfeit the deposit." %}</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section class="pt-4 border-t border-gray-100">
+        <h2 class="text-xl font-bold text-gray-800">{% trans "Questions about these terms?" %}</h2>
+        <p class="mt-3 text-gray-600 leading-relaxed">
+          {% trans "We're happy to clarify anything. Reach us using the details on our" %}
+          <a href="{% url 'contact' %}" class="text-pink-600 font-medium hover:underline">{% trans "Contact page" %}</a>.
+        </p>
+      </section>
+
+    </div>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

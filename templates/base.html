@@ -1,10 +1,42 @@
+{% load i18n %}
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ request.LANGUAGE_CODE|default:'hu' }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Afrikai Hajfonás Budapest</title>
+  <title>{% if seo.meta_title %}{{ seo.meta_title }}{% elif config.business_name %}{{ config.business_name }}{% else %}Afrikai Hajfonás{% endif %}</title>
+
+  {% if config.favicon %}
+    <link rel="icon" type="image/png" href="{{ config.favicon.url }}">
+  {% endif %}
+
+  <!-- SEO Meta Tags (Phase 7E) -->
+  {% if seo.meta_description %}
+    <meta name="description" content="{{ seo.meta_description }}">
+  {% endif %}
+  {% if seo.canonical_url %}
+    <link rel="canonical" href="{{ seo.canonical_url }}{{ request.path }}">
+  {% endif %}
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="{{ seo.og_title }}">
+  <meta property="og:description" content="{{ seo.og_description }}">
+  {% if seo.og_image %}
+    <meta property="og:image" content="{{ seo.canonical_url }}{{ seo.og_image }}">
+  {% endif %}
+  <meta property="og:type" content="website">
+
+  <!-- Search Engine Verification -->
+  {% if seo.google_verification %}
+    <meta name="google-site-verification" content="{{ seo.google_verification }}">
+  {% endif %}
+  {% if seo.bing_verification %}
+    <meta name="msvalidate.01" content="{{ seo.bing_verification }}">
+  {% endif %}
+
+  <!-- JSON-LD LocalBusiness Structured Data (§9.5) -->
+  {% include "_jsonld_localbusiness.html" %}
 
   <!-- Tailwind CDN custom config -->
   <script>
@@ -43,32 +75,60 @@
 
   <!-- HEADER / NAV -->
   <header class="bg-white shadow-md sticky top-0 z-50">
-    <nav class="container mx-auto px-6 py-4 flex justify-between items-center relative" aria-label="Primary navigation">
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center relative" aria-label="{% trans 'Primary navigation' %}">
       <!-- Logo -->
-      <a href="/" class="text-xl font-bold text-gray-800">Afrikai Hajfonás Budapest</a>
+      <a href="/" class="text-xl font-bold text-gray-800 flex items-center gap-2">
+        {% if config.logo %}
+          <img src="{{ config.logo.url }}" alt="{% if config.business_name %}{{ config.business_name }}{% endif %}" class="h-10 w-auto">
+        {% endif %}
+        {% if config.business_name %}{{ config.business_name }}{% else %}Afrikai Hajfonás{% endif %}
+      </a>
 
       <!-- Desktop nav (visible md and up) -->
       <div class="hidden md:flex space-x-6 items-center">
-        <a href="{% url 'services:service_list' %}" class="text-gray-600 hover:text-gray-800">Services</a>
-        <a href="#" class="text-gray-600 hover:text-gray-800">Providers</a>
-        <!-- About & Contact visible on desktop -->
-        <a href="#about-section" class="text-gray-600 hover:text-gray-800">About</a>
-        <a href="#contact-section" class="text-gray-600 hover:text-gray-800">Contact</a>
-        <a href="#faq" class="text-gray-600 hover:text-gray-800">FAQs</a>
+        <a href="{% url 'services:service_list' %}" class="text-gray-600 hover:text-gray-800">{% trans "Services" %}</a>
+        <a href="#" class="text-gray-600 hover:text-gray-800">{% trans "Providers" %}</a>
+        <!-- About & Contact link to dedicated static pages -->
+        <a href="{% url 'about' %}" class="text-gray-600 hover:text-gray-800">{% trans "About" %}</a>
+        <a href="{% url 'contact' %}" class="text-gray-600 hover:text-gray-800">{% trans "Contact" %}</a>
+        <a href="#faq" class="text-gray-600 hover:text-gray-800">{% trans "FAQs" %}</a>
       </div>
 
-      <!-- Right side: login (desktop) + hamburger (mobile) -->
-      <div class="flex items-center">
-        <a href="#" class="hidden md:inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition transform hover:scale-105">
-          Login / Sign Up
+      <!-- Right side: booking status + language switcher (desktop) + hamburger (mobile) -->
+      <div class="flex items-center gap-2">
+        <!-- Check Booking Status (desktop) -->
+        <a href="{% url 'bookings:booking_status' %}" class="hidden md:inline-block text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-300 hover:border-gray-400 px-3 py-2 rounded-lg transition">
+          {% trans "Check Booking Status" %}
         </a>
+
+        <!-- Language Switcher Dropdown (desktop) -->
+        <div class="relative hidden md:block" id="lang-switcher">
+          <button type="button" id="lang-switcher-btn" class="flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-900 px-2 py-2 rounded-lg transition">
+            🌐 <span class="uppercase">{{ request.LANGUAGE_CODE|slice:":2" }}</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div id="lang-switcher-menu" class="hidden absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 z-50">
+            {% get_current_language as CURRENT_LANG %}
+            {% get_available_languages as LANGUAGES %}
+            {% for lang_code, lang_name in LANGUAGES %}
+              <form method="post" action="/i18n/setlang/" class="block">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.get_full_path|default:'/' }}">
+                <input name="language" type="hidden" value="{{ lang_code }}">
+                <button type="submit" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 {% if lang_code == CURRENT_LANG %}font-bold text-blue-600{% else %}text-gray-700{% endif %}">
+                  {{ lang_name }}
+                </button>
+              </form>
+            {% endfor %}
+          </div>
+        </div>
 
         <!-- Hamburger (mobile only) -->
         <button id="menu-toggle"
                 aria-controls="mobile-overlay"
                 aria-expanded="false"
-                class="md:hidden ml-4 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 focus-outline"
-                aria-label="Open menu">
+                class="md:hidden ml-2 p-2 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 focus-outline"
+                aria-label="{% trans 'Open menu' %}">
           <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
@@ -88,27 +148,46 @@
              role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title">
           <div class="px-6 py-6">
             <div class="flex items-center justify-between">
-              <h3 id="mobile-menu-title" class="text-lg font-semibold text-gray-800">Menu</h3>
-              <button id="mobile-menu-close" class="p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus-outline" aria-label="Close menu">
-                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <h3 id="mobile-menu-title" class="text-lg font-semibold text-gray-800">{% trans "Menu" %}</h3>
+              <button id="mobile-menu-close" class="p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary-500 focus-outline" aria-label="{% trans 'Close menu' %}">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
               </button>
             </div>
-
-            <!-- MOBILE MENU LINKS
-                 NOTE: On mobile we intentionally omit About & Contact to keep menu concise -->
+            <!-- Mobile nav links -->
             <nav class="mt-4 flex flex-col space-y-3">
-              <a href="{% url 'services:service_list' %}" class="block text-gray-700 hover:text-blue-600 font-medium">Services</a>
-              <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">Providers</a>
-              <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">FAQs</a> <!-- On mobile it will link to the real FAQ page -->
-
-              <div class="pt-4 border-t border-gray-100">
-                <a href="#" class="block w-full text-center bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold transition">
-                  Login / Sign Up
-                </a>
-              </div>
+              <a href="{% url 'services:service_list' %}" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "Services" %}</a>
+              <a href="{% url 'about' %}" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "About" %}</a>
+              <a href="{% url 'contact' %}" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "Contact" %}</a>
+              <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "Providers" %}</a>
+              <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "FAQs" %}</a> <!-- On mobile it will link to the real FAQ page -->
+              <a href="{% url 'bookings:booking_status' %}" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "Check Booking Status" %}</a>
             </nav>
+
+            <!-- Language switcher (mobile) -->
+            <div class="pt-4 border-t border-gray-100">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">{% trans "Choose your language" %}</p>
+              <div class="flex gap-2">
+                {% get_current_language as CURRENT_LANG %}
+                {% get_available_languages as LANGUAGES %}
+                {% for lang_code, lang_name in LANGUAGES %}
+                <form method="post" action="/i18n/setlang/" class="block">
+                  {% csrf_token %}
+                  <input name="next" type="hidden" value="{{ request.get_full_path|default:'/' }}">
+                  <input name="language" type="hidden" value="{{ lang_code }}">
+                  <button type="submit" class="px-3 py-2 rounded-lg text-sm font-medium border-2 transition {% if lang_code == CURRENT_LANG %}border-blue-500 bg-blue-50 text-blue-700{% else %}border-gray-200 text-gray-600 hover:border-gray-300{% endif %}">
+                    {{ lang_name }}
+                  </button>
+                </form>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Staff Login (subtle, at bottom of mobile menu) -->
+            <div class="pt-4">
+              <a href="/admin/" class="block text-center text-gray-400 hover:text-gray-600 text-sm transition">{% trans "Staff Login" %}</a>
+            </div>
           </div>
         </div>
       </div>
@@ -131,16 +210,16 @@
 
         <!-- ABOUT -->
         <div id="about-section" tabindex="-1">
-          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">About</h3>
+          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">{% trans "About" %}</h3>
           <ul class="space-y-4 text-sm">
-            <li><a href="#" class="hover:text-pink-400 transition">About Afrikai Hajfonás</a></li>
-            <li><a href="#" class="hover:text-pink-400 transition">How To Videos</a></li>
+            <li><a href="{% url 'about' %}" class="hover:text-pink-400 transition">{% trans "About Afrikai Hajfonás" %}</a></li>
+            <li><a href="#" class="hover:text-pink-400 transition">{% trans "How To Videos" %}</a></li>
           </ul>
         </div>
 
         <!-- CONTACT -->
         <div id="contact-section" tabindex="-1">
-          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">Contact Info</h3>
+          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">{% trans "Contact Info" %}</h3>
           <ul class="space-y-4 text-sm">
             {% if config.salon_address %}
             <li class="flex justify-center md:justify-start gap-3 hover:text-pink-400">
@@ -165,7 +244,7 @@
 
         <!-- FOLLOW US -->
         <div>
-          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">Follow Us</h3>
+          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">{% trans "Follow Us" %}</h3>
           <ul class="space-y-4 text-sm">
             {% if config.social_instagram %}
             <li class="flex justify-center md:justify-start gap-3 hover:text-pink-400">
@@ -188,13 +267,14 @@
           </ul>
         </div>
 
-        <!-- LEGAL -->
+        <!-- LEGAL / ESSENTIALS -->
         <div id="faq">
-          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">Essentials</h3>
+          <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">{% trans "Essentials" %}</h3>
           <ul class="space-y-4 text-sm">
-            <li><a href="#" class="hover:text-pink-400 transition">FAQs</a></li>
-            <li><a href="#" class="hover:text-pink-400 transition">Terms & Conditions</a></li>
-            <li><a href="#" class="hover:text-pink-400 transition">Privacy Policy</a></li>
+            <li><a href="#" class="hover:text-pink-400 transition">{% trans "FAQs" %}</a></li>
+            <li><a href="{% url 'terms' %}" class="hover:text-pink-400 transition">{% trans "Terms & Conditions" %}</a></li>
+            <li><a href="{% url 'privacy' %}" class="hover:text-pink-400 transition">{% trans "Privacy Policy" %}</a></li>
+            <li><a href="/admin/" class="text-gray-500 hover:text-pink-400 transition text-xs">{% trans "Staff Login" %}</a></li>
           </ul>
         </div>
 
@@ -202,18 +282,54 @@
 
       <div class="border-t border-gray-800 pt-10 text-center text-sm">
         <p class="text-gray-300">
-          &copy; 2025 Afrikai Hajfonás - All rights reserved.
+          &copy; 2025 Afrikai Hajfonás - {% trans "All rights reserved." %}
           <p><span class="italic text-pink-400">Braids that rhyme with time.</span></p>
         </p>
       </div>
     </div>
   </footer>
 
+  <!-- Language Preference Modal (first-time visitors only) -->
+  <div id="lang-modal-overlay" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center px-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">🌐 {% trans "Choose your language" %}</h2>
+      <p class="text-gray-500 text-sm mb-6">{% trans "This choice will be remembered. You can change it at any time." %}</p>
+      <div class="space-y-3">
+        <!-- Each button is a form that POSTs to Django's set_language view -->
+        <form method="post" action="/i18n/setlang/" class="block">
+          {% csrf_token %}
+          <input name="next" type="hidden" value="{{ request.get_full_path|default:'/' }}">
+          <input name="language" type="hidden" value="en">
+          <button type="submit" class="w-full py-3 px-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-lg font-semibold text-gray-700 transition">
+            🇬🇧 English
+          </button>
+        </form>
+        <form method="post" action="/i18n/setlang/" class="block">
+          {% csrf_token %}
+          <input name="next" type="hidden" value="{{ request.get_full_path|default:'/' }}">
+          <input name="language" type="hidden" value="hu">
+          <button type="submit" class="w-full py-3 px-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-lg font-semibold text-gray-700 transition">
+            🇭🇺 Magyar
+          </button>
+        </form>
+        <form method="post" action="/i18n/setlang/" class="block">
+          {% csrf_token %}
+          <input name="next" type="hidden" value="{{ request.get_full_path|default:'/' }}">
+          <input name="language" type="hidden" value="de">
+          <button type="submit" class="w-full py-3 px-4 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-lg font-semibold text-gray-700 transition">
+            🇩🇪 Deutsch
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- ICONS + SCRIPTS -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script> lucide.createIcons(); </script>
 
   <script>
+    // ── Mobile Menu Toggle ──
     (function() {
       const menuToggle = document.getElementById('menu-toggle');
       const overlay = document.getElementById('mobile-overlay');
@@ -273,19 +389,44 @@
           e.preventDefault();
           const rect = target.getBoundingClientRect();
           const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-          const targetY = rect.top + scrollTop - headerHeight - 12;
-
+          const targetY = rect.top + scrollTop - headerHeight - 16; // 16px breathing room
           window.scrollTo({ top: targetY, behavior: 'smooth' });
-
-          // Focus the target for accessibility
-          setTimeout(() => {
-            target.setAttribute('tabindex', '-1');
-            target.focus({ preventScroll: true });
-          }, 400);
         });
       })();
+    })();
 
+    // ── Language Switcher dropdown toggle ──
+    (function() {
+      const btn = document.getElementById('lang-switcher-btn');
+      const menu = document.getElementById('lang-switcher-menu');
+      if (!btn || !menu) return;
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        menu.classList.toggle('hidden');
+      });
+      document.addEventListener('click', function(e) {
+        if (!menu.contains(e.target) && e.target !== btn) {
+          menu.classList.add('hidden');
+        }
+      });
+    })();
+
+    // ── Language Modal — show only if no language cookie exists ──
+    (function() {
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+      }
+      const langCookie = getCookie('django_language');
+      const modal = document.getElementById('lang-modal-overlay');
+      if (modal && !langCookie) {
+        modal.classList.remove('hidden');
+      }
     })();
   </script>
+
+  {% block extra_js %}{% endblock %}
 </body>
 </html>

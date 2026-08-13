@@ -1,0 +1,144 @@
+{% load i18n %}
+<form id="wizard-step2-form" class="space-y-6">
+    {% csrf_token %}
+    <!-- Hidden service id consumed by the load_slots endpoint -->
+    <input type="hidden" name="service" value="{{ service.id }}">
+
+    <!-- ── Provider Selection ─────────────────────────────── -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-150 p-5 space-y-4">
+        <h3 class="text-base font-bold text-gray-900 border-b pb-3">{% trans "Select Your Stylist" %}</h3>
+
+        {% if providers %}
+            {% with provider_count=providers|length %}
+                {% if provider_count == 1 %}
+                    <!-- Auto-selected single provider -->
+                    <input type="hidden" name="provider" value="{{ providers.0.id }}">
+                    <div class="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                        {% if providers.0.profile_image %}
+                            <img src="{{ providers.0.profile_image.url }}" alt="{{ providers.0.display_name }}" class="w-10 h-10 rounded-full object-cover">
+                        {% else %}
+                            <div class="w-10 h-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 font-bold">
+                                {{ providers.0.display_name|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                        <div>
+                            <p class="font-semibold text-gray-900">{{ providers.0.display_name }}</p>
+                            {% if providers.0.bio %}<p class="text-xs text-gray-500 line-clamp-1">{{ providers.0.bio }}</p>{% endif %}
+                        </div>
+                        <span class="ml-auto text-xs font-medium text-blue-600">{% trans "Auto-assigned" %}</span>
+                    </div>
+                {% else %}
+                    <!-- Multiple providers: dropdown -->
+                    <label for="provider" class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Stylist" %}</label>
+                    <select name="provider" id="provider"
+                            hx-get="{% url 'bookings:load_slots' %}"
+                            hx-target="#time-slot-container"
+                            hx-include="#wizard-step2-form"
+                            hx-trigger="change"
+                            class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+                        <option value="">{% trans "Select a Stylist" %}</option>
+                        {% for provider in providers %}
+                            <option value="{{ provider.id }}">{{ provider.display_name }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            {% endwith %}
+        {% else %}
+            <!-- No providers available -->
+            <div class="p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-sm">
+                <p class="font-semibold">{% trans "No stylists are currently assigned to this service." %}</p>
+                <p class="text-xs mt-0.5">{% trans "Please contact us directly." %}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- ── Date & Time ────────────────────────────────────── -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-150 p-5 space-y-4">
+        <h3 class="text-base font-bold text-gray-900 border-b pb-3">{% trans "Pick a Date & Time" %}</h3>
+
+        <div>
+            <label for="target_date" class="block text-sm font-semibold text-gray-700 mb-1">{% trans "Date" %}</label>
+            <input type="date"
+                   name="date"
+                   id="target_date"
+                   min="{{ today }}"
+                   required
+                   hx-get="{% url 'bookings:load_slots' %}"
+                   hx-target="#time-slot-container"
+                   hx-include="#wizard-step2-form"
+                   hx-trigger="change"
+                   class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+        </div>
+
+        <!-- Time slot container (swapped by load_slots) -->
+        <div id="time-slot-container">
+            <p class="text-sm text-gray-500">{% trans "Select a stylist and date to see available times." %}</p>
+        </div>
+    </div>
+
+    <!-- ── Navigation ─────────────────────────────────────── -->
+    <div class="flex justify-between gap-4">
+        <button type="button"
+                hx-post="{% url 'bookings:book_service' service_pk=service.pk %}"
+                hx-target="#wizard-content"
+                hx-swap="innerHTML"
+                name="wizard_action" value="back_to_step1"
+                class="px-5 py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold rounded-xl transition">
+            ← {% trans "Back to Options" %}
+        </button>
+
+        <!-- Continue to Step 3 -->
+        <div class="flex flex-col items-end">
+            {% if scheduling_error %}
+                <p class="text-sm text-red-600 mb-2 font-medium text-right">{{ scheduling_error }}</p>
+            {% endif %}
+            <button type="button"
+                    id="step2-continue-btn"
+                    hx-post="{% url 'bookings:book_service' service_pk=service.pk %}"
+                    hx-target="#wizard-content"
+                    hx-swap="innerHTML"
+                    name="wizard_action" value="advance_to_step3"
+                    class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition disabled:opacity-50">
+                {% trans "Continue to Your Details" %} →
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+// Client-side guard: require a stylist, date and time slot before the
+// HTMX request to advance to Step 3 fires. Uses htmx:confirm (the
+// documented way to conditionally allow a request).
+(function () {
+    var btn = document.getElementById("step2-continue-btn");
+    if (!btn) { return; }
+
+    btn.addEventListener("htmx:confirm", function (evt) {
+        // Cancel the automatic request; we re-issue it manually if valid.
+        evt.preventDefault();
+
+        var form = document.getElementById("wizard-step2-form");
+        var timeSelected = form.querySelector('input[name="time_slot"]:checked');
+        var providerSel = form.querySelector('select[name="provider"]');
+        var providerHidden = form.querySelector('input[name="provider"]');
+        var hasProvider = (providerHidden && providerHidden.value)
+            || (providerSel && providerSel.value);
+        var dateInput = form.querySelector('input[name="date"]');
+        var hasDate = dateInput && dateInput.value;
+
+        var err = document.getElementById("step2-continue-error");
+        if (!(hasProvider && hasDate && timeSelected)) {
+            if (!err) {
+                err = document.createElement("p");
+                err.id = "step2-continue-error";
+                err.className = "text-sm text-red-600 mb-1 font-medium text-right";
+                btn.parentNode.insertBefore(err, btn);
+            }
+            err.textContent = "{% trans 'Please select a stylist, date and an available time slot.' %}";
+            return;
+        }
+        if (err) { err.remove(); }
+        evt.detail.issueRequest(evt);
+    });
+})();
+</script>

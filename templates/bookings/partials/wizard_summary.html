@@ -1,0 +1,57 @@
+{% load i18n %}
+<div id="wizard-summary" class="bg-white rounded-xl shadow-sm border border-gray-150 p-6 lg:sticky lg:top-24 space-y-4">
+    <h3 class="text-lg font-bold text-gray-900 border-b pb-3">{% trans "Booking Summary" %}</h3>
+
+    <!-- Service -->
+    <div>
+        <p class="text-sm font-semibold text-gray-700">{{ service.title }}</p>
+    </div>
+
+    <!-- Base Price -->
+    <div class="flex justify-between text-sm" id="summary-base">
+        <span class="text-gray-500">{% trans "Base Price" %}</span>
+        <span class="font-medium">
+            {% if service.has_discount %}
+                <span class="text-gray-400 line-through">{{ service.base_price|floatformat:0 }} Ft</span>
+                <span class="text-gray-900 ml-1" id="summary-discounted-base">{{ service.discounted_price|floatformat:0 }} Ft</span>
+            {% else %}
+                <span class="text-gray-900">{{ service.base_price|floatformat:0 }} Ft</span>
+            {% endif %}
+        </span>
+    </div>
+
+    <!-- Discount line (only if has_discount) -->
+    {% if service.has_discount %}
+    <div class="flex justify-between text-sm text-green-600">
+        <span>{% trans "Discount" %} ({{ service.discount_percentage }}%)</span>
+        <span id="summary-discount">-{{ discount_amount|floatformat:0 }} Ft</span>
+    </div>
+    {% endif %}
+
+    <!-- Selected options (populated by JS) -->
+    <div id="summary-options" class="space-y-1"></div>
+
+    <!-- Divider -->
+    <hr class="border-gray-100">
+
+    <!-- Total -->
+    <div class="flex justify-between items-baseline">
+        <span class="font-bold text-gray-900">{% trans "Total" %}</span>
+        <span class="text-2xl font-extrabold text-blue-600" id="summary-total">{{ service.discounted_price|floatformat:0 }} Ft</span>
+    </div>
+
+    <!-- Deposit -->
+    <div class="bg-amber-50 rounded-lg p-3 text-sm">
+        <div class="flex justify-between">
+            <span class="text-amber-800 font-medium">{% trans "Deposit Required" %}</span>
+            <span class="text-amber-900 font-bold" id="summary-deposit">{{ deposit|floatformat:0 }} Ft</span>
+        </div>
+        <p class="text-xs text-amber-700 mt-1">{% trans "A deposit holds your slot for 12 hours while we review your request." %}</p>
+    </div>
+
+    <!-- Duration -->
+    <div class="flex justify-between text-sm text-gray-500">
+        <span>{% trans "Estimated Duration" %}</span>
+        <span>{{ service.formatted_duration }}</span>
+    </div>
+</div>

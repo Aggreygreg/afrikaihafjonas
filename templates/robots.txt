@@ -1,0 +1,9 @@
+﻿User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /bookings/book/
+Disallow: /bookings/status/
+Disallow: /summernote/
+
+# Sitemap
+Sitemap: {{ sitemap_url }}

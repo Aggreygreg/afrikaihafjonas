@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Check Your Request Status" %}{% endblock %}
+
+{% block content %}
+<div class="bg-gray-50 min-h-screen py-12 md:py-16">
+    <div class="max-w-2xl mx-auto px-4">
+
+        <!-- ── Page header ────────────────────────────────────── -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold text-gray-900">{% trans "Check Your Request Status" %}</h1>
+            <p class="text-gray-500 mt-2 max-w-md mx-auto">{% trans "Enter your email address and the reference code we gave you to view the status of your appointment request." %}</p>
+        </div>
+
+        <!-- ── Lookup form ────────────────────────────────────── -->
+        <div class="bg-white rounded-2xl shadow-md border border-gray-150 p-6 md:p-8">
+            <form hx-post="{% url 'bookings:booking_status' %}"
+                  hx-target="#lookup-results"
+                  hx-swap="innerHTML"
+                  method="post">
+                {% csrf_token %}
+                <div class="space-y-4">
+                    <div>
+                        <label for="id-lookup-email" class="block text-sm font-semibold text-gray-700 mb-1.5">{% trans "Email address" %}</label>
+                        <input type="email"
+                               id="id-lookup-email"
+                               name="email"
+                               required
+                               autocomplete="email"
+                               value="{{ request.POST.email }}"
+                               placeholder="you@example.com"
+                               class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition" />
+                    </div>
+                    <div>
+                        <label for="id-lookup-ref" class="block text-sm font-semibold text-gray-700 mb-1.5">{% trans "AFH reference code" %}</label>
+                        <input type="text"
+                               id="id-lookup-ref"
+                               name="payment_reference"
+                               required
+                               pattern="AFH-[A-Za-z0-9]{6}"
+                               value="{{ request.POST.payment_reference }}"
+                               placeholder="AFH-XXXXXX"
+                               title="AFH-XXXXXX"
+                               class="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition font-mono uppercase tracking-wider" />
+                    </div>
+                    <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        {% trans "Look up status" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ── Results container (populated by HTMX) ──────────── -->
+        <div id="lookup-results" class="mt-6">
+            {% include "bookings/partials/guest_lookup_result.html" %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

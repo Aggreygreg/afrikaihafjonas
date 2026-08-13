@@ -1,0 +1,1513 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Afrikai Hajfonas 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-12 00:00+0000\n"
+"PO-Revision-Date: 2026-08-12 00:00+0000\n"
+"Last-Translator: HICLAW Manager\n"
+"Language-Team: en <afrikai@hajfonas.hu>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: _extract_strings.py _extract_strings.py _extract_strings.py
+msgid "..."
+msgstr "..."
+
+#: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
+msgid "This service is for adults aged 16 and over."
+msgstr "This service is for adults aged 16 and over."
+
+#: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
+msgid "This service is for children aged 8 to 15."
+msgstr "This service is for children aged 8 to 15."
+
+#: apps/bookings/forms.py templates/bookings/partials/wizard_step_3.html
+msgid "Clients must be at least 8 years old for this service."
+msgstr "Clients must be at least 8 years old for this service."
+
+#: apps/bookings/forms.py
+msgid "%(label)s is too large. The maximum file size is 5 MB."
+msgstr "%(label)s is too large. The maximum file size is 5 MB."
+
+#: apps/bookings/forms.py
+msgid "%(label)s has an unsupported format. Allowed: %(formats)s."
+msgstr "%(label)s has an unsupported format. Allowed: %(formats)s."
+
+#: apps/bookings/forms.py
+msgid "%(label)s has an unsupported file type."
+msgstr "%(label)s has an unsupported file type."
+
+#: apps/bookings/forms.py
+msgid "I have read and accept the Privacy Policy and consent to the"
+msgstr "I have read and accept the Privacy Policy and consent to the"
+
+#: apps/bookings/forms.py
+msgid "You must accept the privacy policy to continue."
+msgstr "You must accept the privacy policy to continue."
+
+#: apps/bookings/forms.py
+msgid "JPG, PNG or WEBP — max 5 MB."
+msgstr "JPG, PNG or WEBP — max 5 MB."
+
+#: apps/bookings/forms.py
+msgid "Front photo"
+msgstr "Front photo"
+
+#: apps/bookings/forms.py
+msgid "Side photo"
+msgstr "Side photo"
+
+#: apps/bookings/forms.py
+msgid "Back photo"
+msgstr "Back photo"
+
+#: apps/bookings/forms.py
+msgid "I confirm the deposit has been transferred and I agree to the"
+msgstr "I confirm the deposit has been transferred and I agree to the"
+
+#: apps/bookings/forms.py
+msgid "You must agree to the policy to submit your request."
+msgstr "You must agree to the policy to submit your request."
+
+#: apps/bookings/forms.py
+msgid "JPG, PNG or PDF — max 5 MB."
+msgstr "JPG, PNG or PDF — max 5 MB."
+
+#: apps/bookings/forms.py
+msgid "Proof of payment"
+msgstr "Proof of payment"
+
+#: apps/bookings/views.py
+msgid "Please select a stylist, date and an available time slot"
+msgstr "Please select a stylist, date and an available time slot"
+
+#: apps/bookings/views.py
+msgid "We received your request and are verifying your deposit."
+msgstr "We received your request and are verifying your deposit."
+
+#: apps/bookings/views.py
+msgid "Your deposit is verified! We"
+msgstr "Your deposit is verified! We"
+
+#: apps/bookings/views.py
+msgid "Your appointment is confirmed!"
+msgstr "Your appointment is confirmed!"
+
+#: apps/bookings/views.py
+msgid "Unfortunately, your request was not approved."
+msgstr "Unfortunately, your request was not approved."
+
+#: apps/bookings/views.py
+msgid "Your request has expired. Your hold on this time slot has ended."
+msgstr "Your request has expired. Your hold on this time slot has ended."
+
+#: apps/bookings/views.py
+msgid "Please enter both your email address and AFH reference code."
+msgstr "Please enter both your email address and AFH reference code."
+
+#: apps/bookings/views.py
+msgid "No request found. Please check your email and reference code"
+msgstr "No request found. Please check your email and reference code"
+
+#: templates/base.html
+msgid "Primary navigation"
+msgstr "Primary navigation"
+
+#: templates/base.html templates/base.html
+msgid "Services"
+msgstr "Services"
+
+#: templates/base.html templates/base.html
+msgid "Providers"
+msgstr "Providers"
+
+#: templates/base.html templates/base.html templates/base.html
+msgid "About"
+msgstr "About"
+
+#: templates/base.html templates/base.html
+msgid "Contact"
+msgstr "Contact"
+
+#: templates/base.html templates/base.html templates/base.html
+msgid "FAQs"
+msgstr "FAQs"
+
+#: templates/base.html templates/base.html
+msgid "Check Booking Status"
+msgstr "Check Booking Status"
+
+#: templates/base.html
+msgid "Open menu"
+msgstr "Open menu"
+
+#: templates/base.html
+msgid "Menu"
+msgstr "Menu"
+
+#: templates/base.html
+msgid "Close menu"
+msgstr "Close menu"
+
+#: templates/base.html templates/base.html
+msgid "Staff Login"
+msgstr "Staff Login"
+
+#: templates/base.html templates/pages/about.html
+msgid "About Afrikai Hajfonás"
+msgstr "About Afrikai Hajfonás"
+
+#: templates/base.html
+msgid "How To Videos"
+msgstr "How To Videos"
+
+#: templates/base.html
+msgid "Contact Info"
+msgstr "Contact Info"
+
+#: templates/base.html
+msgid "Follow Us"
+msgstr "Follow Us"
+
+#: templates/base.html
+msgid "Essentials"
+msgstr "Essentials"
+
+#: templates/base.html templates/pages/terms.html
+msgid "Terms & Conditions"
+msgstr "Terms & Conditions"
+
+#: templates/base.html templates/pages/privacy.html
+msgid "Privacy Policy"
+msgstr "Privacy Policy"
+
+#: templates/base.html
+msgid "All rights reserved."
+msgstr "All rights reserved."
+
+#: templates/base.html
+msgid "Choose your language"
+msgstr "Choose your language"
+
+#: templates/base.html
+msgid "This choice will be remembered. You can change it at any time."
+msgstr "This choice will be remembered. You can change it at any time."
+
+#: templates/home.html
+msgid "Book Now"
+msgstr "Book Now"
+
+#: templates/home.html
+msgid "Popular Services"
+msgstr "Popular Services"
+
+#: templates/home.html
+msgid "Discover our clients"
+msgstr "Discover our clients"
+
+#: templates/home.html templates/services/service_list.html
+msgid "Women"
+msgstr "Women"
+
+#: templates/home.html templates/services/service_list.html
+msgid "Men"
+msgstr "Men"
+
+#: templates/home.html
+msgid "mins"
+msgstr "mins"
+
+#: templates/home.html
+msgid "No popular services have been selected yet. Mark some as \\"
+msgstr "No popular services have been selected yet. Mark some as \\"
+
+#: templates/home.html
+msgid "View All Services"
+msgstr "View All Services"
+
+#: templates/home.html
+msgid "Sign up for our newsletter"
+msgstr "Sign up for our newsletter"
+
+#: templates/home.html
+msgid ""
+"Stay up to date with our latest styles and offers. Subscribe to receive "
+"exclusive deals and braid inspirations."
+msgstr ""
+"Stay up to date with our latest styles and offers. Subscribe to receive "
+"exclusive deals and braid inspirations."
+
+#: templates/home.html
+msgid "Enter your email"
+msgstr "Enter your email"
+
+#: templates/home.html
+msgid "Subscribe"
+msgstr "Subscribe"
+
+#: templates/home.html
+msgid "We care about the protection of your data."
+msgstr "We care about the protection of your data."
+
+#: templates/home.html
+msgid "Read our Privacy Policy"
+msgstr "Read our Privacy Policy"
+
+#: templates/admin/index.html
+msgid "Dashboard"
+msgstr "Dashboard"
+
+#: templates/bookings/confirmation.html
+msgid "Request Submitted"
+msgstr "Request Submitted"
+
+#: templates/bookings/confirmation.html
+msgid "Your appointment request has been submitted!"
+msgstr "Your appointment request has been submitted!"
+
+#: templates/bookings/confirmation.html
+msgid "Thank you. We have received your request and deposit details."
+msgstr "Thank you. We have received your request and deposit details."
+
+#: templates/bookings/confirmation.html
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Your Payment Reference"
+msgstr "Your Payment Reference"
+
+#: templates/bookings/confirmation.html templates/bookings/confirmation.html
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Copy"
+msgstr "Copy"
+
+#: templates/bookings/confirmation.html
+msgid "Save your reference"
+msgstr "Save your reference"
+
+#: templates/bookings/confirmation.html
+msgid "What happens next?"
+msgstr "What happens next?"
+
+#: templates/bookings/confirmation.html templates/pages/terms.html
+msgid "We"
+msgstr "We"
+
+#: templates/bookings/confirmation.html
+msgid ""
+"Once approved, your appointment is confirmed and your time slot is locked "
+"in."
+msgstr ""
+"Once approved, your appointment is confirmed and your time slot is locked "
+"in."
+
+#: templates/bookings/confirmation.html
+msgid "If anything is missing, we"
+msgstr "If anything is missing, we"
+
+#: templates/bookings/confirmation.html
+#: templates/bookings/partials/guest_lookup_result.html
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Service"
+msgstr "Service"
+
+#: templates/bookings/confirmation.html
+#: templates/bookings/partials/guest_lookup_result.html
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Stylist"
+msgstr "Stylist"
+
+#: templates/bookings/confirmation.html
+#: templates/bookings/partials/wizard_step_3.html
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Date & Time"
+msgstr "Date & Time"
+
+#: templates/bookings/confirmation.html
+#: templates/bookings/partials/guest_lookup_result.html
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Deposit"
+msgstr "Deposit"
+
+#: templates/bookings/confirmation.html
+msgid "Check your request status"
+msgstr "Check your request status"
+
+#: templates/bookings/confirmation.html
+#: templates/bookings/partials/wizard_step_4.html
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Copied!"
+msgstr "Copied!"
+
+#: templates/bookings/consult_wizard.html
+msgid "Book"
+msgstr "Book"
+
+#: templates/bookings/guest_lookup.html templates/bookings/guest_lookup.html
+msgid "Check Your Request Status"
+msgstr "Check Your Request Status"
+
+#: templates/bookings/guest_lookup.html
+msgid ""
+"Enter your email address and the reference code we gave you to view the "
+"status of your appointment request."
+msgstr ""
+"Enter your email address and the reference code we gave you to view the "
+"status of your appointment request."
+
+#: templates/bookings/guest_lookup.html
+msgid "Email address"
+msgstr "Email address"
+
+#: templates/bookings/guest_lookup.html
+msgid "AFH reference code"
+msgstr "AFH reference code"
+
+#: templates/bookings/guest_lookup.html
+msgid "Look up status"
+msgstr "Look up status"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Request not found"
+msgstr "Request not found"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Deposit verified"
+msgstr "Deposit verified"
+
+#: templates/bookings/partials/guest_lookup_result.html
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Date"
+msgstr "Date"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Time"
+msgstr "Time"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Payment method"
+msgstr "Payment method"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Not yet provided"
+msgstr "Not yet provided"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Reference"
+msgstr "Reference"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Admin note"
+msgstr "Admin note"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Refund information"
+msgstr "Refund information"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid ""
+"Your deposit will be refunded to your original payment method within 5 "
+"business days. Please keep your reference code handy. If you do not receive "
+"the refund, contact us quoting your reference."
+msgstr ""
+"Your deposit will be refunded to your original payment method within 5 "
+"business days. Please keep your reference code handy. If you do not receive "
+"the refund, contact us quoting your reference."
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Would you like to submit a new request?"
+msgstr "Would you like to submit a new request?"
+
+#: templates/bookings/partials/guest_lookup_result.html
+msgid "Submit a new request"
+msgstr "Submit a new request"
+
+#: templates/bookings/partials/time_slots.html
+msgid "Available Times"
+msgstr "Available Times"
+
+#: templates/bookings/partials/time_slots.html
+msgid "No appointment slots found."
+msgstr "No appointment slots found."
+
+#: templates/bookings/partials/time_slots.html
+msgid ""
+"The stylist may be fully booked or off-duty on this date. Try another date "
+"or stylist."
+msgstr ""
+"The stylist may be fully booked or off-duty on this date. Try another date "
+"or stylist."
+
+#: templates/bookings/partials/wizard_progress.html
+msgid "Configure"
+msgstr "Configure"
+
+#: templates/bookings/partials/wizard_progress.html
+msgid "Schedule"
+msgstr "Schedule"
+
+#: templates/bookings/partials/wizard_progress.html
+msgid "Details"
+msgstr "Details"
+
+#: templates/bookings/partials/wizard_progress.html
+msgid "Review"
+msgstr "Review"
+
+#: templates/bookings/partials/wizard_step_1.html
+msgid "Optional"
+msgstr "Optional"
+
+#: templates/bookings/partials/wizard_step_1.html
+msgid "Required"
+msgstr "Required"
+
+#: templates/bookings/partials/wizard_step_1.html
+#: templates/services/service_detail.html
+msgid "Select"
+msgstr "Select"
+
+#: templates/bookings/partials/wizard_step_1.html
+msgid "Please select one option."
+msgstr "Please select one option."
+
+#: templates/bookings/partials/wizard_step_1.html
+msgid "This service has no customizable options. Click Continue to proceed."
+msgstr "This service has no customizable options. Click Continue to proceed."
+
+#: templates/bookings/partials/wizard_step_1.html
+msgid "Continue to Scheduling"
+msgstr "Continue to Scheduling"
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Select Your Stylist"
+msgstr "Select Your Stylist"
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Auto-assigned"
+msgstr "Auto-assigned"
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Select a Stylist"
+msgstr "Select a Stylist"
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "No stylists are currently assigned to this service."
+msgstr "No stylists are currently assigned to this service."
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Please contact us directly."
+msgstr "Please contact us directly."
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Pick a Date & Time"
+msgstr "Pick a Date & Time"
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Select a stylist and date to see available times."
+msgstr "Select a stylist and date to see available times."
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Back to Options"
+msgstr "Back to Options"
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Continue to Your Details"
+msgstr "Continue to Your Details"
+
+#: templates/bookings/partials/wizard_step_2.html
+msgid "Please select a stylist, date and an available time slot."
+msgstr "Please select a stylist, date and an available time slot."
+
+#: templates/bookings/partials/wizard_step_3.html
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Your Details"
+msgstr "Your Details"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Full Name"
+msgstr "Full Name"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Phone Number"
+msgstr "Phone Number"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Email Address"
+msgstr "Email Address"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Age"
+msgstr "Age"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Current Hair Length"
+msgstr "Current Hair Length"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Select the option that best matches your hair length today."
+msgstr "Select the option that best matches your hair length today."
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Hair Photos"
+msgstr "Hair Photos"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid ""
+"Upload clear photos of your hair from three angles. JPG, PNG or WEBP — max 5"
+" MB each."
+msgstr ""
+"Upload clear photos of your hair from three angles. JPG, PNG or WEBP — max 5"
+" MB each."
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Front View"
+msgstr "Front View"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Side View"
+msgstr "Side View"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Back View"
+msgstr "Back View"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "IMPORTANT warning"
+msgstr "IMPORTANT warning"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid ""
+"Very thin or fragile hair may not be suitable for certain tension styles and"
+" could lead to breakage. We will assess your photos before confirming your "
+"appointment."
+msgstr ""
+"Very thin or fragile hair may not be suitable for certain tension styles and"
+" could lead to breakage. We will assess your photos before confirming your "
+"appointment."
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Back to Scheduling"
+msgstr "Back to Scheduling"
+
+#: templates/bookings/partials/wizard_step_3.html
+msgid "Continue to Payment"
+msgstr "Continue to Payment"
+
+#: templates/bookings/partials/wizard_step_3.html
+#: templates/bookings/partials/wizard_step_4.html
+msgid "File is too large. Maximum size is 5 MB."
+msgstr "File is too large. Maximum size is 5 MB."
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Review & Payment"
+msgstr "Review & Payment"
+
+#: templates/bookings/partials/wizard_step_4.html
+#: templates/bookings/partials/wizard_summary.html
+msgid "Deposit Required"
+msgstr "Deposit Required"
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid ""
+"Use this exact reference on your transfer so we can match your deposit."
+msgstr ""
+"Use this exact reference on your transfer so we can match your deposit."
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Payment Method"
+msgstr "Payment Method"
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Transfer your deposit using one of the methods below."
+msgstr "Transfer your deposit using one of the methods below."
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Proof of Payment"
+msgstr "Proof of Payment"
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Upload your transfer screenshot"
+msgstr "Upload your transfer screenshot"
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Policy Review"
+msgstr "Policy Review"
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid ""
+"Your time slot is held for 12 hours while we verify your deposit and review "
+"your hair photos. If your request is not approved, your deposit will be "
+"refunded. Please ensure the transferred amount and reference match exactly."
+msgstr ""
+"Your time slot is held for 12 hours while we verify your deposit and review "
+"your hair photos. If your request is not approved, your deposit will be "
+"refunded. Please ensure the transferred amount and reference match exactly."
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Back to Details"
+msgstr "Back to Details"
+
+#: templates/bookings/partials/wizard_step_4.html
+msgid "Submit Request"
+msgstr "Submit Request"
+
+#: templates/bookings/partials/wizard_summary.html
+msgid "Booking Summary"
+msgstr "Booking Summary"
+
+#: templates/bookings/partials/wizard_summary.html
+msgid "Base Price"
+msgstr "Base Price"
+
+#: templates/bookings/partials/wizard_summary.html
+msgid "Discount"
+msgstr "Discount"
+
+#: templates/bookings/partials/wizard_summary.html
+msgid "Total"
+msgstr "Total"
+
+#: templates/bookings/partials/wizard_summary.html
+msgid "A deposit holds your slot for 12 hours while we review your request."
+msgstr "A deposit holds your slot for 12 hours while we review your request."
+
+#: templates/bookings/partials/wizard_summary.html
+msgid "Estimated Duration"
+msgstr "Estimated Duration"
+
+#: templates/pages/about.html
+msgid "Premium African Braiding"
+msgstr "Premium African Braiding"
+
+#: templates/pages/about.html
+msgid ""
+"Authentic, handcrafted African braiding traditions — proudly brought to the "
+"heart of Budapest."
+msgstr ""
+"Authentic, handcrafted African braiding traditions — proudly brought to the "
+"heart of Budapest."
+
+#: templates/pages/about.html
+msgid "Explore Our Styles"
+msgstr "Explore Our Styles"
+
+#: templates/pages/about.html
+msgid "Our Story"
+msgstr "Our Story"
+
+#: templates/pages/about.html
+msgid "Tradition you can feel in every strand"
+msgstr "Tradition you can feel in every strand"
+
+#: templates/pages/about.html
+msgid ""
+"Afrikai Hajfonás was founded on a simple belief: that African braiding is an"
+" art form, passed down through generations and deserving of a true home in "
+"Hungary. What began as a passion for sharing authentic styles has grown into"
+" Budapest"
+msgstr ""
+"Afrikai Hajfonás was founded on a simple belief: that African braiding is an"
+" art form, passed down through generations and deserving of a true home in "
+"Hungary. What began as a passion for sharing authentic styles has grown into"
+" Budapest"
+
+#: templates/pages/about.html
+msgid ""
+"Every appointment begins with a personal consultation. We take the time to "
+"understand your hair, your lifestyle, and the look you dream of — because "
+"beautiful, long-lasting braids start with understanding."
+msgstr ""
+"Every appointment begins with a personal consultation. We take the time to "
+"understand your hair, your lifestyle, and the look you dream of — because "
+"beautiful, long-lasting braids start with understanding."
+
+#: templates/pages/about.html
+msgid "Braiding close-up"
+msgstr "Braiding close-up"
+
+#: templates/pages/about.html
+msgid "Salon styling chair"
+msgstr "Salon styling chair"
+
+#: templates/pages/about.html
+msgid "Our Mission"
+msgstr "Our Mission"
+
+#: templates/pages/about.html
+msgid "Beauty, care, and integrity"
+msgstr "Beauty, care, and integrity"
+
+#: templates/pages/about.html
+msgid ""
+"Our mission is to deliver flawless results without compromising the health "
+"of your hair. We are honest about what each style requires — from hair "
+"length and texture to the right thickness for the design you want."
+msgstr ""
+"Our mission is to deliver flawless results without compromising the health "
+"of your hair. We are honest about what each style requires — from hair "
+"length and texture to the right thickness for the design you want."
+
+#: templates/pages/about.html
+msgid ""
+"That is why every booking is an appointment request, not an instant "
+"reservation. We review your photos, confirm your hair is suited to the "
+"style, and only then secure your slot — so you always leave our chair "
+"delighted."
+msgstr ""
+"That is why every booking is an appointment request, not an instant "
+"reservation. We review your photos, confirm your hair is suited to the "
+"style, and only then secure your slot — so you always leave our chair "
+"delighted."
+
+#: templates/pages/about.html
+msgid "What sets us apart"
+msgstr "What sets us apart"
+
+#: templates/pages/about.html
+msgid "The principles behind every appointment at Afrikai Hajfonás."
+msgstr "The principles behind every appointment at Afrikai Hajfonás."
+
+#: templates/pages/about.html
+msgid "Handcrafted Artistry"
+msgstr "Handcrafted Artistry"
+
+#: templates/pages/about.html
+msgid "Every braid is shaped by hand by experienced stylists."
+msgstr "Every braid is shaped by hand by experienced stylists."
+
+#: templates/pages/about.html
+msgid "Hair-First Care"
+msgstr "Hair-First Care"
+
+#: templates/pages/about.html
+msgid "We only accept styles that suit your hair"
+msgstr "We only accept styles that suit your hair"
+
+#: templates/pages/about.html
+msgid "Authentic Styles"
+msgstr "Authentic Styles"
+
+#: templates/pages/about.html
+msgid "True African braiding techniques, never shortcuts."
+msgstr "True African braiding techniques, never shortcuts."
+
+#: templates/pages/about.html
+msgid "Warm Hospitality"
+msgstr "Warm Hospitality"
+
+#: templates/pages/about.html
+msgid "A welcoming, comfortable experience from start to finish."
+msgstr "A welcoming, comfortable experience from start to finish."
+
+#: templates/pages/about.html
+msgid "The Team"
+msgstr "The Team"
+
+#: templates/pages/about.html
+msgid "Meet our braiders"
+msgstr "Meet our braiders"
+
+#: templates/pages/about.html
+msgid "Skilled hands, genuine passion, and years of braiding experience."
+msgstr "Skilled hands, genuine passion, and years of braiding experience."
+
+#: templates/pages/about.html
+msgid "Master Braider"
+msgstr "Master Braider"
+
+#: templates/pages/about.html
+msgid "Specialist in knotless braids & protective styling"
+msgstr "Specialist in knotless braids & protective styling"
+
+#: templates/pages/about.html
+msgid "Trusted & registered"
+msgstr "Trusted & registered"
+
+#: templates/pages/about.html
+msgid "Licensed Salon"
+msgstr "Licensed Salon"
+
+#: templates/pages/about.html
+msgid "Hair-Safe Products"
+msgstr "Hair-Safe Products"
+
+#: templates/pages/about.html
+msgid "EN · HU · DE"
+msgstr "EN · HU · DE"
+
+#: templates/pages/about.html
+msgid "Premium Service"
+msgstr "Premium Service"
+
+#: templates/pages/about.html
+msgid "Ready for your transformation?"
+msgstr "Ready for your transformation?"
+
+#: templates/pages/about.html
+msgid "Browse our styles and start your appointment request today."
+msgstr "Browse our styles and start your appointment request today."
+
+#: templates/pages/about.html templates/pages/contact.html
+msgid "View Services"
+msgstr "View Services"
+
+#: templates/pages/contact.html
+msgid "Get in touch"
+msgstr "Get in touch"
+
+#: templates/pages/contact.html
+msgid "Contact Afrikai Hajfonás"
+msgstr "Contact Afrikai Hajfonás"
+
+#: templates/pages/contact.html
+msgid "Questions about a style, an appointment, or your deposit? We"
+msgstr "Questions about a style, an appointment, or your deposit? We"
+
+#: templates/pages/contact.html
+msgid "Visit our salon"
+msgstr "Visit our salon"
+
+#: templates/pages/contact.html
+msgid "Budapest, Hungary"
+msgstr "Budapest, Hungary"
+
+#: templates/pages/contact.html
+msgid "Call us"
+msgstr "Call us"
+
+#: templates/pages/contact.html
+msgid "Phone coming soon"
+msgstr "Phone coming soon"
+
+#: templates/pages/contact.html
+msgid "Email us"
+msgstr "Email us"
+
+#: templates/pages/contact.html
+msgid "Email coming soon"
+msgstr "Email coming soon"
+
+#: templates/pages/contact.html
+msgid "Business hours"
+msgstr "Business hours"
+
+#: templates/pages/contact.html
+msgid "Monday"
+msgstr "Monday"
+
+#: templates/pages/contact.html templates/pages/contact.html
+#: templates/pages/contact.html
+msgid "10:00 – 19:00"
+msgstr "10:00 – 19:00"
+
+#: templates/pages/contact.html
+msgid "Tuesday"
+msgstr "Tuesday"
+
+#: templates/pages/contact.html
+msgid "Wednesday"
+msgstr "Wednesday"
+
+#: templates/pages/contact.html
+msgid "Thursday"
+msgstr "Thursday"
+
+#: templates/pages/contact.html
+msgid "Friday"
+msgstr "Friday"
+
+#: templates/pages/contact.html
+msgid "10:00 – 20:00"
+msgstr "10:00 – 20:00"
+
+#: templates/pages/contact.html
+msgid "Saturday"
+msgstr "Saturday"
+
+#: templates/pages/contact.html
+msgid "09:00 – 20:00"
+msgstr "09:00 – 20:00"
+
+#: templates/pages/contact.html
+msgid "Sunday"
+msgstr "Sunday"
+
+#: templates/pages/contact.html
+msgid "Closed"
+msgstr "Closed"
+
+#: templates/pages/contact.html
+msgid "Follow us"
+msgstr "Follow us"
+
+#: templates/pages/contact.html
+msgid "Instagram"
+msgstr "Instagram"
+
+#: templates/pages/contact.html
+msgid "Facebook"
+msgstr "Facebook"
+
+#: templates/pages/contact.html
+msgid "TikTok"
+msgstr "TikTok"
+
+#: templates/pages/contact.html
+msgid "Social links coming soon."
+msgstr "Social links coming soon."
+
+#: templates/pages/contact.html
+msgid "Find us"
+msgstr "Find us"
+
+#: templates/pages/contact.html
+msgid "Salon location map"
+msgstr "Salon location map"
+
+#: templates/pages/contact.html
+msgid "Prefer to book right now?"
+msgstr "Prefer to book right now?"
+
+#: templates/pages/contact.html
+msgid "Browse our styles and submit an appointment request online."
+msgstr "Browse our styles and submit an appointment request online."
+
+#: templates/pages/privacy.html templates/pages/terms.html
+msgid "Legal"
+msgstr "Legal"
+
+#: templates/pages/privacy.html
+msgid "How Afrikai Hajfonás collects, uses, and protects your personal data."
+msgstr "How Afrikai Hajfonás collects, uses, and protects your personal data."
+
+#: templates/pages/privacy.html templates/pages/terms.html
+msgid "Last updated: August 2026"
+msgstr "Last updated: August 2026"
+
+#: templates/pages/privacy.html
+msgid ""
+"Afrikai Hajfonás (“we”, “us”) respects your privacy and is committed to "
+"protecting your personal data in line with the EU General Data Protection "
+"Regulation (GDPR). This policy explains what we collect, why, and the rights"
+" you have over your information."
+msgstr ""
+"Afrikai Hajfonás (“we”, “us”) respects your privacy and is committed to "
+"protecting your personal data in line with the EU General Data Protection "
+"Regulation (GDPR). This policy explains what we collect, why, and the rights"
+" you have over your information."
+
+#: templates/pages/privacy.html
+msgid "Data we collect"
+msgstr "Data we collect"
+
+#: templates/pages/privacy.html
+msgid ""
+"When you request an appointment, we collect only what is necessary to assess"
+" and confirm your booking:"
+msgstr ""
+"When you request an appointment, we collect only what is necessary to assess"
+" and confirm your booking:"
+
+#: templates/pages/privacy.html
+msgid "Contact details"
+msgstr "Contact details"
+
+#: templates/pages/privacy.html
+msgid "Name, email address, phone number, and age."
+msgstr "Name, email address, phone number, and age."
+
+#: templates/pages/privacy.html
+msgid "Hair information"
+msgstr "Hair information"
+
+#: templates/pages/privacy.html
+msgid "Hair length and three photos (front, side, back)."
+msgstr "Hair length and three photos (front, side, back)."
+
+#: templates/pages/privacy.html
+msgid "Payment proof"
+msgstr "Payment proof"
+
+#: templates/pages/privacy.html
+msgid "A screenshot of your bank transfer as proof of deposit."
+msgstr "A screenshot of your bank transfer as proof of deposit."
+
+#: templates/pages/privacy.html
+msgid "Booking details"
+msgstr "Booking details"
+
+#: templates/pages/privacy.html
+msgid "Chosen service, stylist, options, date, and time."
+msgstr "Chosen service, stylist, options, date, and time."
+
+#: templates/pages/privacy.html
+msgid ""
+"We do not require you to create an account, and we do not collect more data "
+"than is needed to process your request."
+msgstr ""
+"We do not require you to create an account, and we do not collect more data "
+"than is needed to process your request."
+
+#: templates/pages/privacy.html
+msgid "How we use your data"
+msgstr "How we use your data"
+
+#: templates/pages/privacy.html
+msgid "To assess whether your hair is suited to the style you requested."
+msgstr "To assess whether your hair is suited to the style you requested."
+
+#: templates/pages/privacy.html
+msgid "To verify your deposit and process your appointment request."
+msgstr "To verify your deposit and process your appointment request."
+
+#: templates/pages/privacy.html
+msgid ""
+"To communicate with you about your booking and any necessary follow-up."
+msgstr ""
+"To communicate with you about your booking and any necessary follow-up."
+
+#: templates/pages/privacy.html
+msgid "To meet our legal and financial record-keeping obligations."
+msgstr "To meet our legal and financial record-keeping obligations."
+
+#: templates/pages/privacy.html
+msgid ""
+"We do not sell your data and do not use it for unrelated marketing without "
+"your consent."
+msgstr ""
+"We do not sell your data and do not use it for unrelated marketing without "
+"your consent."
+
+#: templates/pages/privacy.html
+msgid "Data retention"
+msgstr "Data retention"
+
+#: templates/pages/privacy.html
+msgid ""
+"We keep your appointment information, hair photos, and payment proof for as "
+"long as needed to provide our service and meet legal requirements. Photos "
+"and booking records may be retained to support future consultations and to "
+"maintain accurate service history. You may request deletion at any time (see"
+" Your Rights below)."
+msgstr ""
+"We keep your appointment information, hair photos, and payment proof for as "
+"long as needed to provide our service and meet legal requirements. Photos "
+"and booking records may be retained to support future consultations and to "
+"maintain accurate service history. You may request deletion at any time (see"
+" Your Rights below)."
+
+#: templates/pages/privacy.html
+msgid "Your rights under GDPR"
+msgstr "Your rights under GDPR"
+
+#: templates/pages/privacy.html
+msgid "Access"
+msgstr "Access"
+
+#: templates/pages/privacy.html
+msgid "Request a copy of the data we hold about you."
+msgstr "Request a copy of the data we hold about you."
+
+#: templates/pages/privacy.html
+msgid "Rectification"
+msgstr "Rectification"
+
+#: templates/pages/privacy.html
+msgid "Ask us to correct inaccurate information."
+msgstr "Ask us to correct inaccurate information."
+
+#: templates/pages/privacy.html
+msgid "Erasure"
+msgstr "Erasure"
+
+#: templates/pages/privacy.html
+msgid "Request deletion of your data (the"
+msgstr "Request deletion of your data (the"
+
+#: templates/pages/privacy.html
+msgid "Portability"
+msgstr "Portability"
+
+#: templates/pages/privacy.html
+msgid "Receive your data in a portable format."
+msgstr "Receive your data in a portable format."
+
+#: templates/pages/privacy.html
+msgid ""
+"You also have the right to object to certain processing and to lodge a "
+"complaint with the relevant data protection authority."
+msgstr ""
+"You also have the right to object to certain processing and to lodge a "
+"complaint with the relevant data protection authority."
+
+#: templates/pages/privacy.html
+msgid "Data security"
+msgstr "Data security"
+
+#: templates/pages/privacy.html
+msgid ""
+"We apply reasonable technical and organisational measures to protect your "
+"data from unauthorised access, loss, or misuse. Access to your booking "
+"details and photos is restricted to our salon team and is handled "
+"confidentially."
+msgstr ""
+"We apply reasonable technical and organisational measures to protect your "
+"data from unauthorised access, loss, or misuse. Access to your booking "
+"details and photos is restricted to our salon team and is handled "
+"confidentially."
+
+#: templates/pages/privacy.html
+msgid "Contact for privacy concerns"
+msgstr "Contact for privacy concerns"
+
+#: templates/pages/privacy.html
+msgid ""
+"To exercise any of your rights or ask a question about your data, contact us"
+" using the details on our"
+msgstr ""
+"To exercise any of your rights or ask a question about your data, contact us"
+" using the details on our"
+
+#: templates/pages/privacy.html templates/pages/terms.html
+msgid "Contact page"
+msgstr "Contact page"
+
+#: templates/pages/privacy.html
+msgid "We will respond in accordance with applicable law."
+msgstr "We will respond in accordance with applicable law."
+
+#: templates/pages/terms.html
+msgid "Please read these terms carefully before requesting an appointment."
+msgstr "Please read these terms carefully before requesting an appointment."
+
+#: templates/pages/terms.html
+msgid "About our booking process"
+msgstr "About our booking process"
+
+#: templates/pages/terms.html
+msgid ""
+"Afrikai Hajfonás operates an Appointment Request & Hold system. Intricate "
+"braiding depends on your hair length, age, and thickness, so we do not offer"
+" instant bookings. Instead, you configure a style, submit hair photos, and "
+"send a deposit. Your slot is held temporarily while we review your request "
+"and approve or decline it."
+msgstr ""
+"Afrikai Hajfonás operates an Appointment Request & Hold system. Intricate "
+"braiding depends on your hair length, age, and thickness, so we do not offer"
+" instant bookings. Instead, you configure a style, submit hair photos, and "
+"send a deposit. Your slot is held temporarily while we review your request "
+"and approve or decline it."
+
+#: templates/pages/terms.html
+msgid "Deposit & Hold Policy"
+msgstr "Deposit & Hold Policy"
+
+#: templates/pages/terms.html
+msgid ""
+"A deposit is required to hold your requested time slot. The deposit amount "
+"depends on the service"
+msgstr ""
+"A deposit is required to hold your requested time slot. The deposit amount "
+"depends on the service"
+
+#: templates/pages/terms.html
+msgid "Services of 45,000 Ft or more: a 20,000 Ft deposit."
+msgstr "Services of 45,000 Ft or more: a 20,000 Ft deposit."
+
+#: templates/pages/terms.html
+msgid "Services under 45,000 Ft: a 10,000 Ft deposit."
+msgstr "Services under 45,000 Ft: a 10,000 Ft deposit."
+
+#: templates/pages/terms.html
+msgid ""
+"Once submitted, your slot is held for 12 hours. If we do not confirm within "
+"that window, the hold expires and the slot is released."
+msgstr ""
+"Once submitted, your slot is held for 12 hours. If we do not confirm within "
+"that window, the hold expires and the slot is released."
+
+#: templates/pages/terms.html
+msgid ""
+"Payments are made by manual bank transfer only (Revolut, Wise, TransferGo, "
+"or bank transfer). We do not accept card payments. Deposits are non-"
+"refundable except where required by law or where we decline your request — "
+"in which case a full refund is arranged via our refund queue."
+msgstr ""
+"Payments are made by manual bank transfer only (Revolut, Wise, TransferGo, "
+"or bank transfer). We do not accept card payments. Deposits are non-"
+"refundable except where required by law or where we decline your request — "
+"in which case a full refund is arranged via our refund queue."
+
+#: templates/pages/terms.html
+msgid "Appointment Request Process"
+msgstr "Appointment Request Process"
+
+#: templates/pages/terms.html
+msgid "Choose your style"
+msgstr "Choose your style"
+
+#: templates/pages/terms.html
+msgid "Select a service and configure your options."
+msgstr "Select a service and configure your options."
+
+#: templates/pages/terms.html
+msgid "Pick a stylist, date & time"
+msgstr "Pick a stylist, date & time"
+
+#: templates/pages/terms.html
+msgid "Choose from available slots based on the stylist"
+msgstr "Choose from available slots based on the stylist"
+
+#: templates/pages/terms.html
+msgid "Share your details & photos"
+msgstr "Share your details & photos"
+
+#: templates/pages/terms.html
+msgid ""
+"Provide your contact details and clear hair photos so we can assess "
+"suitability."
+msgstr ""
+"Provide your contact details and clear hair photos so we can assess "
+"suitability."
+
+#: templates/pages/terms.html
+msgid "Send your deposit"
+msgstr "Send your deposit"
+
+#: templates/pages/terms.html
+msgid ""
+"Transfer the deposit and upload your proof of payment using your reference "
+"code (AFH-XXXXXX)."
+msgstr ""
+"Transfer the deposit and upload your proof of payment using your reference "
+"code (AFH-XXXXXX)."
+
+#: templates/pages/terms.html
+msgid ""
+"We then verify your deposit and review your hair photos. You will receive a "
+"confirmation once your appointment is approved. You can check your status "
+"anytime via the booking status lookup."
+msgstr ""
+"We then verify your deposit and review your hair photos. You will receive a "
+"confirmation once your appointment is approved. You can check your status "
+"anytime via the booking status lookup."
+
+#: templates/pages/terms.html
+msgid "Photo Submission Policy"
+msgstr "Photo Submission Policy"
+
+#: templates/pages/terms.html
+msgid ""
+"To assess whether your hair suits the chosen style, we ask for three photos:"
+" front, side, and back. These help us confirm length, texture, and thickness"
+" before you commit."
+msgstr ""
+"To assess whether your hair suits the chosen style, we ask for three photos:"
+" front, side, and back. These help us confirm length, texture, and thickness"
+" before you commit."
+
+#: templates/pages/terms.html
+msgid ""
+"Accepted formats: JPG, JPEG, PNG, and WEBP, up to 5 MB per photo. Photos are"
+" reviewed only by our team and stored securely. See our Privacy Policy for "
+"how your images are handled."
+msgstr ""
+"Accepted formats: JPG, JPEG, PNG, and WEBP, up to 5 MB per photo. Photos are"
+" reviewed only by our team and stored securely. See our Privacy Policy for "
+"how your images are handled."
+
+#: templates/pages/terms.html
+msgid ""
+"Proof of payment (a screenshot of your bank transfer) may be uploaded as "
+"JPG, JPEG, PNG, or PDF, up to 5 MB."
+msgstr ""
+"Proof of payment (a screenshot of your bank transfer) may be uploaded as "
+"JPG, JPEG, PNG, or PDF, up to 5 MB."
+
+#: templates/pages/terms.html
+msgid "Cancellation Policy"
+msgstr "Cancellation Policy"
+
+#: templates/pages/terms.html
+msgid ""
+"If you need to cancel, please contact us as early as possible. Because "
+"braiding appointments reserve several hours of a stylist"
+msgstr ""
+"If you need to cancel, please contact us as early as possible. Because "
+"braiding appointments reserve several hours of a stylist"
+
+#: templates/pages/terms.html
+msgid "If we decline your request, your deposit is refunded in full."
+msgstr "If we decline your request, your deposit is refunded in full."
+
+#: templates/pages/terms.html
+msgid ""
+"If your request expires (no action within 12 hours), it is moved to our "
+"refund queue for processing."
+msgstr ""
+"If your request expires (no action within 12 hours), it is moved to our "
+"refund queue for processing."
+
+#: templates/pages/terms.html
+msgid ""
+"No-shows or late cancellations of approved appointments may forfeit the "
+"deposit."
+msgstr ""
+"No-shows or late cancellations of approved appointments may forfeit the "
+"deposit."
+
+#: templates/pages/terms.html
+msgid "Questions about these terms?"
+msgstr "Questions about these terms?"
+
+#: templates/services/service_detail.html
+msgid "No image available"
+msgstr "No image available"
+
+#: templates/services/service_detail.html
+msgid "Available Options"
+msgstr "Available Options"
+
+#: templates/services/service_detail.html
+msgid "Style Details"
+msgstr "Style Details"
+
+#: templates/services/service_detail.html
+msgid "Suitability Information"
+msgstr "Suitability Information"
+
+#: templates/services/service_detail.html
+msgid "Target Audience"
+msgstr "Target Audience"
+
+#: templates/services/service_detail.html
+msgid "Best For"
+msgstr "Best For"
+
+#: templates/services/service_detail.html
+msgid "Not specified"
+msgstr "Not specified"
+
+#: templates/services/service_detail.html
+msgid "IMPORTANT"
+msgstr "IMPORTANT"
+
+#: templates/services/service_detail.html
+msgid "Watch Video"
+msgstr "Watch Video"
+
+#: templates/services/service_detail.html
+msgid "View a video of this style"
+msgstr "View a video of this style"
+
+#: templates/services/service_detail.html
+msgid "Book Consultation"
+msgstr "Book Consultation"
+
+#: templates/services/service_list.html
+msgid "Explore Braid Styles"
+msgstr "Explore Braid Styles"
+
+#: templates/services/service_list.html
+msgid "Children"
+msgstr "Children"
+
+#: templates/services/service_list.html
+msgid "Search for cornrows, pop smoke, twists..."
+msgstr "Search for cornrows, pop smoke, twists..."
+
+#: templates/services/partials/service_grid.html
+msgid "Filters"
+msgstr "Filters"
+
+#: templates/services/partials/service_grid.html
+msgid "Braid Type"
+msgstr "Braid Type"
+
+#: templates/services/partials/service_grid.html
+msgid "All Types"
+msgstr "All Types"
+
+#: templates/services/partials/service_grid.html
+msgid "Price Range (HUF)"
+msgstr "Price Range (HUF)"
+
+#: templates/services/partials/service_grid.html
+msgid "Min"
+msgstr "Min"
+
+#: templates/services/partials/service_grid.html
+msgid "to"
+msgstr "to"
+
+#: templates/services/partials/service_grid.html
+msgid "Max"
+msgstr "Max"
+
+#: templates/services/partials/service_grid.html
+msgid "Max Duration"
+msgstr "Max Duration"
+
+#: templates/services/partials/service_grid.html
+msgid "Any Duration"
+msgstr "Any Duration"
+
+#: templates/services/partials/service_grid.html
+msgid "Under 1 hour"
+msgstr "Under 1 hour"
+
+#: templates/services/partials/service_grid.html
+msgid "Under 2 hours"
+msgstr "Under 2 hours"
+
+#: templates/services/partials/service_grid.html
+msgid "Under 3 hours"
+msgstr "Under 3 hours"
+
+#: templates/services/partials/service_grid.html
+msgid "Under 4 hours"
+msgstr "Under 4 hours"
+
+#: templates/services/partials/service_grid.html
+msgid "Discounted styles only"
+msgstr "Discounted styles only"
+
+#: templates/services/partials/service_grid.html
+msgid "Sort By"
+msgstr "Sort By"
+
+#: templates/services/partials/service_grid.html
+msgid "Most Popular"
+msgstr "Most Popular"
+
+#: templates/services/partials/service_grid.html
+msgid "Price (Low to High)"
+msgstr "Price (Low to High)"
+
+#: templates/services/partials/service_grid.html
+msgid "Price (High to Low)"
+msgstr "Price (High to Low)"
+
+#: templates/services/partials/service_grid.html
+msgid "Biggest Discount"
+msgstr "Biggest Discount"
+
+#: templates/services/partials/service_grid.html
+msgid "Newest Styles"
+msgstr "Newest Styles"
+
+#: templates/services/partials/service_grid.html
+msgid "Apply Filters"
+msgstr "Apply Filters"
+
+#: templates/services/partials/service_grid.html
+msgid "No services match your search."
+msgstr "No services match your search."
+
+#: templates/services/partials/service_grid.html
+msgid ""
+"Try adjusting your filters, clearing prices, or entering a new keyword."
+msgstr ""
+"Try adjusting your filters, clearing prices, or entering a new keyword."

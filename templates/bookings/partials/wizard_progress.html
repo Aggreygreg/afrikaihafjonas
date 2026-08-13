@@ -1,0 +1,34 @@
+{% load i18n %}
+<!--
+  Generic 4-step wizard progress indicator.
+  Pass `current_step` (1-4) from the view; the matching step is highlighted.
+  Reused by the standalone Step 3 & Step 4 pages so the progress bar stays
+  in sync without duplicating markup.
+-->
+<ol class="flex items-center w-full max-w-3xl mx-auto">
+    <li class="flex items-center w-full last:w-auto">
+        <div class="flex flex-col items-center">
+            <span class="flex items-center justify-center w-9 h-9 rounded-full font-semibold text-sm {% if current_step >= 1 %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">1</span>
+            <span class="mt-1 text-xs font-medium {% if current_step == 1 %}text-blue-700{% else %}text-gray-500{% endif %}">{% trans "Configure" %}</span>
+        </div>
+        <div class="flex-1 h-1 mx-2 rounded {% if current_step >= 2 %}bg-blue-600{% else %}bg-gray-200{% endif %}"></div>
+    </li>
+    <li class="flex items-center w-full last:w-auto">
+        <div class="flex flex-col items-center">
+            <span class="flex items-center justify-center w-9 h-9 rounded-full font-semibold text-sm {% if current_step >= 2 %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">2</span>
+            <span class="mt-1 text-xs font-medium {% if current_step == 2 %}text-blue-700{% else %}text-gray-500{% endif %}">{% trans "Schedule" %}</span>
+        </div>
+        <div class="flex-1 h-1 mx-2 rounded {% if current_step >= 3 %}bg-blue-600{% else %}bg-gray-200{% endif %}"></div>
+    </li>
+    <li class="flex items-center w-full last:w-auto">
+        <div class="flex flex-col items-center">
+            <span class="flex items-center justify-center w-9 h-9 rounded-full font-semibold text-sm {% if current_step >= 3 %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">3</span>
+            <span class="mt-1 text-xs font-medium {% if current_step == 3 %}text-blue-700{% else %}text-gray-500{% endif %}">{% trans "Details" %}</span>
+        </div>
+        <div class="flex-1 h-1 mx-2 rounded {% if current_step >= 4 %}bg-blue-600{% else %}bg-gray-200{% endif %}"></div>
+    </li>
+    <li class="flex flex-col items-center">
+        <span class="flex items-center justify-center w-9 h-9 rounded-full font-semibold text-sm {% if current_step >= 4 %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">4</span>
+        <span class="mt-1 text-xs font-medium {% if current_step == 4 %}text-blue-700{% else %}text-gray-500{% endif %}">{% trans "Review" %}</span>
+    </li>
+</ol>

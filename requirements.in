@@ -12,6 +12,7 @@ pillow
 # Frontend
 django-tailwind
 django-htmx
+pytailwindcss  # standalone Tailwind CLI — required by django-tailwind theme
 
 # Site Config
 django-solo
@@ -19,3 +20,10 @@ django-solo
 # Testing
 pytest
 pytest-django
+
+# i18n tooling (po/mo file management without GNU gettext)
+polib
+
+# Phase 7 — Admin-managed content
+django-summernote  # WYSIWYG for website content (Decision #33)
+bleach             # HTML sanitization for WYSIWYG output
