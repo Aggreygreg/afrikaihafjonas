@@ -322,8 +322,10 @@
 - [x] Seed data: FAQ items, ContentBlocks, Announcement
 - [x] Migrations 0004-0005
 
-**⚠️ Partial — Static Page Prose Migration (spec §8.4):**
-Only the main prose sections of About/Terms/Privacy use ContentBlocks with fallback. Other page sections (Our Mission, Values, Team, Trust badges on About page) remain hardcoded `{% trans %}`. The spec says "Body text, policy text, about text" should move — the main body text did. Full migration of all page prose is polish work.
+**Static Page Prose Migration (§8.4) — ✅ Complete:**
+- All main body content on About/Terms/Privacy uses ContentBlock with `{% trans %}` fallback
+- About page "Our Mission" prose migrated to `about_mission` ContentBlock (migration `0011`)
+- Values cards, Team section (TODO for dynamic Provider data), Trust badges remain `{% trans %}` — these are structural UI elements, not admin-editable prose
 
 ### Phase 7E: SEO Configuration ✅ (merge `865b797`)
 - [x] `GlobalSEO` (SingletonModel): canonical_site_url, og_image_default, google_verification, bing_verification

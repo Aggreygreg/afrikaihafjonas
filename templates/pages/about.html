@@ -60,12 +60,19 @@
     <div>
       <span class="text-pink-600 font-semibold uppercase tracking-wider text-sm">{% trans "Our Mission" %}</span>
       <h2 class="mt-2 text-3xl md:text-4xl font-bold text-gray-800">{% trans "Beauty, care, and integrity" %}</h2>
+      {# Phase 7D §8.4: mission prose comes from the 'about_mission' ContentBlock.
+         Falls back to this hardcoded copy if the block is missing or inactive. #}
+      {% get_content_block 'about_mission' as mission_block %}
+      {% if mission_block %}
+        <div class="prose prose-pink mt-5 max-w-none text-gray-600">{{ mission_block.body|safe }}</div>
+      {% else %}
       <p class="mt-5 text-gray-600 leading-relaxed">
         {% trans "Our mission is to deliver flawless results without compromising the health of your hair. We are honest about what each style requires — from hair length and texture to the right thickness for the design you want." %}
       </p>
       <p class="mt-4 text-gray-600 leading-relaxed">
         {% trans "That is why every booking is an appointment request, not an instant reservation. We review your photos, confirm your hair is suited to the style, and only then secure your slot — so you always leave our chair delighted." %}
       </p>
+      {% endif %}
     </div>
   </div>
 </section>
