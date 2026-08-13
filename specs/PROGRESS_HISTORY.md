@@ -283,7 +283,7 @@
 - [x] `payment_method` → `payment_method_fk` replaced everywhere (views, admin, forms, RefundQueueAdmin)
 - [x] Migrations 0004-0007 (models + seed + data migration + fix)
 
-### Phase 7C: Editable Email Templates — Infrastructure ✅ / Triggers Partial (merge `854ca3c`)
+### Phase 7C: Editable Email Templates — ✅ Complete (merge `854ca3c` + commit `6fafc51`)
 - [x] `EmailTemplate` model (8 developer-controlled email types, `is_active` toggle)
 - [x] `EmailTemplateTranslation` model (subject + body_text + optional body_html, `unique_together`)
 - [x] `email_service.py`: `render_text()` (regex `{{ key }}` substitution — NOT Django template engine, Decision #34), `render_email()` (language fallback: requested → HU), `find_unknown_placeholders()` / `find_placeholders()`, `EMAIL_PLACEHOLDERS` (31 canonical keys)
@@ -293,21 +293,23 @@
 - [x] Transactional vs newsletter strictly separate (Decision #29)
 - [x] `send_expiry_reminders` command refactored to use `render_email()` with legacy template fallback
 - [x] Migrations 0006-0007
+- [x] **`notifications.py`** — `send_appointment_email(appointment, email_type, request=None)` module with `_build_context()` (31 canonical keys), `_build_absolute_url()`, `_format_selected_options()`. Uses `appointment.customer_language` for language selection. `request` optional (management commands fall back to `SiteConfiguration.website_url + reverse()`).
+- [x] **All 8 email triggers wired** (commit `6fafc51`)
 
-**⚠️ Email Trigger Status (7 of 8 types have no code trigger):**
+**✅ Email Trigger Status (8/8 ACTIVE):**
 
 | Email Type | Template Seeded | Code Trigger | Status |
 |---|---|---|---|
 | `expiry_reminder` | ✅ | ✅ `send_expiry_reminders` command (`render_email()` + legacy fallback) | **ACTIVE** |
-| `request_received` | ✅ | ❌ No trigger in Step 3 submit view | **FUTURE WORK** |
-| `verification_pending` | ✅ | ❌ No trigger in Step 4 submit view | **FUTURE WORK** |
-| `payment_verified` | ✅ | ❌ `verify_payments` admin action sends no email | **FUTURE WORK** |
-| `appointment_approved` | ✅ | ❌ `approve_requests` admin action sends no email | **FUTURE WORK** |
-| `appointment_rejected` | ✅ | ❌ `reject_requests` admin action sends no email | **FUTURE WORK** |
-| `appointment_expired` | ✅ | ❌ `expire_holds` sends raw `mail_admins()` (admin notification only, not template-based, not customer-facing) | **FUTURE WORK** |
-| `refund_notification` | ✅ | ❌ `complete_refunds` admin action sends no email | **FUTURE WORK** |
+| `request_received` | ✅ | ✅ `wizard_step_3` view (POST success) | **ACTIVE** |
+| `verification_pending` | ✅ | ✅ `wizard_step_4` view (snapshot created) | **ACTIVE** |
+| `payment_verified` | ✅ | ✅ `verify_payments` admin action | **ACTIVE** |
+| `appointment_approved` | ✅ | ✅ `approve_requests` admin action | **ACTIVE** |
+| `appointment_rejected` | ✅ | ✅ `reject_requests` admin action | **ACTIVE** |
+| `appointment_expired` | ✅ | ✅ `expire_holds` command | **ACTIVE** |
+| `refund_notification` | ✅ | ✅ `complete_refunds` admin action | **ACTIVE** |
 
-> **Note:** Phase 7C's deliverable per spec §7 was the email infrastructure (models, rendering service, placeholder validation, seed data). The spec assigns trigger logic to the developer ("Email-sending logic (when/where/trigger)"). The trigger wiring is a separate implementation step — the templates and rendering pipeline are ready; the `send_mail` calls in views/admin actions are not yet added.
+**Tests:** 18 notification tests in `apps/bookings/tests.py` (`NotificationTests` + `NotificationEdgeCaseTests`) — context building, all trigger paths, language selection, graceful failures, inactive templates. Total suite: **92 passed, 0 skipped**.
 
 ### Phase 7D: Customer-Facing Content ✅ (merge in `0a68461`)
 - [x] `FAQ` + `FAQTranslation` (question, answer per language)
