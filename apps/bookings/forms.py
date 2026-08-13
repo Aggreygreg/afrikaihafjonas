@@ -210,14 +210,17 @@ class WizardStep4Form(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Only show active payment methods, ordered by display_order
-        self.fields["payment_method_fk"].queryset = PaymentMethod.objects.filter(
-            is_active=True
-        )
         self.fields["payment_method_fk"].required = True
         self.fields["payment_method_fk"].label_from_instance = lambda obj: obj.name
         self.fields["payment_method_fk"].empty_label = None
-        self.fields["payment_method_fk"].widget.attrs.update({"class": "sr-only peer"})
+        # Use RadioSelect so the template can iterate choices as <input type="radio">.
+        # Must be set BEFORE queryset so choices propagate to the widget.
+        self.fields["payment_method_fk"].widget = forms.RadioSelect(
+            attrs={"class": "sr-only peer"}
+        )
+        self.fields["payment_method_fk"].queryset = PaymentMethod.objects.filter(
+            is_active=True
+        )
         self.fields["proof_of_payment"].widget.attrs.update(
             {
                 "accept": "image/jpeg,image/png,application/pdf",
