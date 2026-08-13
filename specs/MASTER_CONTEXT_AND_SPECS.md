@@ -1,6 +1,6 @@
 # AFRIKAI HAJFONÁS – MASTER PROJECT CONTEXT & SPECIFICATION
 
-**Last Updated:** August 12, 2026
+**Last Updated:** August 13, 2026
 **Role/Purpose:** This document is the absolute source of truth for all autonomous coding agents and developers working on this repository. If a feature or approach contradicts this document, this document wins.
 
 > **See also:** `ARCHITECTURAL_PRINCIPLES.md` — comprehensive specification for Phase 7 (A-E). Covers: business-managed content principle, three content categories (developer UI / admin reusable / appointment-specific), multilingual content strategy (parent + translation records, NOT `{% trans %}` for admin content), payment method architecture with mandatory historical snapshots, appointment language persistence, transactional email system, and SEO configuration. Read before implementing any Phase 7 work.
@@ -37,8 +37,7 @@ Afrikai Hajfónás is a premium hairstyle consultation and booking platform for 
 **Behavior:**
 - On selection: Set `localStorage.setItem('afrikai_lang_selected', langCode)` where `langCode` is `hu`, `en`, or `de`
 - Set a cookie `afrikai_lang` with the same value (for server-side i18n)
-- Reload the page with the `Accept-Language` header or Django's `i18n` URL prefix (`/en/`, `/de/`, or default `/hu/`)
-- Close the popup (don't reload if using URL-based i18n)
+- Django's `LocaleMiddleware` activates the selected language via the cookie/session — the site does **not** use URL language prefixes (`/en/`, `/de/`), so all languages share the same URL paths
 
 **Implementation Notes:**
 - The popup itself should be a Django template partial, included in `base.html`
@@ -108,13 +107,13 @@ apps/
 | Relations | `service` (FK), `provider` (FK), `selected_options` (JSONField, frozen historical snapshot) |
 | Client Data | `client_name`, `client_email`, `client_phone`, `client_age` |
 | Hair Data | `hair_length` (Choices: Ear, Chin, Neck, Shoulder, Armpit, Bra Strap, Mid Back, Waist, Hip), `photo_front`, `photo_side`, `photo_back` |
-| Financials | `deposit_amount`, `payment_method` (Revolut, Wise, TransferGo, Bank Transfer — currently TextChoices, migrating to FK in Phase 7B), `payment_reference` (Auto-generated `AFH-XXXXXX`), `proof_of_payment` (**blank=True** — created at Step 3, proof added at Step 4) |
+| Financials | `deposit_amount`, `payment_method_fk` (FK to admin-managed `PaymentMethod` model, `on_delete=SET_NULL` — implemented in Phase 7B), `payment_reference` (Auto-generated `AFH-XXXXXX`), `proof_of_payment` (**blank=True** — created at Step 3, proof added at Step 4) |
 
-> **Planned Migration (Phase 7B):** Per `ARCHITECTURAL_PRINCIPLES.md`, `payment_method` will migrate from hardcoded TextChoices to a dynamic `PaymentMethod` model with admin-managed `PaymentDetailField` entries. Each method will support configurable detail fields (IBAN, account holder, QR codes, etc.). Existing records will be preserved via data migration.
+> **Payment Architecture (Phase 7B — implemented ✅):** `payment_method` migrated from hardcoded TextChoices to a dynamic `PaymentMethod` model with admin-managed `PaymentDetailField` entries (IBAN, account holder, QR codes, etc.). Each appointment has a frozen `AppointmentPaymentSnapshot` preserving the payment configuration at submission time. `payment_method_fk` uses `on_delete=SET_NULL` so historical FK references survive method deletion. See `ARCHITECTURAL_PRINCIPLES.md` §6.
 >
-> **Historical Snapshot (Phase 7B, mandatory):** An `AppointmentPaymentSnapshot` will freeze the payment configuration at submission time. Later admin edits to `PaymentMethod` or `PaymentDetailField` will NOT alter historical appointment records. See `ARCHITECTURAL_PRINCIPLES.md` §6.2.
+> **Historical Snapshot (Phase 7B, mandatory):** `AppointmentPaymentSnapshot` freezes the payment configuration at submission time. Later admin edits to `PaymentMethod` or `PaymentDetailField` will NOT alter historical appointment records. See `ARCHITECTURAL_PRINCIPLES.md` §6.2.
 >
-> **Appointment Language (Phase 7B/7C, mandatory):** `AppointmentRequest.customer_language` (hu/en/de) will be captured at submission and used for all transactional emails. See `ARCHITECTURAL_PRINCIPLES.md` §10.
+> **Appointment Language (Phase 7B/7C, mandatory):** `AppointmentRequest.customer_language` (hu/en/de) is captured at Step 3 submission and used for all transactional emails. See `ARCHITECTURAL_PRINCIPLES.md` §10.
 | Timers & State | `target_date`, `target_time`, `created_at`, `held_until` (default 12 hours from creation) |
 | Status | `pending_verification`, `pending_review`, `approved`, `rejected`, `expired` |
 | Payment Status | `pending_verification`, `verified`, `rejected` |

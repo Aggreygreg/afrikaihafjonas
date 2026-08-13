@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Key Decisions & Rationale
 
-**Last Updated:** August 12, 2026
+**Last Updated:** August 13, 2026
 
 ---
 
@@ -257,7 +257,7 @@
 4. Customer-Facing Content (multilingual) — FAQ, content blocks, announcements (Phase 7D)
 5. SEO Configuration (multilingual) — `GlobalSEO`, `PageSEO` with translations, including per-Service SEO (Phase 7E)
 
-**Implementation:** Phased as Phase 7 (A-E). Not started yet. All queued in ARCHITECTURAL_PRINCIPLES.md (Rev 2).
+**Implementation:** ✅ Complete — Phased as Phase 7 (A-E). All tracks built, tested, and merged to `main4qp`. See `ARCHITECTURAL_PRINCIPLES.md` (Rev 3) and `PROGRESS_HISTORY.md` for full implementation details.
 
 **Preserved:** All existing business rules (deposit math, 12-hour hold, age validation, photo rules, anti-patterns) remain unchanged. This principle moves **where** config lives, not **what** the rules are.
 

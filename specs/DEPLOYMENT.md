@@ -12,7 +12,7 @@ clean clone to a production server.
 - Python 3.12+
 - PostgreSQL 14+
 - A reverse proxy (nginx, Caddy, or Cloudflare Tunnel) terminating TLS
-- `gettext` installed on the server (for `.mo` compilation)
+- `gettext` installed on the server (for `.mo` compilation) — or use the `polib`-based `_compile_mo.py` script (no gettext needed)
 
 ---
 
@@ -53,6 +53,7 @@ Edit `.env` and set **all** required values:
 | `EMAIL_USE_TLS` | If SMTP | `True` |
 | `DEFAULT_FROM_EMAIL` | Recommended | `noreply@afrikaihajfonas.hu` |
 | `CSRF_TRUSTED_ORIGINS` | ✅ | `https://afrikaihajfonas.hu,https://www.afrikaihajfonas.hu` |
+| `SECURE_SSL_REDIRECT` | Optional | `True` (default). Set `False` if CDN/proxy handles SSL redirect at edge. |
 | `SECURE_HSTS_SECONDS` | Optional | `31536000` (1 year, default) |
 
 ---
@@ -197,7 +198,7 @@ Example crontab:
 
 When `DEBUG=False`, the following security settings activate automatically:
 
-- `SECURE_SSL_REDIRECT = True` — forces HTTPS
+- `SECURE_SSL_REDIRECT = True` — forces HTTPS (env-configurable via `SECURE_SSL_REDIRECT`, set `False` if CDN/proxy handles redirect)
 - `SESSION_COOKIE_SECURE = True` — cookies only over HTTPS
 - `CSRF_COOKIE_SECURE = True` — CSRF cookie only over HTTPS
 - `SECURE_HSTS_SECONDS = 31536000` — HSTS 1 year

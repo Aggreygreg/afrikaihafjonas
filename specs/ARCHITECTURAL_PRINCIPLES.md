@@ -1,7 +1,7 @@
 # Afrikai Hajfonás — Architectural Principles: Business-Managed Content & Configuration
 
-**Last Updated:** August 12, 2026 (Revision 2 — major architectural refinement)
-**Status:** Specification complete. Implementation tasks queued (Phase 7A–7E). NOT STARTED.
+**Last Updated:** August 13, 2026 (Revision 3 — production-ready, all phases complete)
+**Status:** ✅ Implementation complete (Phase 7A–7E). Production-hardened, smoke-tested, 98 tests passing.
 
 ---
 
@@ -758,8 +758,9 @@ These remain in code, maintained by developers:
 - `robots.txt`
 - Canonical tag logic
 - Structured data (JSON-LD schema for LocalBusiness, Service)
-- Multilingual `hreflang` tags
-- URL/routing implementation (i18n URL patterns)
+- URL/routing implementation
+
+> **hreflang — intentionally deferred.** The site uses cookie/session-based language switching (`LocaleMiddleware`), not i18n URL patterns (`/en/`, `/de/`). Without distinct URLs per language, hreflang annotations are meaningless to search engines. Implementing hreflang would require switching to `i18n_patterns`, which is a significant architectural change. Documented as a future enhancement if URL-based i18n is adopted.
 
 ---
 

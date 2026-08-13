@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Progress History
 
-**Last Updated:** August 12, 2026
+**Last Updated:** August 13, 2026
 
 ---
 
@@ -49,8 +49,8 @@
 - Session-based state management (`consult_<pk>`)
 - Dispatched to hack_3, verified, merged to main4qp
 
-### Phase 4: Wizard Steps 3-4 + Guest Lookup 📋 READY TO DISPATCH (Aug 11, 2026)
-**Status:** Analysis complete, architecture decided, ready to dispatch to builders.
+### Phase 4: Wizard Steps 3-4 + Guest Lookup — Planning (Aug 11, 2026)
+**Status:** ✅ Built and merged — see the "COMPLETE" entry below. This section preserves the original architectural plan.
 
 **Key Architecture Decision — Draft Approach:**
 - `proof_of_payment` model field changed to `blank=True` (safe — no existing AppointmentRequest objects)
@@ -357,6 +357,55 @@ Test breakdown by module:
 - **config/tests.py**: 6 tests — Technical SEO (sitemap index/sections, robots.txt, JSON-LD LocalBusiness) ✅ NEW
 - **apps/site_config/tests.py**: 74 tests — SanitizeHtml, FAQ/ContentBlock/Announcement models, template tags, render_text/render_email, placeholder validation, admin form validation, seed integrity, SEO seed verification, PageSEO constraint/clean, resolve_seo fallback chain, service SEO ✅ ALL PASSING (previously 5 skipped — fixed with Service fixtures)
 - **apps/bookings/tests.py**: 18 tests — Notification system (context building, all 8 trigger paths, language selection, graceful failures, inactive templates) ✅ ALL PASSING
+
+---
+
+### Production Hardening ✅ COMPLETE (Aug 13, 2026)
+**Status:** Production-readiness audit + end-to-end smoke testing + critical bug fix. All on `main4qp`, pushed.
+**Commits:** `45f558b`, `0373c0b`, `9716a79`
+
+**1. Production Security Settings (`45f558b`):**
+- `SECRET_KEY` / `DEBUG` / `ALLOWED_HOSTS` parsing hardened (no None crash, no empty-string)
+- `STATIC_ROOT = BASE_DIR / "staticfiles"` added
+- Email backend fully env-configurable (SMTP for prod, console for dev)
+- `CSRF_TRUSTED_ORIGINS` configurable for HTTPS production domain
+- Production security block activates when `DEBUG=False`: HSTS, secure cookies, content type nosniff, referrer policy, proxy SSL header
+- `SECURE_SSL_REDIRECT` env-configurable (default True; set False if CDN handles edge redirect)
+- `.env.example` — complete deployment env var reference
+- `specs/DEPLOYMENT.md` — 7-step deployment guide + nginx config + cron jobs + troubleshooting
+- `.gitignore` — `staticfiles/`, `mediafiles/`, `server_log.txt` added; `.env.example` un-ignored
+- `requirements.txt` recompiled: `bleach` + `django-summernote` were missing (fresh install would crash)
+
+**2. End-to-End Smoke Testing (DEBUG=False + Real SMTP):**
+- Full customer journey tested: Homepage → Service Detail → Wizard Steps 1-4 → Confirmation → Guest Lookup
+- All 4 admin workflows tested: verify payment → approve → reject → complete refund
+- Both management commands tested: `expire_holds`, `send_expiry_reminders` (2h + 1h)
+- All 8 email triggers verified via SMTP capture (correct language, correct content)
+- Security headers verified active: X-Frame-Options DENY, nosniff, Referrer-Policy, secure cookies
+- Guest Lookup verified: valid lookup returns correct details; invalid lookup shows styled error; bank details NEVER shown to customers (Decision #15/#31 respected)
+- Media file serving: 404 via Django in DEBUG=False (correct — nginx serves `/media/` in production)
+
+**3. Critical Bug Found & Fixed During Smoke Test (`0373c0b`):**
+- **Step 4 payment selector non-functional:** `WizardStep4Form.payment_method_fk` used the default `Select` widget, which rendered `<option>` tags. The template iterated choices expecting `<input type="radio">`, making the entire payment step unselectable.
+- **Fix:** Changed to `forms.RadioSelect(attrs={"class": "sr-only peer"})`. Widget must be set BEFORE queryset assignment so choices propagate correctly.
+- Re-tested: radio buttons render correctly (4 methods), HTMX detail fields load, proof upload works, submission succeeds.
+
+**4. PostgreSQL Compatibility (Code Review):**
+- No raw SQL, no `.raw()` queries, no `connection.cursor()`, no SQLite-specific code
+- `JSONField` maps to `jsonb` on PostgreSQL (cross-database compatible)
+- `CheckConstraint` uses standard `models.Q` (cross-database compatible)
+
+**Verification:**
+- `check --deploy`: 0 issues (with proper-length SECRET_KEY)
+- `collectstatic`: 195 files collected successfully
+- 98 tests passed, 0 skipped, 0 failed
+- `makemigrations --check`: clean
+- 49/49 migrations applied, 0 pending
+
+**Intentionally Deferred Limitations:**
+- PostgreSQL live instance: not tested locally (no PG installed), but code review confirms compatibility
+- Real HTTPS/TLS: not tested (no cert locally), but security headers + HSTS config verified
+- hreflang: not implemented (cookie/session-based i18n, not URL prefixes — requires `i18n_patterns` architectural change)
 
 ---
 

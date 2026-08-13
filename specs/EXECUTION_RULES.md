@@ -164,9 +164,9 @@ The main project directory (`C:\Users\Sabiedu\Projects\afrikai-hajfonas`) is sha
 ## File Organization
 
 ### 20. Photo Upload Paths
-- Hair photos: `MEDIA_ROOT/hair_photos/<AFH-XXXXXX>/`
-- Proof of payment: `MEDIA_ROOT/proof_of_payment/<AFH-XXXXXX>/`
-- Organized by reference code for easy admin lookup
+- Hair photos: `MEDIA_ROOT/hair_photos/` (flat — no AFH reference subfolders)
+- Proof of payment: `MEDIA_ROOT/payment_proofs/` (flat)
+- Paths are intentionally flat for now. AFH reference subfolders are a future optimization, not a current concern.
 - Files retained indefinitely (no auto-deletion)
 
 ### 21. Template Structure
