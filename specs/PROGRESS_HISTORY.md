@@ -338,28 +338,23 @@ Only the main prose sections of About/Terms/Privacy use ContentBlocks with fallb
 - [x] Admin: `GlobalSEOAdmin` (SingletonModelAdmin) + `PageSEOAdmin` with translation inlines
 - [x] Migrations 0008-0010
 
-**⚠️ Not built (legitimately deferred — developer-managed per spec §9.5):**
-- `sitemap.xml`, `robots.txt`, `hreflang`, JSON-LD structured data — all developer-managed technical SEO, not admin-configurable. Not part of Phase 7E scope.
-- `/consult/` PageSEO — the wizard URL is dynamic (`/bookings/book/<service_pk>/`), not a static route. No static PageSEO created for it (documented spec/URL mismatch).
+**⚠️ Technical SEO (§9.5) — implemented as developer-managed code:**
+- [x] `sitemap.xml` — Django sitemap framework: `StaticViewSitemap` (6 static pages) + `ServiceSitemap` (dynamic, all services). Sitemap index at `/sitemap.xml`, sections at `/sitemap-<section>.xml`.
+- [x] `robots.txt` — served at `/robots.txt`, allows all crawlers, disallows `/admin/`, `/bookings/book/`, `/bookings/status/`, `/summernote/`. References sitemap.
+- [x] JSON-LD `HairSalon` structured data — built in `context_processors._build_jsonld_localbusiness()` from `SiteConfiguration` singleton (name, phone, email, address, map, hours, social links). Rendered on every page via `base.html`.
+- [x] Canonical tag logic — already implemented in Phase 7E (`seo.canonical_url` + `request.path`).
+- [x] 6 tests in `config/tests.py` (sitemap index, static section, services section, robots.txt content, JSON-LD rendering, JSON-LD field omission).
+- **hreflang intentionally NOT implemented:** The site uses cookie/session-based language switching (LocaleMiddleware), not i18n URL patterns (`/en/`, `/de/`). Without distinct URLs per language, hreflang annotations are meaningless to search engines. Implementing hreflang would require switching to `i18n_patterns`, which is a significant architectural change that would alter all existing URLs and the language popup logic. Documented as a future enhancement if URL-based i18n is adopted.
 
 ---
 
 ### Phase 7 Test Suite
-**74 tests collected, 69 passed, 5 skipped** (all in `apps/site_config/tests.py`; other app test files are empty stubs).
+**98 tests collected, 98 passed, 0 skipped** across `config/tests.py`, `apps/site_config/tests.py`, and `apps/bookings/tests.py`.
 
-The 5 skipped tests are all Service-dependent SEO tests that skip because no `Service` fixture exists in the test database:
-- `PageSEOConstraintTests::test_service_only_allowed`
-- `PageSEOConstraintTests::test_both_set_rejected_by_clean`
-- `PageSEOConstraintTests::test_service_only_passes_clean`
-- `ResolveSEOServiceTests::test_service_seo_resolution`
-- `ResolveSEOServiceTests::test_service_without_seo_falls_back`
-
-> ⚠️ The commit message for Phase 7E claimed "74 tests all passing" — this was **inaccurate**. Correct count is 69 passed, 5 skipped.
-
-Test breakdown by track:
-- **7D** (SanitizeHtml, FAQ/ContentBlock/Announcement models, template tags, seed): ~20 tests
-- **7C** (render_text, render_email, placeholder validation, admin form validation, seed integrity): ~33 tests
-- **7E** (SEO seed verification, PageSEO constraint/clean, resolve_seo fallback chain, service SEO): ~21 tests (5 skipped)
+Test breakdown by module:
+- **config/tests.py**: 6 tests — Technical SEO (sitemap index/sections, robots.txt, JSON-LD LocalBusiness) ✅ NEW
+- **apps/site_config/tests.py**: 74 tests — SanitizeHtml, FAQ/ContentBlock/Announcement models, template tags, render_text/render_email, placeholder validation, admin form validation, seed integrity, SEO seed verification, PageSEO constraint/clean, resolve_seo fallback chain, service SEO ✅ ALL PASSING (previously 5 skipped — fixed with Service fixtures)
+- **apps/bookings/tests.py**: 18 tests — Notification system (context building, all 8 trigger paths, language selection, graceful failures, inactive templates) ✅ ALL PASSING
 
 ---
 

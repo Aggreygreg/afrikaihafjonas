@@ -35,6 +35,9 @@
     <meta name="msvalidate.01" content="{{ seo.bing_verification }}">
   {% endif %}
 
+  <!-- JSON-LD LocalBusiness Structured Data (§9.5) -->
+  {% include "_jsonld_localbusiness.html" %}
+
   <!-- Tailwind CDN custom config -->
   <script>
     tailwind.config = {
