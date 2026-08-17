@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Execution Rules
 
-**Last Updated:** August 11, 2026
+**Last Updated:** August 17, 2026
 **Purpose:** Guardrails for builder agents (hack_1, hack_2, hack_3, etc.) working on this project. These rules are non-negotiable.
 
 ---
@@ -23,10 +23,10 @@
 - Do NOT batch 10 different feature updates into one massive commit
 
 ### 3. Branching
-- Feature branches fork from `main4qp`
-- Merge back into `main4qp` when complete
+- Feature branches fork from `main` (**updated Aug 17, 2026** — `main4qp` was merged and retired)
+- Merge back into `main` when complete
 - Delete feature branch after merge (clean repo)
-- Final merge into `main` when stable
+- `main4qp` still exists but is history-only — do NOT target it
 
 ### 4. Security
 - Fine-Grained PAT only (no root SSH keys)
@@ -98,10 +98,11 @@ The main project directory (`C:\Users\Sabiedu\Projects\afrikai-hajfonas`) is sha
 - Enforced everywhere: models, templates, admin
 - `@property` methods for formatting, never template tags
 
-### 9. i18n = Wrap Now, Translate Later
-- All template strings wrapped in `{% trans %}` during construction
-- Translation files and language popup deferred to final polish phase
-- No translation work during active development
+### 9. i18n = Wrap Now, Translate Later (NOW FULLY BUILT)
+- All template strings wrapped in `{% trans %}` ✅ (323 msgids)
+- Translations complete: HU/EN/DE `.po` files tracked; `.mo` are build artifacts — after a fresh clone run `_build_po.py` → `_apply_translations.py` → `_compile_mo.py` (polib, no gettext needed)
+- Language switching: `django_language` cookie + `/i18n/setlang/` (first-visit modal in `base.html`); no URL prefixes
+- New UI strings: wrap in `{% trans %}` immediately, add msgids to all 3 `.po` files, keep msgids in English
 
 ### 10. Fat Models, Skinny Templates
 - All business logic in Django model `@property` methods or `utils.py`
@@ -235,3 +236,20 @@ git checkout -b feature/<name>
 9. **NO** SMS integrations
 10. **NO** multi-tenant logic
 11. **NO** process-termination commands (`Stop-Process`, `taskkill`, `pkill`) on ANY process you didn't start — see Rule 4.5
+
+---
+
+## Known Gotchas / Open Issues (as of Aug 17, 2026)
+
+Read before touching these areas — do not "discover" them the hard way:
+
+1. **HTMX is NOT loaded globally.** The `<script src="unpkg.com/htmx.org@1.9.12">` include exists only in `consult_wizard.html`, `wizard_step_3.html`, `wizard_step_4.html`. `service_list.html` uses `hx-get` + calls `htmx.trigger()` **without loading the library** — catalog live filtering (gender tabs, debounced search) is non-functional; native form submit still works. If you build a new HTMX page, include the script on THAT template.
+2. **Tailwind is loaded via CDN** (`cdn.tailwindcss.com` in `base.html`). The `theme/` + `django-tailwind` build chain exists but its compiled CSS is not committed or referenced; `static/` only has a `.gitkeep`. Dev setup needs NO npm.
+3. **Docker is not real.** `Dockerfile` is a stub (env vars + WORKDIR only, no pip install/CMD). Supported setup = venv (see README).
+4. **Dead config:** `SECURE_REDIRECT_EXEMPT` lists `/health-check/` but no such URL exists. Harmless; remove if you add a health-check route.
+5. **No public FAQ page** — `FAQ`/`FAQTranslation` models + admin exist; nav "FAQs" links are `#faq`/`#` placeholders. Build the view/template before pointing nav links at it.
+6. **Canonical migration count = 47.** The two `payments` migrations were intentionally deleted at decommission (`e2687c8`); `apps/payments/` is an empty shell kept only to avoid import errors.
+7. **Windows console:** run Python with `set "PYTHONIOENCODING=utf-8"` (cp1252 default mangles HU/DE text); wrap cmd `set` values in quotes.
+8. **Pytest:** always pass explicit test file paths (e.g. `pytest apps/bookings/tests.py`), not bare `pytest`.
+9. **Locked dev DB:** if `db.sqlite3` is held by another process, don't move it — run tests/migrations against a temp DB via `DATABASE_URL=sqlite:///db_fresh_test.sqlite3`.
+10. **Uploads are flat:** `MEDIA_ROOT/hair_photos/` and `MEDIA_ROOT/payment_proofs/` — no per-app subdirectories (Rule 20).

@@ -1,6 +1,6 @@
 # AFRIKAI HAJFONÁS – MASTER PROJECT CONTEXT & SPECIFICATION
 
-**Last Updated:** August 13, 2026
+**Last Updated:** August 17, 2026 (synced to `main` @ post-merge state)
 **Role/Purpose:** This document is the absolute source of truth for all autonomous coding agents and developers working on this repository. If a feature or approach contradicts this document, this document wins.
 
 > **See also:** `ARCHITECTURAL_PRINCIPLES.md` — comprehensive specification for Phase 7 (A-E). Covers: business-managed content principle, three content categories (developer UI / admin reusable / appointment-specific), multilingual content strategy (parent + translation records, NOT `{% trans %}` for admin content), payment method architecture with mandatory historical snapshots, appointment language persistence, transactional email system, and SEO configuration. Read before implementing any Phase 7 work.
@@ -21,29 +21,26 @@ Afrikai Hajfónás is a premium hairstyle consultation and booking platform for 
 
 ---
 
-## 2. Language Preference Popup (New Feature)
+## 2. Language Preference Modal (IMPLEMENTED — Phase 6)
 
-**What it is:** A modal/popup that appears for first-time visitors, asking them to choose their preferred language (Hungarian, English, or German).
+**What it is:** A modal that appears for first-time visitors, asking them to choose their preferred language (Hungarian, English, or German).
 
-**Trigger:** Shown on first visit only. Detected via `localStorage` key `afrikai_lang_selected`. If the key doesn't exist, show the popup. Once a language is selected, set the key and don't show again.
+**Trigger:** Shown on first visit only. The modal is rendered (hidden) in `base.html` and revealed only if the visitor has no `django_language` cookie. Once a language is chosen via Django's `set_language` view, the cookie exists and the modal never appears again.
 
-**UI:**
-- Centered modal overlay (semi-transparent backdrop)
-- Three clickable cards: 🇭🇺 Magyar (Hungarian), 🇬🇧 English, 🇩🇪 Deutsch (German)
-- Each card shows the language name in its own script
+**UI (actual implementation):**
+- Centered modal overlay (`#lang-modal-overlay` in `base.html`) with semi-transparent backdrop
+- Three buttons: 🇬🇧 English, 🇭🇺 Magyar, 🇩🇪 Deutsch
 - No "X" close button — user MUST pick a language
-- Default selection: Hungarian (pre-highlighted)
+- A language switcher dropdown is also available in the header for later changes
 
-**Behavior:**
-- On selection: Set `localStorage.setItem('afrikai_lang_selected', langCode)` where `langCode` is `hu`, `en`, or `de`
-- Set a cookie `afrikai_lang` with the same value (for server-side i18n)
-- Django's `LocaleMiddleware` activates the selected language via the cookie/session — the site does **not** use URL language prefixes (`/en/`, `/de/`), so all languages share the same URL paths
+**Behavior (actual implementation):**
+- Each language button is its own `<form method="post" action="/i18n/setlang/">` with a CSRF token and a hidden `language` input
+- Django's built-in `set_language` view activates the language, sets the `django_language` cookie (and session), and redirects back to the `next` path
+- The site does **not** use URL language prefixes (`/en/`, `/de/`) — all languages share the same URL paths; `LocaleMiddleware` resolves the language from cookie/session
 
-**Implementation Notes:**
-- The popup itself should be a Django template partial, included in `base.html`
-- Language codes: `hu` (Hungarian), `en` (English), `de` (German)
-- Django i18n middleware handles the rest once the language is set
-- The popup must NOT flash on subsequent visits (localStorage check is client-side, instant)
+**Language codes:** `hu` (Hungarian), `en` (English), `de` (German)
+
+**Translations:** complete — 323 msgids × 3 languages (HU/EN/DE), managed via the polib script workflow (`_build_po.py` → `_apply_translations.py` → `_compile_mo.py`; `.mo` files are gitignored build artifacts — run the scripts after a fresh clone).
 
 ---
 
@@ -51,23 +48,30 @@ Afrikai Hajfónás is a premium hairstyle consultation and booking platform for 
 
 ```
 apps/
-├── site_config/      # Global settings (singleton)
+├── site_config/      # Business info singleton + admin-managed content (FAQ, ContentBlock,
+│                     # Announcement, EmailTemplate, SEO) + context processors
 ├── users/            # Custom user model (admin access)
 ├── providers/        # Stylists + weekly availability
 ├── services/         # E-Commerce engine (catalog, options, images)
-├── bookings/         # Consultation engine (AppointmentRequest + wizard)
-├── payments/         # DECOMMISSIONED (Phase 0)
-└── reviews/          # DELETED (intentionally scrapped)
+├── bookings/         # Consultation engine (AppointmentRequest + wizard + payments + emails)
+├── payments/         # DECOMMISSIONED (Phase 0) — empty shell, NOT in INSTALLED_APPS,
+│                     # migrations intentionally deleted (see §3.1)
+└── reviews/          # DELETED (intentionally scrapped — no directory exists)
 ```
 
 ### apps.site_config
-**Purpose:** Global settings injected into all templates via a Context Processor.
+**Purpose:** Global settings injected into all templates via a Context Processor, plus all admin-managed content models (Phase 7).
 
-**Fields:** Salon address, phone, email, Hero Title, Hero Subtitle, Hero Background Image, Instagram/TikTok/Facebook links.
+**SiteConfiguration (solo singleton — expanded in Phase 7A ✅):** business name, address, address description/directions, phone, email, business hours, Google Maps link, website URL, logo, favicon, hero title/subtitle/image, Instagram/TikTok/Facebook links.
 
-> **Planned Expansion (Phase 7A):** Per `ARCHITECTURAL_PRINCIPLES.md`, this model will be extended with: business name, address directions, working hours, Google Maps link, website URL, logo, favicon, and global SEO fields. All customer-facing business information should live here, not in templates.
+**Content models (all with parent + per-language translation records — see ARCHITECTURAL_PRINCIPLES §3/§4):**
+- `FAQ` + `FAQTranslation` — admin-managed FAQs (**note:** no public FAQ page is built yet; nav links are placeholders)
+- `ContentBlock` + `ContentBlockTranslation` — static page prose by slug (`about_page`, `terms_page`, `privacy_page`, `about_mission`; templates fall back to hardcoded copy when a block is inactive/missing)
+- `Announcement` + `AnnouncementTranslation` — site banner system
+- `EmailTemplate` + `EmailTemplateTranslation` — 8 transactional email types × 3 languages (seeded)
+- `GlobalSEO` + `GlobalSEOTranslation`, `PageSEO` + `PageSEOTranslation` — SEO metadata (Phase 7E)
 
-**Usage:** `{{ config.salon_phone }}` available in any template.
+**Usage:** `{{ config.salon_phone }}` available in any template; SEO metadata via the `seo` context processor.
 
 ### apps.users & apps.providers
 **User:** Standard custom user model for admin access. No client accounts — clients are anonymous consultation submitters.
@@ -108,16 +112,17 @@ apps/
 | Client Data | `client_name`, `client_email`, `client_phone`, `client_age` |
 | Hair Data | `hair_length` (Choices: Ear, Chin, Neck, Shoulder, Armpit, Bra Strap, Mid Back, Waist, Hip), `photo_front`, `photo_side`, `photo_back` |
 | Financials | `deposit_amount`, `payment_method_fk` (FK to admin-managed `PaymentMethod` model, `on_delete=SET_NULL` — implemented in Phase 7B), `payment_reference` (Auto-generated `AFH-XXXXXX`), `proof_of_payment` (**blank=True** — created at Step 3, proof added at Step 4) |
+| Timers & State | `target_date`, `target_time`, `created_at`, `held_until` (default 12 hours from creation), `reminder_2h_sent`, `reminder_1h_sent` |
+| Status | `pending_verification`, `pending_review`, `approved`, `rejected`, `expired` |
+| Payment Status | `pending_verification`, `verified`, `rejected` |
+| Language | `customer_language` (hu/en/de — captured at Step 3 submission, immutable; drives all transactional email language) |
+| Notes | `admin_notes` (client-visible on Guest Lookup — Category C free-form content, NOT auto-translated), `internal_notes` (private) |
 
 > **Payment Architecture (Phase 7B — implemented ✅):** `payment_method` migrated from hardcoded TextChoices to a dynamic `PaymentMethod` model with admin-managed `PaymentDetailField` entries (IBAN, account holder, QR codes, etc.). Each appointment has a frozen `AppointmentPaymentSnapshot` preserving the payment configuration at submission time. `payment_method_fk` uses `on_delete=SET_NULL` so historical FK references survive method deletion. See `ARCHITECTURAL_PRINCIPLES.md` §6.
 >
 > **Historical Snapshot (Phase 7B, mandatory):** `AppointmentPaymentSnapshot` freezes the payment configuration at submission time. Later admin edits to `PaymentMethod` or `PaymentDetailField` will NOT alter historical appointment records. See `ARCHITECTURAL_PRINCIPLES.md` §6.2.
 >
 > **Appointment Language (Phase 7B/7C, mandatory):** `AppointmentRequest.customer_language` (hu/en/de) is captured at Step 3 submission and used for all transactional emails. See `ARCHITECTURAL_PRINCIPLES.md` §10.
-| Timers & State | `target_date`, `target_time`, `created_at`, `held_until` (default 12 hours from creation) |
-| Status | `pending_verification`, `pending_review`, `approved`, `rejected`, `expired` |
-| Payment Status | `pending_verification`, `verified`, `rejected` |
-| Notes | `admin_notes` (client-visible on Guest Lookup — Category C free-form content, NOT auto-translated), `internal_notes` (private) |
 
 **State Machine:**
 ```
@@ -135,7 +140,9 @@ pending_verification → pending_review → approved
 - This avoids temp file storage for multi-step HTMX file uploads.
 
 ### apps.payments (DECOMMISSIONED)
-Stripe/PayPal gateways removed in Phase 0. Payments are manually verified using administrator-configured payment methods and instructions. No automated third-party payment gateway integrations.
+Stripe/PayPal gateways removed in Phase 0 (commit `e2687c8`). The app directory remains as an empty, documented shell to avoid import errors; it is **commented out of `INSTALLED_APPS`** and its two migration files were **intentionally deleted**. Payment logic lives on `AppointmentRequest` + `PaymentMethod`/`PaymentDetailField`/`AppointmentPaymentSnapshot` in `apps.bookings`. Payments are manually verified using administrator-configured payment methods and instructions. No automated third-party payment gateway integrations.
+
+> **Migration note:** the canonical applied-migration count across active apps is **47**. Any count of 49 includes the two deleted `payments` migrations from before the decommission.
 
 ### apps.reviews (DELETED)
 Intentionally scrapped. No star ratings, comments, or review system.
@@ -250,7 +257,7 @@ Intentionally scrapped. No star ratings, comments, or review system.
 - Time slots calculated by `utils.py`: 30-minute grid, duration-aware, blocked slot detection
 - Session-based state management (`consult_<pk>`)
 
-**Step 3: Client Details & Hair Data (To Build — Phase 4)**
+**Step 3: Client Details & Hair Data (Built ✅ — Phase 4)**
 - Fields: Client Name, Email, Phone, Age
 - Age validation: Client-side JS + server-side enforcement
 - Hair Length: 9 visual clickable cards (Ear → Hip)
@@ -260,19 +267,19 @@ Intentionally scrapped. No star ratings, comments, or review system.
 - GDPR/Privacy Policy consent checkbox (required)
 - **Transition to Step 4:** Regular form POST with `enctype="multipart/form-data"`. Creates `AppointmentRequest` with `status=pending_verification`. Session stores `appointment_request_id`.
 
-**Step 4: Finances & Submission (To Build — Phase 4)**
+**Step 4: Finances & Submission (Built ✅ — Phase 4, dynamic methods in Phase 7B)**
 - Display: Calculated deposit amount, AFH-XXXXXX reference with copy button, service/provider/date summary
-- Fields: Payment Method (radio: Revolut, Wise, TransferGo, Bank Transfer), Proof of Payment (screenshot upload, accept .jpg/.jpeg/.png/.pdf, max 5MB), Policy review text, Final consent checkbox
-- **Submit:** Updates existing `AppointmentRequest` with payment data. Sets `held_until = now + 12 hours`. Redirects to confirmation page.
+- Fields: Payment method (dynamic radio cards from admin-managed `PaymentMethod` — seeded with Revolut, Wise, TransferGo, Bank Transfer; selecting one loads its live `PaymentDetailField` transfer details via HTMX), Proof of Payment (screenshot upload, accept .jpg/.jpeg/.png/.pdf, max 5MB), Policy review text, Final consent checkbox
+- **Submit:** Updates existing `AppointmentRequest` with payment data, creates the frozen `AppointmentPaymentSnapshot`, sends the `verification_pending` email. Sets `held_until = now + 12 hours`. Redirects to confirmation page.
 
-**Confirmation Page (To Build — Phase 4)**
+**Confirmation Page (Built ✅ — Phase 4)**
 - "Your appointment request has been submitted!"
 - Payment reference code (large, copyable)
 - Next steps: "We'll verify your deposit and review your photos within 12 hours"
 - Link to Guest Lookup: "Check your request status at /bookings/status/"
 - Reference code reminder: "Save your reference: AFH-XXXXXX"
 
-### Journey 4: Guest Lookup Page (`/bookings/status/`) (To Build — Phase 4)
+### Journey 4: Guest Lookup Page (`/bookings/status/`) (Built ✅ — Phase 4)
 
 **Purpose:** Lightweight page where clients enter email + AFH reference code to view their appointment request status. No accounts needed.
 
@@ -351,16 +358,29 @@ Because ServiceOption groups are infinite (Color, Length, Cap Size, etc.), the S
 
 ---
 
-## 6. URL Structure
+## 6. URL Structure (actual routes — `config/urls.py` + app urls)
 
 | URL Pattern | View | Description |
 |-------------|------|-------------|
-| `/` | Homepage | Hero banner + Popular Services grid |
-| `/services/` | Service Catalog | HTMX-powered browsing with filters |
-| `/services/<id>/` | Service Detail | SHEIN-style product page with dynamic gallery |
-| `/services/<id>/request/` | Consultation Wizard | 4-step HTMX multi-step form |
-| `/bookings/status/` | Guest Lookup | Email + AFH reference → status view |
-| `/admin/` | Django Admin | Operational dashboard |
+| `/` | `homepage_view` | Hero banner + Popular Services grid |
+| `/about/` | `site_config.about_page` | About page (prose from `about_page` ContentBlock) |
+| `/contact/` | `site_config.contact_page` | Contact info (from `SiteConfiguration`) |
+| `/terms/` | `site_config.terms_page` | Terms & Conditions incl. deposit/refund policy |
+| `/privacy/` | `site_config.privacy_page` | Privacy Policy |
+| `/services/` | `services.service_list_view` | Catalog with HTMX filters *(known issue: HTMX lib not loaded — see §8.1)* |
+| `/services/<id>/` | `services.service_detail_view` | SHEIN-style product page with dynamic gallery |
+| `/bookings/book/<service_pk>/` | `bookings.consult_wizard_view` | Wizard Step 1 (options config) |
+| `/bookings/book/<service_pk>/step3/` | `bookings.wizard_step_3` | Wizard Step 3 (client + hair data) |
+| `/bookings/book/<service_pk>/step4/` | `bookings.wizard_step_4` | Wizard Step 4 (payment + submit) |
+| `/bookings/confirmation/<reference>/` | `bookings.confirmation` | Post-submit confirmation |
+| `/bookings/status/` | `bookings.guest_lookup_view` | Guest Lookup (email + AFH reference) |
+| `/bookings/ajax/load-slots/` | `bookings.load_available_slots_view` | HTMX time-slot loading (Step 2) |
+| `/bookings/ajax/payment-detail/` | `bookings.payment_detail_fields` | HTMX payment details (Step 4) |
+| `/admin/` | Django Admin | Custom operational dashboard |
+| `/summernote/` | django_summernote | WYSIWYG assets |
+| `/i18n/` | Django i18n URLs | `set_language` POST endpoint |
+| `/robots.txt` | TemplateView | robots.txt |
+| `/sitemap.xml` | sitemap index | Sectioned sitemap (`/sitemap-static.xml`, `/sitemap-services.xml`) |
 
 ---
 
@@ -380,12 +400,20 @@ To prevent architectural bloat and LLM hallucinations, autonomous agents are str
 
 ---
 
-## 8. Branching Strategy
+## 8. Branching Strategy (CURRENT STATE — updated Aug 17, 2026)
 
-- **`main`**: Production branch. Stable releases only.
-- **`main4qp`**: Integration branch for QwenPaw development. All feature branches fork from `main4qp` and merge back into it.
-- **Feature branches**: Fork from `main4qp`, merge back into `main4qp` when complete. Delete after merge.
-- **Final merge**: `main4qp` → `main` when stable.
+- **`main`** — the stable, production branch. All Phase 1–7 work was merged here on Aug 17, 2026 (merge commit `ef16dc7`) and verified (98/98 tests, migration-integrity audit, fresh-DB migrate-from-zero). **New work branches from `main`.**
+- **`main4qp`** — the *former* integration branch used during parallel agent-driven development (Phases 1–7). Fully merged into `main`; retained for history only. Do not target it with new work.
+- **Feature branches** — fork from `main`, merge back into `main` when complete, then delete. (All Phase 1–7 feature branches have been deleted, locally and on origin.)
+- All merged work is verified (tests + `check` + `makemigrations --check`) before merging.
+
+### 8.1 Known Open Issues (documented, not yet fixed)
+
+1. **Catalog HTMX filtering non-functional:** `service_list.html` uses `hx-get` attributes and calls `htmx.trigger()` in JS, but the HTMX library `<script>` is only loaded on wizard templates (`consult_wizard.html`, `wizard_step_3/4.html`), not on the catalog page or `base.html`. Gender tabs and debounced search therefore do nothing until the include is added; native form submission still works.
+2. **No public FAQ page:** the `FAQ`/`FAQTranslation` models and admin exist, but no view/template renders them; nav "FAQs" links point to `#faq` anchors or `#` placeholders.
+3. **`SECURE_REDIRECT_EXEMPT` lists `/health-check/`** in `settings.py` but no such URL route exists (harmless dead config).
+4. **`Dockerfile` is a minimal stub** (no pip install / CMD); the `docker-compose.yml` references it but the supported setup is the venv flow.
+5. **Legacy `media/` directory** at repo root (contains `service_images`); the real `MEDIA_ROOT` is `mediafiles/`.
 
 ---
 

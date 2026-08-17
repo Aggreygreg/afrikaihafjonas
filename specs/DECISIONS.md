@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Key Decisions & Rationale
 
-**Last Updated:** August 13, 2026
+**Last Updated:** August 17, 2026
 
 ---
 
@@ -21,6 +21,8 @@
 **Rationale:** Third-party gateways charge fees. For a salon business with high-value transactions (up to 90,000 Ft), even 2-3% fees are significant. Manual transfers eliminate processing costs.
 
 **Impact:** `payments` app obsolete. RefundQueue proxy model needed for manual refund tracking. Admin must manually verify payments and process refunds.
+
+> **Current state (Aug 2026):** the `payments` app is fully decommissioned (commit `e2687c8`) — empty shell, out of `INSTALLED_APPS`, migrations deleted. Payment methods are admin-managed `PaymentMethod`/`PaymentDetailField` records in `apps.bookings` (Decision/Phase 7B), frozen per-appointment via `AppointmentPaymentSnapshot`.
 
 ---
 
@@ -87,8 +89,10 @@
 
 ---
 
-### 10. Branching: main4qp Integration Branch
-**Decision:** All QwenPaw development happens on `main4qp`, forked from `main`. Feature branches fork from `main4qp` and merge back into it. Final merge into `main` when stable.
+### 10. Branching: main4qp Integration Branch (LEGACY — merged Aug 17, 2026)
+**Decision:** All QwenPaw development happened on `main4qp`, forked from `main`. Feature branches forked from `main4qp` and merged back into it. Final merge into `main` when stable.
+
+**Status:** ✅ Complete — `main4qp` was merged into `main` (commit `ef16dc7`) and verified (98/98 tests, migration audit, fresh-DB migrate). **New development now branches directly from `main`.** `main4qp` is retained for history only.
 
 **Rationale:** Protects the production `main` branch from experimental AI-generated code. Provides a stable integration branch for testing before production deployment.
 
@@ -185,18 +189,22 @@
 
 ---
 
-### 18. Language Preference Popup
-**Decision:** A modal popup appears for first-time visitors asking them to choose their preferred language (Hungarian, English, or German). Detected via `localStorage` key `afrikai_lang_selected`.
+### 18. Language Preference Modal (IMPLEMENTED — Phase 6, mechanism revised)
+**Decision:** A modal appears for first-time visitors asking them to choose their preferred language (Hungarian, English, or German).
 
-**Rationale:** The target market is Europe (Hungary-based salon with international clients). Hungarian is the default, but English and German support is essential. The popup ensures users see the site in their language from the start.
+**Rationale:** The target market is Europe (Hungary-based salon with international clients). Hungarian is the default, but English and German support is essential. The modal ensures users see the site in their language from the start.
 
-**Implementation:**
-- Centered modal overlay with three clickable cards (🇭🇺 Magyar, 🇬🇧 English, 🇩🇪 Deutsch)
+**Actual implementation (shipped):**
+- Centered modal overlay (`#lang-modal-overlay` in `base.html`) with three language buttons
 - No close button — user MUST pick a language
-- On selection: set `localStorage` + cookie, reload with language prefix (`/en/`, `/de/`, or default `/hu/`)
-- Shown once only (localStorage check is instant, no flash)
+- Each button is a form POST to Django's built-in `/i18n/setlang/` view, which sets the `django_language` cookie + session language and redirects back to the same path
+- **No URL language prefixes** — all languages share the same URLs; `LocaleMiddleware` resolves from cookie/session
+- Shown once only: revealed by JS when the `django_language` cookie is absent
+- A header dropdown language switcher is also available for later changes
 
-**Impact:** Template partial in `base.html`. Django i18n middleware handles language switching. Deferred to Final Polish phase.
+> **Note:** the original design sketched a `localStorage` + `/en/`-prefix mechanism; the shipped implementation uses the `django_language` cookie + `set_language` view instead (simpler, server-visible). This is also why hreflang tags were deferred (see ARCHITECTURAL_PRINCIPLES §9.5).
+
+**Impact:** Modal partial in `base.html`. ✅ Complete.
 
 ---
 

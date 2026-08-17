@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Architectural Principles: Business-Managed Content & Configuration
 
-**Last Updated:** August 13, 2026 (Revision 3 — production-ready, all phases complete)
+**Last Updated:** August 17, 2026 (Revision 4 — synced to `main` post-merge; Phase 7A–7E complete)
 **Status:** ✅ Implementation complete (Phase 7A–7E). Production-hardened, smoke-tested, 98 tests passing.
 
 ---
@@ -213,24 +213,25 @@ class SomethingTranslationInline(admin.StackedInline):
 
 **Decision:** `SiteConfiguration` remains a singleton with single-language fields. If address descriptions or hours descriptions need translation, use ContentBlocks (Phase 7D) keyed by slug. This keeps the singleton simple and avoids over-engineering.
 
-**Required Fields (extending current `SiteConfiguration`):**
+**Fields (all implemented ✅ — Phase 7A):**
 
 | Field | Type | Multilingual? | Current State |
 |---|---|---|---|
-| Business name | CharField | No | ❌ Hardcoded in templates |
-| Address | CharField | No | ✅ Exists |
-| Address description/directions | TextField | Optional (via ContentBlock) | ❌ Missing |
-| Phone number | CharField | No | ✅ Exists |
-| Email address | EmailField | No | ✅ Exists |
-| Business/working hours | TextField | Optional (via ContentBlock) | ❌ Hardcoded |
-| Google Maps/location link | URLField | No | ❌ Missing |
-| Website URL | URLField | No | ❌ Missing |
-| Logo | ImageField | No | ❌ Missing |
-| Favicon | ImageField | No | ❌ Missing |
-| Instagram URL | URLField | No | ✅ Exists |
-| Facebook URL | URLField | No | ✅ Exists |
-| TikTok URL | URLField | No | ✅ Exists |
-| Global SEO fields (title, description, OG) | Various | Handled in Phase 7E | ❌ Missing |
+| Business name | CharField | No | ✅ `business_name` |
+| Address | CharField | No | ✅ `salon_address` |
+| Address description/directions | TextField | Optional (via ContentBlock) | ✅ `address_description` |
+| Phone number | CharField | No | ✅ `salon_phone` |
+| Email address | EmailField | No | ✅ `salon_email` |
+| Business/working hours | TextField | Optional (via ContentBlock) | ✅ `business_hours` |
+| Google Maps/location link | URLField | No | ✅ `google_maps_link` |
+| Website URL | URLField | No | ✅ `website_url` |
+| Logo | ImageField | No | ✅ `logo` |
+| Favicon | ImageField | No | ✅ `favicon` |
+| Hero title / subtitle / image | CharField / ImageField | `{% trans %}` | ✅ `hero_title`, `hero_subtitle`, `hero_image` |
+| Instagram URL | URLField | No | ✅ `instagram_url` |
+| Facebook URL | URLField | No | ✅ `facebook_url` |
+| TikTok URL | URLField | No | ✅ `tiktok_url` |
+| Global SEO fields (title, description, OG) | Various | `GlobalSEO` + translations (Phase 7E ✅) | ✅ `GlobalSEO` model |
 
 **Rule:** Changes automatically reflect everywhere the data is used — templates AND email templates (via placeholder system).
 
@@ -642,13 +643,13 @@ class AnnouncementTranslation(models.Model):
         unique_together = ('announcement', 'language')
 ```
 
-### 8.4 Static Page Content Migration
+### 8.4 Static Page Content Migration (IMPLEMENTED ✅ — Phase 7D)
 
-The current static pages (About, Contact, Terms, Privacy) have content hardcoded in templates. Phase 7D moves the **prose content** into `ContentBlock` records, while the template structure (layout, sections, headings) remains developer-controlled.
+The static pages (**About, Contact, Terms, Privacy** — Terms includes the deposit/refund policy as a section) have their prose served from `ContentBlock` records keyed by slug (`about_page`, `terms_page`, `privacy_page`, `about_mission`). The template structure (layout, sections, headings) remains developer-controlled; templates fall back to the original hardcoded copy if a block is inactive or missing.
 
-**What stays in templates:** Page layout, section structure, CSS classes, non-prose elements (maps, contact form).
+**What stays in templates:** Page layout, section structure, CSS classes, non-prose elements (map embed on Contact, contact details display — the Contact page has **no form**; it renders `SiteConfiguration` contact data only).
 
-**What moves to ContentBlocks:** Body text, policy text, about text — anything the admin should be able to edit without a developer.
+**What lives in ContentBlocks:** Body text, policy text, about text — anything the admin should be able to edit without a developer.
 
 ---
 
@@ -729,16 +730,18 @@ class PageSEOTranslation(models.Model):
 
 ### 9.3 SEO-Capable Pages
 
-| Page | Type | SEO Managed Via |
-|---|---|---|
-| Homepage (`/`) | Static route | `PageSEO(url_path='/')` |
-| Services listing (`/services/`) | Static route | `PageSEO(url_path='/services/')` |
-| **Individual service (`/services/<id>/`)** | Dynamic — FK to Service | `PageSEO(service=...)` |
-| About (`/about/`) | Static route | `PageSEO(url_path='/about/')` |
-| Contact (`/contact/`) | Static route | `PageSEO(url_path='/contact/')` |
-| Terms (`/terms/`) | Static route | `PageSEO(url_path='/terms/')` |
-| Privacy (`/privacy/`) | Static route | `PageSEO(url_path='/privacy/')` |
-| Consultation wizard (`/consult/`) | Static route | `PageSEO(url_path='/consult/')` |
+| Page | Type | SEO Managed Via | Seeded? |
+|---|---|---|---|
+| Homepage (`/`) | Static route | `PageSEO(url_path='/')` | ✅ |
+| Services listing (`/services/`) | Static route | `PageSEO(url_path='/services/')` | ✅ |
+| **Individual service (`/services/<id>/`)** | Dynamic — FK to Service | `PageSEO(service=...)` | ❌ Not seeded — created per-service in Admin when wanted |
+| About (`/about/`) | Static route | `PageSEO(url_path='/about/')` | ✅ |
+| Contact (`/contact/`) | Static route | `PageSEO(url_path='/contact/')` | ✅ |
+| Terms (`/terms/`) | Static route | `PageSEO(url_path='/terms/')` | ✅ |
+| Privacy (`/privacy/`) | Static route | `PageSEO(url_path='/privacy/')` | ✅ |
+| Wizard entry (`/bookings/book/<id>/`) | Dynamic route (per service) | Inherits service detail SEO / global fallback | ❌ No dedicated PageSEO |
+
+> **Note:** the wizard has no static `/consult/` URL — each service starts its own wizard at `/bookings/book/<service_pk>/`, so there is no single wizard landing page to give SEO metadata.
 
 **Individual Service pages (`/services/<id>/`) are first-class SEO targets.** They are major customer-facing landing pages — customers search for specific services (e.g., "knotless box braids Budapest"). Each service gets its own SEO metadata (title, description, OG tags) per language.
 
@@ -821,35 +824,29 @@ The email rendering system (Phase 7C) reads `appointment.customer_language` to s
 
 ---
 
-## 12. Open Architectural Decisions
+## 12. Architectural Decisions (ALL RESOLVED — historical record)
 
-These decisions should be made before implementation begins:
+All questions below were decided during Phase 7 planning and are implemented. This section is retained as the decision record:
 
-### 12.1 Rich Text Editor for Admin Content
-
-**Question:** Should admin-managed text fields (FAQ answers, content blocks, email HTML) use a rich-text editor?
-
-### 12.1 Rich Text Editor for Admin Content — DECIDED
+### 12.1 Rich Text Editor for Admin Content — DECIDED ✅
 
 **Decision:** Limited WYSIWYG (`django-summernote`) for website content (FAQ, ContentBlock, Announcement). Plain textarea for email templates (`body_text`). Optional plain HTML textarea for email `body_html`. NO Markdown. See §8.0 for full rationale.
 
 **Rationale:** The admin is a salon owner, not a developer. Markdown syntax (`**bold**`) is a learning barrier that undermines the "admin controls content independently" principle. A limited WYSIWYG toolbar with bleach sanitization is intuitive and safe. Email HTML is too fragile for WYSIWYG — emails stay plain text.
 
-### 12.2 Global SEO Model Design — DECIDED
+### 12.2 Global SEO Model Design — DECIDED ✅
 
 **Decision:** Dedicated `GlobalSEO` model with translations (§9.1), NOT in `SiteConfiguration`. Keeps `SiteConfiguration` focused on business contact info. SEO is a distinct concern.
 
-### 12.3 Payment Snapshot Timing — DECIDED
+### 12.3 Payment Snapshot Timing — DECIDED ✅
 
 **Decision:** Snapshot created at **Step 4** (payment submission), in the same transaction. See §6.2.
 
-### 12.4 Content Block vs Dedicated Models — DECIDED
+### 12.4 Content Block vs Dedicated Models — DECIDED ✅
 
 **Decision:** Generic `ContentBlock` with slug keys (§8.2). Pages share the same structure (title + body), so one generic model is sufficient.
 
-### 12.5 App Placement for New Models
-
-**Recommendation:**
+### 12.5 App Placement for New Models — DECIDED ✅ (as built)
 
 | Model(s) | App | Rationale |
 |---|---|---|
@@ -859,27 +856,25 @@ These decisions should be made before implementation begins:
 | `FAQ`, `ContentBlock`, `Announcement` + translations | `apps/site_config/` | Same rationale |
 | `GlobalSEO`, `PageSEO` + translations | `apps/site_config/` | Same rationale |
 
-> **Alternative considered:** A new `apps/admin_content/` app for all Category B content. Decided against for now — `site_config` keeps things simple. Can be refactored later if it grows.
+> **Alternative considered:** A new `apps/admin_content/` app for all Category B content. Decided against — `site_config` keeps things simple. Can be refactored later if it grows.
 
-### 12.6 `customer_language` Migration for Existing Records
+### 12.6 `customer_language` Migration for Existing Records — DECIDED ✅
 
-**Question:** When adding `customer_language` to existing `AppointmentRequest` records, what default value?
+**Decision:** Default to `hu` (base language). Existing records are historical and we cannot retroactively know what language the customer was using. HU is the safest default since it's the base language and the salon is in Hungary.
 
-**Recommendation:** Default to `hu` (base language). Existing records are historical and we cannot retroactively know what language the customer was using. HU is the safest default since it's the base language and the salon is in Hungary.
-
-### 12.7 Email Placeholder Rendering Security — DECIDED
+### 12.7 Email Placeholder Rendering Security — DECIDED ✅
 
 **Decision:** Use regex-based `{{ key }}` string substitution for admin-authored email templates, NOT Django's `django.template.Template` engine. See §7.4.
 
 **Rationale:** Django's template engine would allow admins to inject `{% load %}` or `{% include %}` tags. Regex substitution limits admins to `{{ placeholder }}` only — no template tag injection possible.
 
-### 12.8 Step 4 Payment Instruction Display — DECIDED
+### 12.8 Step 4 Payment Instruction Display — DECIDED ✅
 
 **Decision:** Step 4 wizard page shows live `PaymentDetailField` values (IBAN, QR codes, instructions) when a payment method is selected, via HTMX. These are shown ONLY at payment time, never in Guest Lookup. See §6.4.
 
-### 12.9 Seed Email Templates — DECIDED
+### 12.9 Seed Email Templates — DECIDED ✅
 
-**Decision:** The Phase 7C data migration must seed all 8 email types x 3 languages = 24 template records with developer-authored initial content. The admin can edit them later. Without seeded templates, the email system has nothing to send.
+**Decision:** The Phase 7C data migration seeds all 8 email types x 3 languages = 24 template records with developer-authored initial content (verified in the seed audit). The admin can edit them later. Without seeded templates, the email system has nothing to send.
 
 ---
 

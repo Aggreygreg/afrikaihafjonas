@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Progress History
 
-**Last Updated:** August 13, 2026
+**Last Updated:** August 17, 2026
 
 ---
 
@@ -154,9 +154,9 @@
 
 ## Branches
 
-- `main` — production
-- `main4qp` — integration branch (all feature branches merge here first)
-- Stale feature branches (Phase 2, 2.5, 3) — fully merged, safe to delete
+- `main` — **production branch and the new default target** (all Phase 1–7 work merged Aug 17, 2026, commit `ef16dc7`)
+- `main4qp` — former integration branch; fully merged into `main`, retained for history only
+- All Phase 1–7 feature branches deleted (local + remote) after ancestor-verified merges
 
 ## Dev Environment
 
@@ -400,12 +400,39 @@ Test breakdown by module:
 - `collectstatic`: 195 files collected successfully
 - 98 tests passed, 0 skipped, 0 failed
 - `makemigrations --check`: clean
-- 49/49 migrations applied, 0 pending
+- 47/47 migrations applied, 0 pending *(original note said 49 — corrected by the Phase 8 migration-integrity audit; see below)*
 
 **Intentionally Deferred Limitations:**
 - PostgreSQL live instance: not tested locally (no PG installed), but code review confirms compatibility
 - Real HTTPS/TLS: not tested (no cert locally), but security headers + HSTS config verified
 - hreflang: not implemented (cookie/session-based i18n, not URL prefixes — requires `i18n_patterns` architectural change)
+
+---
+
+## Phase 8: Merge to main + Documentation Sync ✅ COMPLETE (Aug 17, 2026)
+
+**1. Spec Audit on `main4qp` (commit `a90ded9`):** MASTER_CONTEXT / DECISIONS #24 / DEPLOYMENT / EXECUTION_RULES #20 / PROGRESS_HISTORY aligned to production-ready reality (payment_method_fk snapshot, gettext-optional note, flat upload paths, Production Hardening entry).
+
+**2. Branch Cleanup:** after ancestor checks, deleted merged feature branches locally + on origin (`feature/consult-wizard`, `feature/i18n-nav-cleanup`, `feature/shein-detail-page`, remote-only `feature/static-pages`). Remaining: `main`, `main4qp`.
+
+**3. Merge `main4qp` → `main` (commit `ef16dc7`, --no-ff):** 108 files, ~17.9k insertions. Verified on `main`: 98/98 tests, 0 pending migrations, clean tree.
+
+**4. Migration-Integrity Audit — SAFE:**
+- Canonical applied-migration count is **47** (`showmigrations --plan` + `django_migrations` table agree)
+- The historical "49" included the two `payments` migrations deleted at decommission commit `e2687c8` (app left as empty shell, removed from `INSTALLED_APPS`)
+- Fresh-DB test (`DATABASE_URL=sqlite:///db_fresh_test.sqlite3`): migrate-from-zero = 47/47 OK, seeds verified (PaymentMethod 4, PaymentDetailField 9, ContentBlock 4, EmailTemplate 8, GlobalSEO 1), `makemigrations --check` clean, 98/98 tests; test DB deleted
+
+**5. Documentation Sync on `main` (this commit):** full README rewrite (was 2 lines) + specs aligned with actual code:
+- Language modal: `django_language` cookie + `/i18n/setlang/` POST (no localStorage, no URL prefixes)
+- URL map: real routes incl. `/bookings/book/<pk>/` (no `/consult/`), ajax endpoints, sitemap/robots
+- site_config section: Phase 7 models documented as built; payments decommission note + migration-count clarification
+- Branching section: `main` is now the default target; `main4qp` historical
+- Known issues documented (NOT fixed — out of scope for a docs commit):
+  1. `service_list.html` uses HTMX attributes but never loads the htmx `<script>` → catalog live filtering non-functional (gender tabs/search) until the include is added
+  2. No public FAQ page (models + admin exist; nav links are `#faq`/`#` placeholders)
+  3. `SECURE_REDIRECT_EXEMPT` references non-existent `/health-check/` route (dead config)
+  4. `Dockerfile` is a stub (no pip install/CMD) — venv flow is the supported setup
+  5. Legacy `media/` directory at repo root (real `MEDIA_ROOT` = `mediafiles/`)
 
 ---
 
