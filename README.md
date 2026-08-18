@@ -34,7 +34,7 @@ A customer-facing appointment **request** platform for an African hair braiding 
 |---|---|---|
 | Language | Python 3.12 | |
 | Framework | Django 4.2 (LTS) | Modular `apps/` layout |
-| Interactivity | HTMX 1.9 | Loaded from CDN on wizard pages only |
+| Interactivity | HTMX 1.9 | Loaded from CDN on wizard + catalog templates (per-template, not in base) |
 | Styling | Tailwind CSS | **Loaded via CDN in `base.html`** (no npm build needed to run). A `theme/` app with django-tailwind exists for optional production builds. |
 | Database | SQLite (dev) / PostgreSQL (prod) | Configured via `DATABASE_URL` |
 | Server | Django `runserver` (dev) / gunicorn + nginx (prod) | |
@@ -74,7 +74,7 @@ Core tenets (enforced across the codebase):
 ## Customer Journey
 
 1. **Home (`/`)** — hero (content from `SiteConfiguration`), popular services, language modal for first-time visitors.
-2. **Catalog (`/services/`)** — browse by parent category tabs (Women's / Men's / Children's Braids), keyword search, price range, subcategory filters. *(Known issue: the HTMX library is not loaded on this page — see [Implemented vs. Deferred](#implemented-vs-deferred).)*
+2. **Catalog (`/services/`)** — browse by parent category tabs (Women's / Men's / Children's Braids), keyword search, price range, subcategory filters. Live HTMX filtering (gender tabs, debounced search); native "Apply Filters" form submit works without JS. *(Known issue: the view's gender lookup uses `icontains`, so "Men's Braids" also matches "Women's Braids" — see [Implemented vs. Deferred](#implemented-vs-deferred).)*
 3. **Service detail (`/services/<id>/`)** — SHEIN-style product page: dynamic image gallery that switches with selected options, suitability info, option cards (radio ≤4 options, dropdown >4).
 4. **Consultation wizard (`/bookings/book/<service_pk>/`)** — 4 steps:
    - **Step 1 — Configure:** service options (radio cards / dropdowns / add-on checkboxes), live price total.
@@ -246,12 +246,14 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 
 **Known gaps / deferred (do not assume these work):**
 
-1. **Catalog live filtering is broken:** `service_list.html` uses `hx-get`/`htmx.trigger()` but never loads the HTMX library (only wizard pages load it). Gender tabs/debounced search do nothing until the script include is added; native form submission still works. *(Known code bug, documented — not fixed in the docs-sync pass.)*
-2. **No public FAQ page:** the `FAQ` model + admin exist; nav links are placeholders. Page not built.
-3. **hreflang tags:** deferred (needs URL-based i18n).
-4. **`settings.py` exempts `/health-check/` from SSL redirect but no such URL exists** — harmless dead config.
-5. **`Dockerfile`** is a stub; Docker flow is not supported.
-6. **`media/` directory at repo root** is a legacy leftover; the real `MEDIA_ROOT` is `mediafiles/`.
+1. **~~Catalog live filtering is broken~~ — FIXED (Aug 18, 2026):** `service_list.html` now loads the HTMX runtime (per-template include, same pattern as the wizard). Gender tabs and debounced search swap results via the `service_grid.html` partial; the native no-JS "Apply Filters" submit still works. Covered by `apps/services/tests.py`.
+2. **Catalog gender matching is wrong (NEWLY FOUND, not fixed):** `service_list_view` resolves the `gender` param with `name__icontains` — "Wo*men's Braids*" contains the substring "men's braids", so the **Men's tab matches the Women's parent** (and `.first()` makes it order-dependent). Affects HTMX and native fallback alike. One-line fix when approved: use `name__iexact`.
+3. **No public FAQ page:** the `FAQ` model + admin exist; nav links are placeholders. Page not built.
+4. **hreflang tags:** deferred (needs URL-based i18n).
+5. **`settings.py` exempts `/health-check/` from SSL redirect but no such URL exists** — harmless dead config.
+6. **`Dockerfile`** is a stub; Docker flow is not supported.
+7. **`media/` directory at repo root** is a legacy leftover; the real `MEDIA_ROOT` is `mediafiles/`. Seeded service images still reference `/media/service_images/…` and 404 in dev.
+8. **Gender tab highlight goes stale after an HTMX swap** (cosmetic): tab pills are server-rendered outside the swapped `#services-wrapper`, so the highlighted tab doesn't follow a gender switch until a full page load.
 
 ## Project Documentation
 

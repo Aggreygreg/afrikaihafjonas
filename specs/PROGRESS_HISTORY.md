@@ -428,11 +428,27 @@ Test breakdown by module:
 - site_config section: Phase 7 models documented as built; payments decommission note + migration-count clarification
 - Branching section: `main` is now the default target; `main4qp` historical
 - Known issues documented (NOT fixed — out of scope for a docs commit):
-  1. `service_list.html` uses HTMX attributes but never loads the htmx `<script>` → catalog live filtering non-functional (gender tabs/search) until the include is added
+  1. ~~`service_list.html` HTMX script missing~~ → **FIXED Aug 18, 2026** (see Post-Merge Fixes below)
   2. No public FAQ page (models + admin exist; nav links are `#faq`/`#` placeholders)
   3. `SECURE_REDIRECT_EXEMPT` references non-existent `/health-check/` route (dead config)
   4. `Dockerfile` is a stub (no pip install/CMD) — venv flow is the supported setup
   5. Legacy `media/` directory at repo root (real `MEDIA_ROOT` = `mediafiles/`)
+
+---
+
+## Post-Merge Fixes
+
+### HTMX Catalog Fix ✅ (Aug 18, 2026)
+**Bug:** `service_list.html` used `hx-get`/`hx-trigger` and called `htmx.trigger()` without loading the HTMX runtime (only `consult_wizard.html` loaded it) — gender tabs threw `htmx is not defined`, debounced search was inert; only the native form submit worked.
+
+**Fix:** added the per-template include `<script src="https://unpkg.com/htmx.org@1.9.12" defer>` (same pattern as the wizard; base template intentionally stays script-free). Root cause verified end-to-end before fixing: view already had the `HX-Request` → `service_grid.html` partial switch whose root `#services-wrapper` matches `hx-target`/`hx-swap=outerHTML`.
+
+**Verification:** live browser test — htmx 1.9.12 present; gender tab click fired `GET /services/?gender=…` (200) with full swap chain (`beforeRequest → beforeSwap shouldSwap=true → afterSwap`); debounced search (`q=knotless`) fired + swapped; native full-page GET with filter params still renders the complete page with "Apply Filters" (no-JS fallback intact). Added `apps/services/tests.py` (was an empty stub): 4 regression tests. Suite: 102/102. `makemigrations --check` clean.
+
+**Discovered during verification (NOT fixed — separate authorization required):**
+- `service_list_view` gender lookup uses `name__icontains` → "Women's Braids" contains "men's braids", so the **Men's tab matches the Women's parent** (`.first()` order-dependent). Affects HTMX and native fallback alike. Proposed fix: `name__iexact`.
+- Cosmetic: gender tab pill highlight doesn't update after an HTMX swap (tabs render outside the swapped `#services-wrapper`).
+- The dev-DB 404s during testing were `/media/service_images/test_0.jpg` — the legacy-media known issue (#5), unrelated.
 
 ---
 

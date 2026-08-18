@@ -239,17 +239,19 @@ git checkout -b feature/<name>
 
 ---
 
-## Known Gotchas / Open Issues (as of Aug 17, 2026)
+## Known Gotchas / Open Issues (as of Aug 18, 2026)
 
 Read before touching these areas — do not "discover" them the hard way:
 
-1. **HTMX is NOT loaded globally.** The `<script src="unpkg.com/htmx.org@1.9.12">` include exists only in `consult_wizard.html`, `wizard_step_3.html`, `wizard_step_4.html`. `service_list.html` uses `hx-get` + calls `htmx.trigger()` **without loading the library** — catalog live filtering (gender tabs, debounced search) is non-functional; native form submit still works. If you build a new HTMX page, include the script on THAT template.
-2. **Tailwind is loaded via CDN** (`cdn.tailwindcss.com` in `base.html`). The `theme/` + `django-tailwind` build chain exists but its compiled CSS is not committed or referenced; `static/` only has a `.gitkeep`. Dev setup needs NO npm.
-3. **Docker is not real.** `Dockerfile` is a stub (env vars + WORKDIR only, no pip install/CMD). Supported setup = venv (see README).
-4. **Dead config:** `SECURE_REDIRECT_EXEMPT` lists `/health-check/` but no such URL exists. Harmless; remove if you add a health-check route.
-5. **No public FAQ page** — `FAQ`/`FAQTranslation` models + admin exist; nav "FAQs" links are `#faq`/`#` placeholders. Build the view/template before pointing nav links at it.
-6. **Canonical migration count = 47.** The two `payments` migrations were intentionally deleted at decommission (`e2687c8`); `apps/payments/` is an empty shell kept only to avoid import errors.
-7. **Windows console:** run Python with `set "PYTHONIOENCODING=utf-8"` (cp1252 default mangles HU/DE text); wrap cmd `set` values in quotes.
-8. **Pytest:** always pass explicit test file paths (e.g. `pytest apps/bookings/tests.py`), not bare `pytest`.
-9. **Locked dev DB:** if `db.sqlite3` is held by another process, don't move it — run tests/migrations against a temp DB via `DATABASE_URL=sqlite:///db_fresh_test.sqlite3`.
-10. **Uploads are flat:** `MEDIA_ROOT/hair_photos/` and `MEDIA_ROOT/payment_proofs/` — no per-app subdirectories (Rule 20).
+1. **HTMX is NOT loaded globally — include it per template.** The `<script src="unpkg.com/htmx.org@1.9.12">` include exists in `consult_wizard.html` and (fixed Aug 18, 2026) `service_list.html`. The base template deliberately does not bundle it. If you build a new HTMX page, include the script on THAT template. (The catalog shipped without it and live filtering was dead until the fix — regression tests now cover it in `apps/services/tests.py`.)
+2. **Catalog gender lookup uses `icontains` — known bug, don't build on it.** `service_list_view` matches `name__icontains=gender`, so "Men's Braids" matches "Women's Braids". If you touch this view, propose the `name__iexact` fix separately; do not silently rely on the current matching.
+3. **Tailwind is loaded via CDN** (`cdn.tailwindcss.com` in `base.html`). The `theme/` + `django-tailwind` build chain exists but its compiled CSS is not committed or referenced; `static/` only has a `.gitkeep`. Dev setup needs NO npm.
+4. **Docker is not real.** `Dockerfile` is a stub (env vars + WORKDIR only, no pip install/CMD). Supported setup = venv (see README).
+5. **Dead config:** `SECURE_REDIRECT_EXEMPT` lists `/health-check/` but no such URL exists. Harmless; remove if you add a health-check route.
+6. **No public FAQ page** — `FAQ`/`FAQTranslation` models + admin exist; nav "FAQs" links are `#faq`/`#` placeholders. Build the view/template before pointing nav links at it.
+7. **Canonical migration count = 47.** The two `payments` migrations were intentionally deleted at decommission (`e2687c8`); `apps/payments/` is an empty shell kept only to avoid import errors.
+8. **Windows console:** run Python with `set "PYTHONIOENCODING=utf-8"` (cp1252 default mangles HU/DE text); wrap cmd `set` values in quotes.
+9. **Pytest:** always pass explicit test file paths (e.g. `pytest apps/bookings/tests.py`), not bare `pytest`.
+10. **Locked dev DB:** if `db.sqlite3` is held by another process, don't move it — run tests/migrations against a temp DB via `DATABASE_URL=sqlite:///db_fresh_test.sqlite3`.
+11. **Uploads are flat:** `MEDIA_ROOT/hair_photos/` and `MEDIA_ROOT/payment_proofs/` — no per-app subdirectories (Rule 20).
+12. **Gender tab highlight goes stale after an HTMX catalog swap** (cosmetic) — pills render outside the swapped `#services-wrapper`; only a full reload corrects the highlight.

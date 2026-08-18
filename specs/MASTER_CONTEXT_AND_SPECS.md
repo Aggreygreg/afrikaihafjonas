@@ -367,7 +367,7 @@ Because ServiceOption groups are infinite (Color, Length, Cap Size, etc.), the S
 | `/contact/` | `site_config.contact_page` | Contact info (from `SiteConfiguration`) |
 | `/terms/` | `site_config.terms_page` | Terms & Conditions incl. deposit/refund policy |
 | `/privacy/` | `site_config.privacy_page` | Privacy Policy |
-| `/services/` | `services.service_list_view` | Catalog with HTMX filters *(known issue: HTMX lib not loaded — see §8.1)* |
+| `/services/` | `services.service_list_view` | Catalog with live HTMX filtering (script included on this template — fixed Aug 18, 2026) |
 | `/services/<id>/` | `services.service_detail_view` | SHEIN-style product page with dynamic gallery |
 | `/bookings/book/<service_pk>/` | `bookings.consult_wizard_view` | Wizard Step 1 (options config) |
 | `/bookings/book/<service_pk>/step3/` | `bookings.wizard_step_3` | Wizard Step 3 (client + hair data) |
@@ -409,11 +409,13 @@ To prevent architectural bloat and LLM hallucinations, autonomous agents are str
 
 ### 8.1 Known Open Issues (documented, not yet fixed)
 
-1. **Catalog HTMX filtering non-functional:** `service_list.html` uses `hx-get` attributes and calls `htmx.trigger()` in JS, but the HTMX library `<script>` is only loaded on wizard templates (`consult_wizard.html`, `wizard_step_3/4.html`), not on the catalog page or `base.html`. Gender tabs and debounced search therefore do nothing until the include is added; native form submission still works.
-2. **No public FAQ page:** the `FAQ`/`FAQTranslation` models and admin exist, but no view/template renders them; nav "FAQs" links point to `#faq` anchors or `#` placeholders.
-3. **`SECURE_REDIRECT_EXEMPT` lists `/health-check/`** in `settings.py` but no such URL route exists (harmless dead config).
-4. **`Dockerfile` is a minimal stub** (no pip install / CMD); the `docker-compose.yml` references it but the supported setup is the venv flow.
-5. **Legacy `media/` directory** at repo root (contains `service_images`); the real `MEDIA_ROOT` is `mediafiles/`.
+1. ~~**Catalog HTMX filtering non-functional**~~ — **FIXED Aug 18, 2026:** `service_list.html` now includes the HTMX runtime (`htmx.org@1.9.12`, per-template pattern like the wizard — the base template still does not bundle it). Verified live: gender tab click → XHR → partial swap; debounced search → swap; native no-JS form submit unaffected. Regression tests in `apps/services/tests.py`.
+2. **Catalog gender matching is wrong (found during the above verification, NOT fixed):** `service_list_view` resolves the `gender` query param via `ParentCategory.objects.filter(name__icontains=gender_name).first()` — `"Women's Braids"` contains the substring `"men's braids"`, so the Men's tab matches the Women's parent (result is also `.first()`-order-dependent). Affects HTMX and native fallback identically. Proposed one-line fix: `name__iexact`.
+3. **Gender tab highlight goes stale after an HTMX swap** (cosmetic): tab pills are server-rendered outside the swapped `#services-wrapper`; no class-sync in `switchGender`, no `htmx:afterSwap` handler. Highlight only corrects on full page load.
+4. **No public FAQ page:** the `FAQ`/`FAQTranslation` models and admin exist, but no view/template renders them; nav "FAQs" links point to `#faq` anchors or `#` placeholders.
+5. **`SECURE_REDIRECT_EXEMPT` lists `/health-check/`** in `settings.py` but no such URL route exists (harmless dead config).
+6. **`Dockerfile` is a minimal stub** (no pip install / CMD); the `docker-compose.yml` references it but the supported setup is the venv flow.
+7. **Legacy `media/` directory** at repo root (contains `service_images`); the real `MEDIA_ROOT` is `mediafiles/`. Seeded service images reference `/media/service_images/…` and 404 in dev.
 
 ---
 
