@@ -11,34 +11,29 @@
           hx-swap="outerHTML"
           class="w-full">
         
-        <!-- Top Search & Gender section -->
+        <!-- Top Search & Category section -->
         <div class="bg-white border-b border-gray-100 py-10 shadow-sm">
             <div class="container mx-auto px-6 max-w-7xl">
                 <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight text-center md:text-left mb-6">{% trans "Explore Braid Styles" %}</h1>
                 
-                <!-- Hidden input to track gender state -->
-                <input type="hidden" name="gender" id="gender-input" value="{{ active_gender }}">
+                <!-- Hidden input tracking the selected parent category (by ID, never name) -->
+                <input type="hidden" name="cat" id="cat-input" value="{{ active_parent_pk }}">
 
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     
-                    <!-- Gender Switch Tab Group -->
+                    <!-- Category Switch Tab Group (admin-driven: one tab per ParentCategory, creation order) -->
+                    {% if parent_categories %}
                     <div class="flex items-center gap-2 p-1.5 bg-gray-100 rounded-xl w-fit self-center md:self-auto">
+                        {% for parent in parent_categories %}
                         <button type="button" 
-                                onclick="switchGender('Women\'s Braids')"
-                                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {% if active_gender == 'Women\'s Braids' %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-                            {% trans "Women's Braids" %}
+                                data-cat-tab="{{ parent.pk }}"
+                                onclick="switchCategory('{{ parent.pk }}')"
+                                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {% if parent.pk == active_parent_pk %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                            {{ parent.name }}
                         </button>
-                        <button type="button" 
-                                onclick="switchGender('Men\'s Braids')"
-                                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {% if active_gender == 'Men\'s Braids' %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-                            {% trans "Men's Braids" %}
-                        </button>
-                        <button type="button" 
-                                onclick="switchGender('Children\'s Braids')"
-                                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {% if active_gender == 'Children\'s Braids' %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-                            {% trans "Children's Braids" %}
-                        </button>
+                        {% endfor %}
                     </div>
+                    {% endif %}
 
                     <!-- Search Input Box -->
                     <div class="relative w-full md:max-w-md">
@@ -69,7 +64,7 @@
 <!-- HTMX runtime (the base template does not bundle it) -->
 <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 
-<!-- Scripts to manage Mobile Toggles and Gender State Updates -->
+<!-- Scripts to manage Mobile Toggles and Category State Updates -->
 <script>
     function toggleFilters() {
         const filterContent = document.getElementById('filter-content');
@@ -82,20 +77,33 @@
         }
     }
 
-    function switchGender(genderValue) {
-        const genderInput = document.getElementById('gender-input');
-        if (genderInput && genderInput.value !== genderValue) {
-            genderInput.value = genderValue;
-            
-            // Instantly clear subcategory selection to prevent category mismatches across gender trees
-            const categorySelect = document.getElementById('category');
-            if (categorySelect) {
-                categorySelect.value = "";
-            }
-            
-            // Instantly submit the unified form via HTMX to load matching styles and sync subcategories
-            htmx.trigger('#filter-form', 'submit');
+    function switchCategory(pk) {
+        const catInput = document.getElementById('cat-input');
+        if (!catInput || String(catInput.value) === String(pk)) {
+            return;
         }
+        catInput.value = pk;
+
+        // Instantly clear subcategory selection to prevent category mismatches
+        // across parent trees (sidebar options only belong to the active parent)
+        const categorySelect = document.getElementById('category');
+        if (categorySelect) {
+            categorySelect.value = "";
+        }
+
+        // Tabs live OUTSIDE the HTMX-swapped wrapper, so the server-rendered
+        // active classes cannot update on swap — sync the highlight here.
+        document.querySelectorAll('[data-cat-tab]').forEach(function (btn) {
+            const isActive = btn.getAttribute('data-cat-tab') === String(pk);
+            btn.classList.toggle('bg-gray-900', isActive);
+            btn.classList.toggle('text-white', isActive);
+            btn.classList.toggle('shadow-md', isActive);
+            btn.classList.toggle('scale-[1.02]', isActive);
+            btn.classList.toggle('text-gray-600', !isActive);
+        });
+
+        // Instantly submit the unified form via HTMX to load matching styles and sync subcategories
+        htmx.trigger('#filter-form', 'submit');
     }
 </script>
 {% endblock %}

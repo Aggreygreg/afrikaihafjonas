@@ -42,6 +42,8 @@
 
 **Impact:** `ParentCategory` model updated. `target_audience` field added to `Service`. Age validation logic required.
 
+**Update Aug 18, 2026:** The "exactly three ParentCategories" implication of this decision is **superseded by Decision #35** — ParentCategory is now dynamic/admin-defined. The age-validation and `target_audience` parts of this decision remain fully in force (ParentCategory stays purely navigational; age policy never moved to categories).
+
 ---
 
 ### 5. Age & Suitability Gates
@@ -343,8 +345,28 @@
 **Impact:** `django-summernote` + `bleach` added to requirements. `@tailwindcss/typography` added to Tailwind config for rendering WYSIWYG output in `prose` containers.
 
 ### 34. Email Placeholder Security — Regex Substitution Only
-**Decision:** Admin-authored email templates use regex-based `{{ key }}` string substitution for rendering, NOT Django's `django.template.Template` engine. This prevents template tag injection (`{% load %}`, `{% include %}`).
+**Decision:** Admin-authored email templates use regex-based `{{ key }}` string substitution for rendering, NOT Django's `django.template` engine. This prevents template tag injection (`{% load %}`, `{% include %}`).
 
 **Rationale:** Admin-authored content must not have access to Django's template tag system. Regex substitution limits the admin to simple `{{ placeholder }}` replacement.
 
 **Impact:** Email rendering service uses `re.sub(r'\{\{(\w+)\}\}', ...)` instead of `django.template.Template().render()`.
+
+---
+
+### 35. ParentCategory Is Dynamic & Admin-Defined (ID-Based Selection)
+**Date:** Aug 18, 2026 · **Branch:** `feature/dynamic-parent-categories` (not yet merged)
+
+**Decision:** The top-level tabs on `/services/` are generated from `ParentCategory` records instead of being hardcoded to Women's/Men's/Children's. An admin-created ParentCategory automatically becomes a selectable tab. This **supersedes** the "strictly limited to exactly three entries" wording in the original model spec and the three-entry implication of Decision #4.
+
+**Scope of the change (deliberately narrow):**
+- Selection is ID-based (`?cat=<pk>`); category names are display-only, never used for matching. The old `gender` name param and the `name__icontains` lookup were removed (this was the "Men's Braids matches Women's Braids" substring bug, formerly Known Issue #2).
+- Tab order = creation order (`order_by("pk")` in the view; `Meta.ordering = ["name"]` deliberately NOT used — alphabetical would reorder tabs to Children's/Men's/Women's). The classic seed order Women's → Men's → Children's preserves the original presentation; new categories append at the end. Default tab = first category in creation order (Women's with classic seeds — matches previous behavior).
+- No schema change: `sort_order` and `is_active` fields were evaluated and **rejected for this iteration** (no current requirement justifies a migration; admin can already delete a category via existing CASCADE). If reordering or hiding-without-deleting becomes a real requirement, add fields then.
+- Single `/services/` URL architecture unchanged; no category landing pages, no slugs, no category SEO URLs, no category images.
+- Subcategory sidebar, search/price/duration/discount/sort filters, HTMX partial path, and native no-JS fallback all preserved.
+- The grid's per-category accent color (pink/blue/amber) remains name-keyed for the classic trio; **any other category renders with the existing neutral gray fallback** — no color-management feature.
+- Bonus fix in the same code path: tab highlight now syncs on HTMX swap (previously Known Issue #3) — tabs sit outside the swapped wrapper, so `switchCategory()` toggles the active classes client-side.
+
+**Translation consequence (documented, NOT solved here):** Category labels are single-language DB values rendered verbatim (`{{ parent.name }}`). The previous `{% trans "Women's Braids" %}` wrappers were **inert** — those strings were never msgids in any `.po` file, so customers saw English tab labels in HU/EN/DE before this change too. Customer-visible behavior is identical; the fake translation wrappers are simply gone. If multilingual category names become a real requirement, apply the Category B pattern (parent + Translation records, per ARCHITECTURAL_PRINCIPLES) as a separately approved change. Do NOT assume category labels are translated.
+
+**Impact:** `apps/services/views.py` (ID-based `cat` param), `templates/services/service_list.html` (dynamic tab loop, `cat` hidden input, `switchCategory()`), `apps/services/tests.py` (rewritten + expanded). No migrations, no `.po` changes. Suite 102 → 123 tests.

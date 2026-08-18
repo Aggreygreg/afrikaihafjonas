@@ -3,22 +3,39 @@ from django.db.models import Q
 from .models import Service, ParentCategory, ServiceCategory
 
 def service_list_view(request):
-    # 1. Fetch parent categories for reference
-    parent_categories = ParentCategory.objects.all()
-    
-    # 2. Get currently selected gender (default to "Women's Braids")
-    gender_name = request.GET.get('gender', "Women's Braids")
-    active_parent = parent_categories.filter(name__icontains=gender_name).first()
-    
+    # 1. All parent categories for the top-level tabs, in CREATION order (pk).
+    #    Tab order = creation order: seeding Women's -> Men's -> Children's
+    #    reproduces the original fixed tab order, and admin-created categories
+    #    (e.g. "Bridal", "Locs") append predictably at the end.
+    #    (ParentCategory.Meta.ordering is ["name"]; we deliberately do NOT use
+    #    it here — alphabetical order would reorder the tabs to
+    #    Children's / Men's / Women's.)
+    parent_categories = ParentCategory.objects.order_by("pk")
+
+    # 2. Resolve the selected parent category by primary key — never by name.
+    #    Name lookups are unsafe: the old `name__icontains` made
+    #    "Men's Braids" match "Women's Braids" (substring collision).
+    cat_param = request.GET.get("cat", "")
+    active_parent = None
+    if cat_param.isdigit():
+        active_parent = parent_categories.filter(pk=int(cat_param)).first()
+    if active_parent is None:
+        # No/invalid/unknown `cat` -> fall back to the first category in
+        # creation order. With the classic seeds, Women's Braids remains the
+        # default tab, matching the previous behaviour.
+        # If no ParentCategory exists at all, active_parent stays None and
+        # the page renders unfiltered with an empty tab bar.
+        active_parent = parent_categories.first()
+
     # 3. Base Queryset (optimized loading of foreign keys + images)
     services = Service.objects.all().select_related(
         'category__parent'
     ).prefetch_related('images')
-    
-    # 4. Filter by Gender (Parent Category)
+
+    # 4. Filter by selected Parent Category
     if active_parent:
         services = services.filter(category__parent=active_parent)
-        # Only show subcategories belonging to the active gender in the filter menu
+        # Only show subcategories belonging to the active parent in the filter menu
         subcategories = ServiceCategory.objects.filter(parent=active_parent)
     else:
         subcategories = ServiceCategory.objects.none()
@@ -72,7 +89,7 @@ def service_list_view(request):
         'services': services,
         'parent_categories': parent_categories,
         'subcategories': subcategories,
-        'active_gender': gender_name,
+        'active_parent_pk': active_parent.pk if active_parent else '',
         'search_query': search_query,
         'selected_category': subcategory_id,
         'selected_price_min': price_min,

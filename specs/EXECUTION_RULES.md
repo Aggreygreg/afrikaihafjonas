@@ -244,7 +244,7 @@ git checkout -b feature/<name>
 Read before touching these areas — do not "discover" them the hard way:
 
 1. **HTMX is NOT loaded globally — include it per template.** The `<script src="unpkg.com/htmx.org@1.9.12">` include exists in `consult_wizard.html` and (fixed Aug 18, 2026) `service_list.html`. The base template deliberately does not bundle it. If you build a new HTMX page, include the script on THAT template. (The catalog shipped without it and live filtering was dead until the fix — regression tests now cover it in `apps/services/tests.py`.)
-2. **Catalog gender lookup uses `icontains` — known bug, don't build on it.** `service_list_view` matches `name__icontains=gender`, so "Men's Braids" matches "Women's Braids". If you touch this view, propose the `name__iexact` fix separately; do not silently rely on the current matching.
+2. **Catalog categories are dynamic & ID-based (Decision #35, Aug 18, 2026).** `/services/` tabs render from `ParentCategory` records in creation order; selection uses `?cat=<pk>` — **never match categories by name** (the old `name__icontains` lookup made "Men's Braids" match "Women's Braids"; removed together with the `gender` param). Category labels are single-language DB values, NOT translated. In tests, pass `cat=<pk>` and remember responses render in HU when `.mo` files are compiled — don't assert on `{% trans %}` literals.
 3. **Tailwind is loaded via CDN** (`cdn.tailwindcss.com` in `base.html`). The `theme/` + `django-tailwind` build chain exists but its compiled CSS is not committed or referenced; `static/` only has a `.gitkeep`. Dev setup needs NO npm.
 4. **Docker is not real.** `Dockerfile` is a stub (env vars + WORKDIR only, no pip install/CMD). Supported setup = venv (see README).
 5. **Dead config:** `SECURE_REDIRECT_EXEMPT` lists `/health-check/` but no such URL exists. Harmless; remove if you add a health-check route.
@@ -254,4 +254,4 @@ Read before touching these areas — do not "discover" them the hard way:
 9. **Pytest:** always pass explicit test file paths (e.g. `pytest apps/bookings/tests.py`), not bare `pytest`.
 10. **Locked dev DB:** if `db.sqlite3` is held by another process, don't move it — run tests/migrations against a temp DB via `DATABASE_URL=sqlite:///db_fresh_test.sqlite3`.
 11. **Uploads are flat:** `MEDIA_ROOT/hair_photos/` and `MEDIA_ROOT/payment_proofs/` — no per-app subdirectories (Rule 20).
-12. **Gender tab highlight goes stale after an HTMX catalog swap** (cosmetic) — pills render outside the swapped `#services-wrapper`; only a full reload corrects the highlight.
+12. ~~**Gender tab highlight goes stale after an HTMX catalog swap**~~ — **FIXED Aug 18, 2026** with the dynamic-category change: `switchCategory()` syncs the active pill classes client-side (tabs render outside the swapped `#services-wrapper`).

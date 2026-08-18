@@ -452,6 +452,18 @@ Test breakdown by module:
 
 ---
 
+### Dynamic ParentCategory Tabs ✅ (Aug 18, 2026 — branch `feature/dynamic-parent-categories`, NOT yet merged)
+**Change:** `/services/` top-level tabs are generated from `ParentCategory` records instead of hardcoded Women's/Men's/Children's buttons. Admin-created categories appear automatically as tabs. Selection is ID-based (`?cat=<pk>`); the old `gender` name param and its buggy `name__icontains` lookup (the "Men's tab matches Women's" substring bug above) were removed. This deliberately supersedes the "exactly three entries" model rule — full scope, rejected alternatives (`sort_order`/`is_active` fields, Category B translations, color management), and the translation consequence are recorded in **Decision #35**.
+
+**Deliberately out of scope (deferred, not requirements):** category landing URLs/slugs/SEO, category images, multilingual category names, `sort_order`/`is_active` model fields.
+
+**Files:** `apps/services/views.py` (ID-based `cat` param, creation-order tabs, safe fallbacks), `templates/services/service_list.html` (dynamic tab loop, `cat` hidden input, `switchCategory()` with highlight sync — also fixes the stale-highlight cosmetic issue), `apps/services/tests.py` (rewritten: 25 tests covering tab rendering, auto-appearance of admin-created categories, per-category filtering, substring-collision regression, sidebar scoping, search/sort/price, empty/no-category cases, admin CRUD incl. rename/delete, HTMX partial + native fallback). Plus spec sync: MASTER_CONTEXT, DECISIONS (#4 update, #35 new), EXECUTION_RULES gotchas, this file, README.
+
+**Verification:** baseline 102/102 → **123/123**; `makemigrations --check` clean (**no schema change — no migration**); `manage.py check` 0 issues; `.po` files untouched (no new msgids; removed 3 dead `{% trans %}` wrappers whose msgids never existed). Live browser: 4 tabs incl. admin-created "Bridal" rendered from DB; Men's tab click → HTMX swap, highlight moves, women's service absent (bug dead); per-category sidebar scoping; native `?cat=3` full-page fallback; debounced search intact. Dev DB seeded additively (idempotent `get_or_create`) with Men's/Children's/Bridal parents + demo services for acceptance testing.
+
+
+---
+
 ## Session Management Policy (for HICLAW)
 
 **Context windows fill up.** When working on a long project like this, sessions accumulate context. Here's the policy:

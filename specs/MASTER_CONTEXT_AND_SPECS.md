@@ -82,7 +82,7 @@ apps/
 
 ### apps.services (The E-Commerce Engine)
 
-**ParentCategory:** Strictly limited to exactly three entries: Women's Braids, Men's Braids, and Children's Braids.
+**ParentCategory:** Dynamic and admin-defined (Decision #35, Aug 18, 2026 — supersedes the original "exactly three entries" rule). Any number of entries; every record renders automatically as a top-level tab on `/services/` in creation order (pk). The classic seed trio Women's → Men's → Children's preserves the original presentation; admin-created categories (e.g., "Bridal", "Locs") append at the end. Tab selection is ID-based (`?cat=<pk>`); category names are display-only and never used for query matching. Labels are single-language DB values — see Decision #35 for the translation consequence.
 
 **ServiceCategory:** The specific braid style linked to a parent (e.g., "Knotless Box Braids").
 
@@ -203,7 +203,7 @@ Intentionally scrapped. No star ratings, comments, or review system.
 
 **Home Page:** Dynamic Hero, Popular Services Grid (with Gender Badges: Pink for Women, Blue for Men), Language Preference Popup.
 
-**Catalog Page:** Users switch between Parent Categories (Women's, Men's, Children's) using top-level tabs. Clicking a tab triggers HTMX to swap the grid AND dynamically filter the sidebar dropdowns to show only relevant subcategories. Includes live keyword search and numerical `price_min`/`price_max` inputs.
+**Catalog Page:** Users switch between Parent Categories using top-level tabs generated from `ParentCategory` records (admin-defined, creation order, default = first; selection via `?cat=<pk>` — ID-based, never name-based). Clicking a tab triggers HTMX to swap the grid AND dynamically filter the sidebar dropdowns to show only relevant subcategories. Includes live keyword search and numerical `price_min`/`price_max` inputs.
 
 ### Journey 2: The E-Commerce Detail Page (SHEIN-Style)
 
@@ -367,7 +367,7 @@ Because ServiceOption groups are infinite (Color, Length, Cap Size, etc.), the S
 | `/contact/` | `site_config.contact_page` | Contact info (from `SiteConfiguration`) |
 | `/terms/` | `site_config.terms_page` | Terms & Conditions incl. deposit/refund policy |
 | `/privacy/` | `site_config.privacy_page` | Privacy Policy |
-| `/services/` | `services.service_list_view` | Catalog with live HTMX filtering (script included on this template — fixed Aug 18, 2026) |
+| `/services/` | `services.service_list_view` | Catalog with live HTMX filtering (script included on this template — fixed Aug 18, 2026); dynamic admin-defined parent-category tabs via `?cat=<pk>` |
 | `/services/<id>/` | `services.service_detail_view` | SHEIN-style product page with dynamic gallery |
 | `/bookings/book/<service_pk>/` | `bookings.consult_wizard_view` | Wizard Step 1 (options config) |
 | `/bookings/book/<service_pk>/step3/` | `bookings.wizard_step_3` | Wizard Step 3 (client + hair data) |
@@ -410,8 +410,8 @@ To prevent architectural bloat and LLM hallucinations, autonomous agents are str
 ### 8.1 Known Open Issues (documented, not yet fixed)
 
 1. ~~**Catalog HTMX filtering non-functional**~~ — **FIXED Aug 18, 2026:** `service_list.html` now includes the HTMX runtime (`htmx.org@1.9.12`, per-template pattern like the wizard — the base template still does not bundle it). Verified live: gender tab click → XHR → partial swap; debounced search → swap; native no-JS form submit unaffected. Regression tests in `apps/services/tests.py`.
-2. **Catalog gender matching is wrong (found during the above verification, NOT fixed):** `service_list_view` resolves the `gender` query param via `ParentCategory.objects.filter(name__icontains=gender_name).first()` — `"Women's Braids"` contains the substring `"men's braids"`, so the Men's tab matches the Women's parent (result is also `.first()`-order-dependent). Affects HTMX and native fallback identically. Proposed one-line fix: `name__iexact`.
-3. **Gender tab highlight goes stale after an HTMX swap** (cosmetic): tab pills are server-rendered outside the swapped `#services-wrapper`; no class-sync in `switchGender`, no `htmx:afterSwap` handler. Highlight only corrects on full page load.
+2. ~~**Catalog gender matching is wrong**~~ — **FIXED Aug 18, 2026 (branch `feature/dynamic-parent-categories`):** the `name__icontains` lookup ("Men's Braids" matched "Women's Braids") was eliminated by the dynamic-category change: tabs are now generated from `ParentCategory` records and selected by primary key (`?cat=<pk>`); the old `gender` name param was removed entirely. See Decision #35.
+3. ~~**Gender tab highlight goes stale after an HTMX swap**~~ — **FIXED Aug 18, 2026 (same branch):** `switchCategory()` now syncs the active pill classes client-side (tabs sit outside the swapped `#services-wrapper`, so server-rendered classes cannot update on swap). Verified live in the browser.
 4. **No public FAQ page:** the `FAQ`/`FAQTranslation` models and admin exist, but no view/template renders them; nav "FAQs" links point to `#faq` anchors or `#` placeholders.
 5. **`SECURE_REDIRECT_EXEMPT` lists `/health-check/`** in `settings.py` but no such URL route exists (harmless dead config).
 6. **`Dockerfile` is a minimal stub** (no pip install / CMD); the `docker-compose.yml` references it but the supported setup is the venv flow.

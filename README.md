@@ -74,7 +74,7 @@ Core tenets (enforced across the codebase):
 ## Customer Journey
 
 1. **Home (`/`)** — hero (content from `SiteConfiguration`), popular services, language modal for first-time visitors.
-2. **Catalog (`/services/`)** — browse by parent category tabs (Women's / Men's / Children's Braids), keyword search, price range, subcategory filters. Live HTMX filtering (gender tabs, debounced search); native "Apply Filters" form submit works without JS. *(Known issue: the view's gender lookup uses `icontains`, so "Men's Braids" also matches "Women's Braids" — see [Implemented vs. Deferred](#implemented-vs-deferred).)*
+2. **Catalog (`/services/`)** — browse by parent category tabs (dynamic, admin-defined — every `ParentCategory` record renders as a tab in creation order; the seeded trio is Women's / Men's / Children's Braids and admin-created categories appear automatically), keyword search, price range, subcategory filters. Tab selection is ID-based (`?cat=<pk>`). Live HTMX filtering (category tabs, debounced search); native "Apply Filters" form submit works without JS. *(Note: category labels are single-language DB values — see [Decision #35](specs/DECISIONS.md).)*
 3. **Service detail (`/services/<id>/`)** — SHEIN-style product page: dynamic image gallery that switches with selected options, suitability info, option cards (radio ≤4 options, dropdown >4).
 4. **Consultation wizard (`/bookings/book/<service_pk>/`)** — 4 steps:
    - **Step 1 — Configure:** service options (radio cards / dropdowns / add-on checkboxes), live price total.
@@ -247,13 +247,14 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 **Known gaps / deferred (do not assume these work):**
 
 1. **~~Catalog live filtering is broken~~ — FIXED (Aug 18, 2026):** `service_list.html` now loads the HTMX runtime (per-template include, same pattern as the wizard). Gender tabs and debounced search swap results via the `service_grid.html` partial; the native no-JS "Apply Filters" submit still works. Covered by `apps/services/tests.py`.
-2. **Catalog gender matching is wrong (NEWLY FOUND, not fixed):** `service_list_view` resolves the `gender` param with `name__icontains` — "Wo*men's Braids*" contains the substring "men's braids", so the **Men's tab matches the Women's parent** (and `.first()` makes it order-dependent). Affects HTMX and native fallback alike. One-line fix when approved: use `name__iexact`.
+2. **~~Catalog gender matching is wrong~~ — FIXED (Aug 18, 2026, branch `feature/dynamic-parent-categories`):** the `name__icontains` lookup ("Men's Braids" matched "Women's Braids") was eliminated by making catalog tabs dynamic and ID-based (`?cat=<pk>`); the old `gender` name param was removed. See Decision #35.
 3. **No public FAQ page:** the `FAQ` model + admin exist; nav links are placeholders. Page not built.
 4. **hreflang tags:** deferred (needs URL-based i18n).
 5. **`settings.py` exempts `/health-check/` from SSL redirect but no such URL exists** — harmless dead config.
 6. **`Dockerfile`** is a stub; Docker flow is not supported.
 7. **`media/` directory at repo root** is a legacy leftover; the real `MEDIA_ROOT` is `mediafiles/`. Seeded service images still reference `/media/service_images/…` and 404 in dev.
-8. **Gender tab highlight goes stale after an HTMX swap** (cosmetic): tab pills are server-rendered outside the swapped `#services-wrapper`, so the highlighted tab doesn't follow a gender switch until a full page load.
+8. **~~Gender tab highlight goes stale after an HTMX swap~~ — FIXED (Aug 18, 2026, same branch):** `switchCategory()` now syncs the active pill classes client-side.
+9. **Category labels are single-language (not a bug — documented):** dynamic category names are DB values rendered verbatim; they were effectively English-only before this change too (the old `{% trans %}` wrappers had no msgids in any `.po`). Multilingual category names = Category B translation pattern, deferred unless separately approved (Decision #35).
 
 ## Project Documentation
 
@@ -261,7 +262,7 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 |---|---|
 | `specs/MASTER_CONTEXT_AND_SPECS.md` | Source of truth: philosophy, models, business rules, journeys, URLs |
 | `specs/ARCHITECTURAL_PRINCIPLES.md` | Business-managed content architecture (Phases 7A–7E), content categories, snapshots, emails, SEO |
-| `specs/DECISIONS.md` | Decision log with rationale (#1–#34) |
+| `specs/DECISIONS.md` | Decision log with rationale (#1–#35) |
 | `specs/PROGRESS_HISTORY.md` | Phase-by-phase build history and verification results |
 | `specs/EXECUTION_RULES.md` | Guardrails for builder agents |
 | `specs/DEPLOYMENT.md` | Production deployment guide |

@@ -1,45 +1,233 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.utils.html import escape
 
 from apps.services.models import ParentCategory, ServiceCategory, Service
 
+# NOTE: responses render in the project default language (hu) when compiled
+# .mo catalogs are present, so never assert on {% trans %} literals — assert
+# on markup structure or response.context instead. Category names come from
+# the DB and are HTML-escaped in output (apostrophes become &#x27;).
+E = escape
 
-class ServiceListHTMXTests(TestCase):
-    """Regression tests for the catalog HTMX wiring.
 
-    Bug fixed 2026-08-18: service_list.html used hx-get / hx-trigger and called
-    htmx.trigger() without ever loading the HTMX runtime, so live filtering
-    (gender tabs, debounced search) was dead. The runtime must be included on
-    this template (the base template intentionally does not bundle it).
-    """
+def make_service(category, title, price=10000, duration=120, discount=0,
+                 description="", popular=False):
+    return Service.objects.create(
+        category=category,
+        title=title,
+        description=description or f"Description for {title}",
+        target_audience="Adults",
+        base_price=price,
+        discount_percentage=discount,
+        duration_minutes=duration,
+        is_popular=popular,
+    )
+
+
+class CatalogFixtureMixin:
+    """Classic trio of ParentCategories in creation order (Women -> Men ->
+    Children), mirroring the production seed order, plus one service each."""
 
     @classmethod
     def setUpTestData(cls):
         cls.women = ParentCategory.objects.create(name="Women's Braids")
+        cls.men = ParentCategory.objects.create(name="Men's Braids")
         cls.children = ParentCategory.objects.create(name="Children's Braids")
-        cls.womens_cat = ServiceCategory.objects.create(parent=cls.women, name="Knotless")
+
+        cls.womens_cat = ServiceCategory.objects.create(parent=cls.women, name="Knotless Box Braids")
+        cls.mens_cat = ServiceCategory.objects.create(parent=cls.men, name="Men's Cornrows")
         cls.childrens_cat = ServiceCategory.objects.create(parent=cls.children, name="Kids Cornrows")
-        cls.womens_service = Service.objects.create(
-            category=cls.womens_cat,
-            title="Knotless Box Braids",
-            description="Classic knotless braids",
-            target_audience="adults",
-            base_price=45000,
-            discount_percentage=0,
-            duration_minutes=240,
-        )
-        cls.childrens_service = Service.objects.create(
-            category=cls.childrens_cat,
-            title="Kids Cornrows Simple",
-            description="Simple cornrows for kids",
-            target_audience="children",
-            base_price=15000,
-            discount_percentage=10,
-            duration_minutes=90,
-        )
+
+        cls.womens_service = make_service(
+            cls.womens_cat, "Knotless Box Braids - Medium", price=45000,
+            description="Classic knotless braids", popular=True)
+        cls.mens_service = make_service(
+            cls.mens_cat, "Two Strand Twists Men", price=20000,
+            description="Twists for men")
+        cls.childrens_service = make_service(
+            cls.childrens_cat, "Kids Cornrows Simple", price=15000,
+            description="Simple cornrows for kids", discount=10)
+
+
+class DynamicCategoryTabsTests(CatalogFixtureMixin, TestCase):
+    """The top-level tabs on /services/ are generated from ParentCategory
+    records (admin-driven), selected by ID — never by name."""
+
+    def test_existing_categories_render_as_tabs(self):
+        """All existing ParentCategories appear as tabs, in creation order."""
+        response = self.client.get("/services/")
+        self.assertEqual(response.status_code, 200)
+        for name in ("Women's Braids", "Men's Braids", "Children's Braids"):
+            self.assertContains(response, E(name))
+        html = response.content.decode()
+        self.assertTrue(html.index(E("Women's Braids")) < html.index(E("Men's Braids"))
+                        < html.index(E("Children's Braids")),
+                        "Tabs must render in creation order (Women -> Men -> Children)")
+
+    def test_newly_created_category_appears_automatically(self):
+        """An admin-created ParentCategory becomes a tab with no code change."""
+        bridal = ParentCategory.objects.create(name="Bridal")
+        response = self.client.get("/services/")
+        self.assertContains(response, "Bridal")
+        self.assertContains(response, 'data-cat-tab="%d"' % bridal.pk)
+
+    def test_tabs_use_id_based_selection(self):
+        """Tab buttons carry the category pk; no name-based switching remains."""
+        response = self.client.get("/services/")
+        self.assertContains(response, 'data-cat-tab="%d"' % self.women.pk)
+        self.assertContains(response, "switchCategory('%d')" % self.women.pk)
+        self.assertNotContains(response, "switchGender")
+        self.assertNotContains(response, 'name="gender"')
+
+    def test_default_view_selects_first_category(self):
+        """No `cat` param -> first category in creation order is active and
+        its services shown (legacy default: Women's Braids)."""
+        response = self.client.get("/services/")
+        self.assertContains(response, self.womens_service.title)
+        self.assertNotContains(response, self.mens_service.title)
+        self.assertNotContains(response, self.childrens_service.title)
+
+    def test_hidden_input_carries_active_pk(self):
+        response = self.client.get("/services/", {"cat": self.men.pk})
+        self.assertContains(response, 'name="cat" id="cat-input" value="%d"' % self.men.pk)
+
+    def test_invalid_or_unknown_cat_falls_back_to_default(self):
+        """Bad values degrade to the default tab instead of erroring."""
+        for bad in ("abc", "-1", "99999", ""):
+            response = self.client.get("/services/", {"cat": bad})
+            self.assertEqual(response.status_code, 200, "cat=%r must not crash" % bad)
+            self.assertContains(response, self.womens_service.title)
+
+    def test_legacy_gender_param_is_ignored(self):
+        """The removed name-based `gender` param must NOT filter (and must
+        never resolve Men's -> Women's again)."""
+        response = self.client.get("/services/", {"gender": "Men's Braids"})
+        self.assertContains(response, self.womens_service.title)
+        self.assertNotContains(response, self.mens_service.title)
+
+
+class CategoryFilteringTests(CatalogFixtureMixin, TestCase):
+    """Selecting a category filters via ParentCategory -> ServiceCategory ->
+    Service, with no name-substring collisions."""
+
+    def test_mens_never_resolves_to_womens(self):
+        """THE regression: 'Men's Braids' icontains-matched 'Women's Braids'
+        (substring). ID-based selection must never cross-match."""
+        response = self.client.get("/services/", {"cat": self.men.pk})
+        self.assertContains(response, self.mens_service.title)
+        self.assertNotContains(
+            response, self.womens_service.title,
+            msg_prefix="'Men's Braids' resolved to 'Women's Braids' — substring collision")
+
+    def test_substring_named_categories_do_not_collide(self):
+        """Categories whose names are substrings of each other stay isolated."""
+        long_cat_parent = ParentCategory.objects.create(name="Braids")
+        short_cat_parent = ParentCategory.objects.create(name="Long Braids")
+        c1 = ServiceCategory.objects.create(parent=long_cat_parent, name="Sub A")
+        c2 = ServiceCategory.objects.create(parent=short_cat_parent, name="Sub B")
+        s1 = make_service(c1, "Service In Braids")
+        s2 = make_service(c2, "Service In Long Braids")
+        r1 = self.client.get("/services/", {"cat": long_cat_parent.pk})
+        self.assertContains(r1, s1.title)
+        self.assertNotContains(r1, s2.title)
+        r2 = self.client.get("/services/", {"cat": short_cat_parent.pk})
+        self.assertContains(r2, s2.title)
+        self.assertNotContains(r2, s1.title)
+
+    def test_each_category_filters_correctly(self):
+        pairs = [
+            (self.women, self.womens_service),
+            (self.men, self.mens_service),
+            (self.children, self.childrens_service),
+        ]
+        for parent, service in pairs:
+            response = self.client.get("/services/", {"cat": parent.pk})
+            self.assertContains(response, service.title,
+                                msg_prefix="service for %s missing" % parent.name)
+            for other_parent, other_service in pairs:
+                if other_parent is not parent:
+                    self.assertNotContains(response, other_service.title)
+
+    def test_subcategory_sidebar_follows_selected_parent(self):
+        """Sidebar dropdown lists ONLY the active parent's subcategories."""
+        response = self.client.get("/services/", {"cat": self.men.pk})
+        self.assertContains(response, E(self.mens_cat.name))
+        self.assertNotContains(response, E(self.womens_cat.name))
+        self.assertNotContains(response, E(self.childrens_cat.name))
+
+    def test_subcategory_filter_applies_within_parent(self):
+        """?cat=X&category=Y filters to subcategory Y under parent X."""
+        second_womens = ServiceCategory.objects.create(parent=self.women, name="Goddess Locs")
+        make_service(second_womens, "Goddess Locs Style", price=30000)
+        response = self.client.get("/services/", {
+            "cat": self.women.pk, "category": self.womens_cat.pk})
+        self.assertContains(response, self.womens_service.title)
+        self.assertNotContains(response, "Goddess Locs Style")
+
+    def test_search_sort_price_still_work(self):
+        """Search, price bounds and sort keep working under a category scope."""
+        knot_womens = make_service(self.womens_cat, "Goddess Locs Premium", price=90000)
+        # Search within Women's tab
+        r = self.client.get("/services/", {"cat": self.women.pk, "q": "Knotless"})
+        self.assertContains(r, self.womens_service.title)
+        self.assertNotContains(r, knot_womens.title)
+        # Price ceiling excludes the premium style
+        r = self.client.get("/services/", {"cat": self.women.pk, "price_max": "50000"})
+        self.assertContains(r, self.womens_service.title)
+        self.assertNotContains(r, knot_womens.title)
+        # Sort ascending by price: Knotless (45000) first, then Goddess (90000)
+        r = self.client.get("/services/", {"cat": self.women.pk, "sort_by": "price_asc"})
+        html = r.content.decode()
+        self.assertLess(html.index(self.womens_service.title), html.index(knot_womens.title))
+        # Discounted-only: only the Children's service has a discount
+        r = self.client.get("/services/", {"cat": self.children.pk, "discounted_only": "1"})
+        self.assertContains(r, self.childrens_service.title)
+
+    def test_new_category_tab_filters_to_its_own_services(self):
+        """An admin-created category shows only its own services (empty state
+        included) when selected."""
+        bridal = ParentCategory.objects.create(name="Bridal")
+        r = self.client.get("/services/", {"cat": bridal.pk})
+        self.assertEqual(list(r.context["services"]), [])
+        self.assertNotContains(r, self.womens_service.title)
+
+
+class EmptyCatalogTests(TestCase):
+    """Degenerate DB states must render safely."""
+
+    def test_no_parent_categories_renders_unfiltered(self):
+        """Zero ParentCategories: page renders, no tab bar, services shown."""
+        orphan_cat = ServiceCategory.objects.create(parent=None, name="Orphan Type")
+        orphan = make_service(orphan_cat, "Orphan Service")
+        response = self.client.get("/services/")
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'data-cat-tab="')
+        self.assertContains(response, orphan.title)
+
+    def test_completely_empty_database(self):
+        response = self.client.get("/services/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["services"]), [])
+
+    def test_no_categories_invalid_cat_param(self):
+        response = self.client.get("/services/", {"cat": "42"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["services"]), [])
+
+
+class ServiceListHTMXTests(CatalogFixtureMixin, TestCase):
+    """Regression tests for the catalog HTMX wiring.
+
+    Bug fixed 2026-08-18: service_list.html used hx-get / hx-trigger and called
+    htmx.trigger() without ever loading the HTMX runtime, so live filtering
+    (category tabs, debounced search) was dead. The runtime must be included on
+    this template (the base template intentionally does not bundle it).
+    """
 
     def test_htmx_runtime_loaded_on_catalog_page(self):
-        """The HTMX <script> include must be present — without it, gender tabs
-        throw `htmx is not defined` and search/filter triggers are inert."""
+        """The HTMX <script> include must be present — without it, category
+        tabs throw `htmx is not defined` and search/filter triggers are inert."""
         response = self.client.get("/services/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "htmx.org", count=1)
@@ -61,21 +249,71 @@ class ServiceListHTMXTests(TestCase):
         response = self.client.get("/services/")
         self.assertTemplateUsed(response, "services/service_list.html")
 
-    def test_gender_filter_param_flows_in_both_modes(self):
-        """The gender query param must drive filtering in BOTH the HTMX
-        partial request and the native full-page GET fallback.
-
-        Uses Children's Braids deliberately: the view's gender lookup uses
-        name__icontains, and "Women's Braids" *contains* the substring
-        "men's braids" — so a Men's-vs-Women's assertion is order-dependent
-        (known view bug, reported separately, not fixed here).
-        """
-        htmx_response = self.client.get(
-            "/services/", {"gender": "Children's Braids"}, HTTP_HX_REQUEST="true"
+    def test_category_param_flows_in_both_modes(self):
+        """The `cat` pk param must drive filtering in BOTH the HTMX partial
+        and the native full-page response."""
+        partial = self.client.get(
+            "/services/", {"cat": self.children.pk}, HTTP_HX_REQUEST="true"
         )
-        self.assertContains(htmx_response, "Kids Cornrows Simple")
-        self.assertNotContains(htmx_response, "Knotless Box Braids")
+        self.assertContains(partial, self.childrens_service.title)
+        self.assertNotContains(partial, self.womens_service.title)
 
-        full_response = self.client.get("/services/", {"gender": "Children's Braids"})
-        self.assertContains(full_response, "Kids Cornrows Simple")
-        self.assertNotContains(full_response, "Knotless Box Braids")
+        full = self.client.get("/services/", {"cat": self.children.pk})
+        self.assertContains(full, self.childrens_service.title)
+        self.assertNotContains(full, self.womens_service.title)
+
+
+class AdminCategoryCrudTests(CatalogFixtureMixin, TestCase):
+    """Admin CRUD keeps working and admin-created categories flow into the
+    catalog automatically (the dynamic-tab contract)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.admin = get_user_model().objects.create_superuser(
+            "catadmin", "catadmin@example.com", "pw-12345")
+
+    def setUp(self):
+        self.client.force_login(self.admin)
+
+    def test_parent_category_changelist_loads(self):
+        response = self.client.get("/admin/services/parentcategory/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, E("Women's Braids"))
+
+    def test_admin_can_create_parent_category(self):
+        response = self.client.post(
+            "/admin/services/parentcategory/add/",
+            {"name": "Locs", "_save": "Save"},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(ParentCategory.objects.filter(name="Locs").exists())
+
+        # New category immediately selectable on the catalog page
+        catalog = self.client.get("/services/")
+        self.assertContains(catalog, "Locs")
+
+    def test_admin_can_rename_parent_category(self):
+        response = self.client.post(
+            "/admin/services/parentcategory/%d/change/" % self.children.pk,
+            {"name": "Kids Braids", "_save": "Save"},
+            follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        catalog = self.client.get("/services/")
+        self.assertContains(catalog, "Kids Braids")
+        # Renaming must not break filtering: pk unchanged
+        self.assertContains(catalog, 'data-cat-tab="%d"' % self.children.pk)
+
+    def test_admin_can_delete_parent_category(self):
+        response = self.client.post(
+            "/admin/services/parentcategory/%d/delete/" % self.children.pk,
+            {"post": "yes"}, follow=True,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(ParentCategory.objects.filter(pk=self.children.pk).exists())
+        # Catalog still renders; children's services disappear with the cascade
+        catalog = self.client.get("/services/")
+        self.assertNotContains(catalog, "Children's Braids")
+        self.assertContains(catalog, self.womens_service.title)
