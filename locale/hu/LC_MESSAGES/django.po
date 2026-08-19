@@ -1529,3 +1529,57 @@ msgid ""
 msgstr ""
 "Próbálja meg módosítani a szűrőket, törölni az árakat, vagy új kulcsszót "
 "megadni."
+
+msgid "Help Center"
+msgstr "Súgóközpont"
+
+msgid "Frequently Asked Questions"
+msgstr "Gyakran Ismételt Kérdések"
+
+msgid "Answers about booking, payments, services and more."
+msgstr "Válaszok a foglalásról, a fizetésről, a szolgáltatásokról és egyebekről."
+
+msgid "Search FAQs..."
+msgstr "Keresés a GYIK-ben..."
+
+msgid "Search FAQs"
+msgstr "Keresés a GYIK-ben"
+
+msgid "Search"
+msgstr "Keresés"
+
+msgid "Show:"
+msgstr "Megjelenítés:"
+
+msgid "Expand all"
+msgstr "Összes kinyitása"
+
+msgid "Collapse all"
+msgstr "Összes összecsukása"
+
+msgid "General"
+msgstr "Általános"
+
+msgid "No FAQs match your search."
+msgstr "Nincs a keresésnek megfelelő kérdés."
+
+msgid "Try a different keyword, or clear the search to browse all topics."
+msgstr "Próbáljon más kulcsszót, vagy törölje a keresést a témák böngészéséhez."
+
+msgid "Clear search"
+msgstr "Keresés törlése"
+
+msgid "FAQs are coming soon."
+msgstr "A GYIK hamarosan elérhető lesz."
+
+msgid "In the meantime, feel free to contact us directly with any questions."
+msgstr "Addig is bármilyen kérdésével forduljon hozzánk bizalommal."
+
+msgid "Contact Us"
+msgstr "Vegye fel velünk a kapcsolatot"
+
+msgid "Announcements"
+msgstr "Közlemények"
+
+msgid "Dismiss announcement"
+msgstr "Közlemény bezárása"

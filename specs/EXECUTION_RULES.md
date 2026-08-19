@@ -99,7 +99,7 @@ The main project directory (`C:\Users\Sabiedu\Projects\afrikai-hajfonas`) is sha
 - `@property` methods for formatting, never template tags
 
 ### 9. i18n = Wrap Now, Translate Later (NOW FULLY BUILT)
-- All template strings wrapped in `{% trans %}` ✅ (323 msgids)
+- All template strings wrapped in `{% trans %}` ✅ (341 msgids)
 - Translations complete: HU/EN/DE `.po` files tracked; `.mo` are build artifacts — after a fresh clone run `_build_po.py` → `_apply_translations.py` → `_compile_mo.py` (polib, no gettext needed)
 - Language switching: `django_language` cookie + `/i18n/setlang/` (first-visit modal in `base.html`); no URL prefixes
 - New UI strings: wrap in `{% trans %}` immediately, add msgids to all 3 `.po` files, keep msgids in English
@@ -239,17 +239,21 @@ git checkout -b feature/<name>
 
 ---
 
-## Known Gotchas / Open Issues (as of Aug 18, 2026)
+## Known Gotchas / Open Issues (as of Aug 19, 2026)
 
 Read before touching these areas — do not "discover" them the hard way:
 
 1. **HTMX is NOT loaded globally — include it per template.** The `<script src="unpkg.com/htmx.org@1.9.12">` include exists in `consult_wizard.html` and (fixed Aug 18, 2026) `service_list.html`. The base template deliberately does not bundle it. If you build a new HTMX page, include the script on THAT template. (The catalog shipped without it and live filtering was dead until the fix — regression tests now cover it in `apps/services/tests.py`.)
 2. **Catalog categories are dynamic & ID-based (Decision #35, Aug 18, 2026).** `/services/` tabs render from `ParentCategory` records in creation order; selection uses `?cat=<pk>` — **never match categories by name** (the old `name__icontains` lookup made "Men's Braids" match "Women's Braids"; removed together with the `gender` param). Category labels are single-language DB values, NOT translated. In tests, pass `cat=<pk>` and remember responses render in HU when `.mo` files are compiled — don't assert on `{% trans %}` literals.
 3. **Tailwind is loaded via CDN** (`cdn.tailwindcss.com` in `base.html`). The `theme/` + `django-tailwind` build chain exists but its compiled CSS is not committed or referenced; `static/` only has a `.gitkeep`. Dev setup needs NO npm.
-4. **Docker is not real.** `Dockerfile` is a stub (env vars + WORKDIR only, no pip install/CMD). Supported setup = venv (see README).
-5. **Dead config:** `SECURE_REDIRECT_EXEMPT` lists `/health-check/` but no such URL exists. Harmless; remove if you add a health-check route.
-6. **No public FAQ page** — `FAQ`/`FAQTranslation` models + admin exist; nav "FAQs" links are `#faq`/`#` placeholders. Build the view/template before pointing nav links at it.
-7. **Canonical migration count = 47.** The two `payments` migrations were intentionally deleted at decommission (`e2687c8`); `apps/payments/` is an empty shell kept only to avoid import errors.
+4. ~~**Docker is not real.**~~ — **REMOVED Aug 19, 2026 (Decision #36).** The scaffold-era `Dockerfile` + `docker-compose.yml` were deleted (never functional: no pip install/CMD). The venv flow is the **only** supported setup (see README). Do not re-add Docker files without a real, tested compose spec.
+5. ~~**Dead config:** `SECURE_REDIRECT_EXEMPT` lists `/health-check/`~~ — **REMOVED Aug 19, 2026 (Decision #36).** The line was deleted from `settings.py`; `SECURE_SSL_REDIRECT` is retained. gunicorn/nginx serve directly — no health-check route exists by design.
+6. ~~**No public FAQ page**~~ — **FIXED Aug 19, 2026 (Decision #36).** `/faq/` (`site_config.faq_page`) now renders `FAQ`/`FAQTopic` (topics group FAQs, trilingual with HU fallback, HTMX search, accordion). Nav links resolve to `{% url 'faq' %}`; sitemap includes it. `FAQ.topic` is a nullable FK (`SET_NULL`) — deleting a topic keeps its FAQs (→ "General" section).
+7. **Canonical migration count = 48** (was 47; +`0012_faq_topics` Aug 19, 2026). The two `payments` migrations were intentionally deleted at decommission (`e2687c8`); `apps/payments/` is an empty shell kept only to avoid import errors.
+7a. **True test count = 167** (was thought to be 161/123). `config/tests.py` has 6 tests that are easy to omit — **always include it in the pytest path**. Per-app: services 25, site_config 118, bookings 18, config 6; `providers`/`users`/`payments` test modules are empty stubs. Full command: `set "DJANGO_SETTINGS_MODULE=config.settings" && set "PYTHONIOENCODING=utf-8" && .venv\Scripts\python.exe -m pytest apps/services/tests.py apps/site_config/tests.py apps/bookings/tests.py apps/providers/tests.py apps/users/tests.py apps/payments/tests.py config/tests.py -q`
+7b. **cmd.exe limitations (Windows):** ① no `sed`/`tail` → use Python (`-X utf8`) or PowerShell; ② `python -c "..."` multiline gets folded to one line → write a temp `.py` file and run it; ③ `;` is NOT a separator (use `&&`/`&`); ④ `dir /b /s *.foo` globbing is unreliable → use `glob_search`. PowerShell `Get-Content` mangles non-ASCII in console echo (em-dash/arrow show as `ƒ?`/`ƒ+`) — the file content is fine; verify via `read_file`.
+7c. **Django `--noreload` + `DEBUG=True` template cache is unreliable:** most templates hot-reload, but some occasionally serve stale (seen with `privacy.html` on a long-running process). After editing templates, **restart the dev server** to guarantee the new markup is served.
+7d. **`.venv\Scripts\python.exe` delegates to uv's system Python** (`AppData\Roaming\uv\python\cpython-3.12.x`). Process `CommandLine` shows the uv path, not `.venv` — do not be fooled into thinking the wrong interpreter is running.
 8. **Windows console:** run Python with `set "PYTHONIOENCODING=utf-8"` (cp1252 default mangles HU/DE text); wrap cmd `set` values in quotes.
 9. **Pytest:** always pass explicit test file paths (e.g. `pytest apps/bookings/tests.py`), not bare `pytest`.
 10. **Locked dev DB:** if `db.sqlite3` is held by another process, don't move it — run tests/migrations against a temp DB via `DATABASE_URL=sqlite:///db_fresh_test.sqlite3`.

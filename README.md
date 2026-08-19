@@ -41,7 +41,7 @@ A customer-facing appointment **request** platform for an African hair braiding 
 | Admin content editing | django-summernote (limited toolbar) + bleach sanitization | Website content only — never email templates |
 | Site configuration | django-solo | `SiteConfiguration` singleton |
 | i18n tooling | polib (custom scripts) | No GNU gettext required |
-| Testing | pytest + pytest-django | 98 tests |
+| Testing | pytest + pytest-django | 167 tests (incl. `config/tests.py`) |
 
 Key dependencies are managed with pip-tools: edit `requirements.in`, then recompile with `pip-compile requirements.in --output-file=requirements.txt`. Never edit `requirements.txt` by hand.
 
@@ -147,13 +147,13 @@ Everything the business routinely changes is editable in Django Admin — no red
 |---|---|---|
 | Business info (name, address, phone, hours, socials, logo, hero, maps link) | `SiteConfiguration` (solo) | Injected site-wide via context processor |
 | Static page prose | `ContentBlock` + translations | Slugs: `about_page`, `terms_page`, `privacy_page`, `about_mission`; templates fall back to hardcoded copy if a block is missing |
-| FAQs | `FAQ` + translations | **Admin model exists; no public FAQ page is built yet** (nav links are placeholders) |
-| Announcements/banners | `Announcement` + translations | Model + admin complete |
+| FAQs | `FAQ` + `FAQTopic` + translations | Public `/faq/` page (Aug 19, 2026): admin-managed topics + Q&A, trilingual with HU fallback, HTMX search, accordion; topics group FAQs (ungrouped → "General" section). |
+| Announcements/banners | `Announcement` + translations | Model + admin complete; rendered site-wide as a dismissible banner stack (Aug 19, 2026) — active + scheduling window, per-language with HU fallback, dismissed client-side via localStorage. |
 | Payment methods & details | `PaymentMethod`, `PaymentDetailField` | See above |
 | Email templates | `EmailTemplate` + translations | 8 types × 3 languages seeded |
 | SEO metadata | `GlobalSEO`, `PageSEO` + translations | See below |
 
-Static pages: **About** (`/about/`), **Contact** (`/contact/` — informational, data from `SiteConfiguration`), **Terms & Conditions** (`/terms/` — includes deposit/hold and refund policy sections), **Privacy** (`/privacy/`). Website prose uses django-summernote with a restricted toolbar, sanitized by bleach on save; email templates stay plain text (no WYSIWYG — email HTML is too fragile).
+Static pages: **About** (`/about/`), **Contact** (`/contact/` — informational, data from `SiteConfiguration`), **Terms & Conditions** (`/terms/` — includes deposit/hold and refund policy sections), **Privacy** (`/privacy/`), **FAQ** (`/faq/` — admin-managed topics + Q&A). Website prose uses django-summernote with a restricted toolbar, sanitized by bleach on save; email templates stay plain text (no WYSIWYG — email HTML is too fragile).
 
 ## SEO System
 
@@ -185,7 +185,7 @@ python manage.py runserver
 - Dev database: SQLite at `db.sqlite3` (gitignored).
 - Emails print to the console in dev (`console` email backend).
 - Uploads land in `mediafiles/` (flat paths: `hair_photos/`, `payment_proofs/`, `payment_snapshots/<ref>/`); served by Django only when `DEBUG=True`.
-- A `docker-compose.yml` exists (web + Postgres) but the `Dockerfile` is a minimal stub — the supported setup is the venv flow above.
+- ~~Docker~~ — the scaffold-era `Dockerfile` and `docker-compose.yml` were removed (Aug 19, 2026); they were never functional (no CMD / no pip install) and the README has always documented the venv flow as the supported setup. The venv flow above is the only supported path.
 
 ## Environment Configuration
 
@@ -214,12 +214,12 @@ python -m pytest apps/bookings/tests.py apps/site_config/tests.py apps/payments/
 
 python manage.py check                    # 0 issues expected
 python manage.py makemigrations --check   # "No changes detected" expected
-python manage.py showmigrations           # 47 applied, 0 pending
+python manage.py showmigrations           # 48 applied, 0 pending
 ```
 
-Current state: **98/98 tests pass**; migration graph verified from a fresh database (migrate-from-zero succeeds; seed data present: 4 payment methods, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO).
+Current state: **167/167 tests pass** (services 25, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 48 applied migrations; seed data present: 4 payment methods, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO).
 
-> Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **47** applied migrations across active apps.
+> Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **48** applied migrations across active apps.
 
 ## Management Commands & Cron
 
@@ -236,23 +236,23 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 
 ## Branch Strategy
 
-- **`main`** — the stable, production branch. All Phase 1–7 work is merged here (`ef16dc7`, Aug 17, 2026) and verified (98 tests, migration-integrity check, fresh-DB migrate).
+- **`main`** — the stable, production branch. All Phase 1–7 work is merged here (`ef16dc7`, Aug 17, 2026) and verified (167 tests, migration-integrity check, fresh-DB migrate).
 - **`main4qp`** — the *former* integration branch used during parallel agent-driven development. Fully merged into `main`; kept only for history. New work should branch from `main`.
 - Feature branches are deleted after merging.
 
 ## Implemented vs. Deferred
 
-**Implemented and verified:** catalog + SHEIN-style detail page, full 4-step wizard with payments + snapshots, confirmation, guest lookup, admin dashboard + review/refund workflow, auto-expire + reminders, all 8 transactional emails, trilingual UI (323 strings ×3), admin-managed business content (7A–7E), SEO models + sitemap/robots/JSON-LD, production security settings, deployment guide.
+**Implemented and verified:** catalog + SHEIN-style detail page, full 4-step wizard with payments + snapshots, confirmation, guest lookup, admin dashboard + review/refund workflow, auto-expire + reminders, all 8 transactional emails, trilingual UI (341 strings ×3), admin-managed business content (7A–7E) **including public FAQ page + announcement banner rendering (Aug 19, 2026)**, SEO models + sitemap/robots/JSON-LD, production security settings, deployment guide.
 
 **Known gaps / deferred (do not assume these work):**
 
 1. **~~Catalog live filtering is broken~~ — FIXED (Aug 18, 2026):** `service_list.html` now loads the HTMX runtime (per-template include, same pattern as the wizard). Gender tabs and debounced search swap results via the `service_grid.html` partial; the native no-JS "Apply Filters" submit still works. Covered by `apps/services/tests.py`.
 2. **~~Catalog gender matching is wrong~~ — FIXED (Aug 18, 2026, branch `feature/dynamic-parent-categories`):** the `name__icontains` lookup ("Men's Braids" matched "Women's Braids") was eliminated by making catalog tabs dynamic and ID-based (`?cat=<pk>`); the old `gender` name param was removed. See Decision #35.
-3. **No public FAQ page:** the `FAQ` model + admin exist; nav links are placeholders. Page not built.
+3. **~~No public FAQ page~~ — FIXED (Aug 19, 2026):** the `FAQ` + `FAQTopic` models are now surfaced at `/faq/` (admin-managed topics grouping, trilingual with HU fallback, HTMX search, accordion, expand/collapse-all). Nav links point to the real page; sitemap includes it. See Decision #36.
 4. **hreflang tags:** deferred (needs URL-based i18n).
-5. **`settings.py` exempts `/health-check/` from SSL redirect but no such URL exists** — harmless dead config.
-6. **`Dockerfile`** is a stub; Docker flow is not supported.
-7. **`media/` directory at repo root** is a legacy leftover; the real `MEDIA_ROOT` is `mediafiles/`. Seeded service images still reference `/media/service_images/…` and 404 in dev.
+5. **~~`settings.py` exempts `/health-check/` from SSL redirect but no such URL exists~~ — FIXED (Aug 19, 2026):** the dead `SECURE_REDIRECT_EXEMPT` entry was removed (no consumer; gunicorn/nginx serve directly). See Decision #36.
+6. **~~`Dockerfile` is a stub; Docker flow is not supported~~ — FIXED (Aug 19, 2026):** the scaffold-era `Dockerfile` and `docker-compose.yml` were removed entirely (never functional: no CMD / no pip install; README has always documented the venv flow). See Decision #36.
+7. **~~`media/` directory at repo root + seeded service images 404~~ — FIXED (Aug 19, 2026):** the legacy empty `media/` dir was removed, and the 4 dev `ServiceImage` rows were repointed to real tracked files in `mediafiles/`. Note: this is dev/demo data — in production the administrator manages service images; no permanent production ownership of the current demo images is claimed (Decision #36).
 8. **~~Gender tab highlight goes stale after an HTMX swap~~ — FIXED (Aug 18, 2026, same branch):** `switchCategory()` now syncs the active pill classes client-side.
 9. **Category labels are single-language (not a bug — documented):** dynamic category names are DB values rendered verbatim; they were effectively English-only before this change too (the old `{% trans %}` wrappers had no msgids in any `.po`). Multilingual category names = Category B translation pattern, deferred unless separately approved (Decision #35).
 

@@ -1511,3 +1511,57 @@ msgid ""
 "Try adjusting your filters, clearing prices, or entering a new keyword."
 msgstr ""
 "Try adjusting your filters, clearing prices, or entering a new keyword."
+
+msgid "Help Center"
+msgstr "Help Center"
+
+msgid "Frequently Asked Questions"
+msgstr "Frequently Asked Questions"
+
+msgid "Answers about booking, payments, services and more."
+msgstr "Answers about booking, payments, services and more."
+
+msgid "Search FAQs..."
+msgstr "Search FAQs..."
+
+msgid "Search FAQs"
+msgstr "Search FAQs"
+
+msgid "Search"
+msgstr "Search"
+
+msgid "Show:"
+msgstr "Show:"
+
+msgid "Expand all"
+msgstr "Expand all"
+
+msgid "Collapse all"
+msgstr "Collapse all"
+
+msgid "General"
+msgstr "General"
+
+msgid "No FAQs match your search."
+msgstr "No FAQs match your search."
+
+msgid "Try a different keyword, or clear the search to browse all topics."
+msgstr "Try a different keyword, or clear the search to browse all topics."
+
+msgid "Clear search"
+msgstr "Clear search"
+
+msgid "FAQs are coming soon."
+msgstr "FAQs are coming soon."
+
+msgid "In the meantime, feel free to contact us directly with any questions."
+msgstr "In the meantime, feel free to contact us directly with any questions."
+
+msgid "Contact Us"
+msgstr "Contact Us"
+
+msgid "Announcements"
+msgstr "Announcements"
+
+msgid "Dismiss announcement"
+msgstr "Dismiss announcement"

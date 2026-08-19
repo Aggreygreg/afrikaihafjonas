@@ -1,5 +1,6 @@
 {% load i18n %}
 {% load static %}
+{% load content_tags %}
 <!DOCTYPE html>
 <html lang="{{ request.LANGUAGE_CODE|default:'hu' }}">
 <head>
@@ -73,6 +74,36 @@
 </head>
 <body class="bg-gray-100 font-sans antialiased text-gray-900">
 
+  {% comment %}
+    Site-wide announcement banners (Phase 7D model, admin-managed):
+    active + in scheduling window, per-language with HU fallback.
+    Dismissal is client-side (localStorage, keyed by announcement slug).
+  {% endcomment %}
+  {% get_active_announcements as announcements %}
+  {% if announcements %}
+  <div id="announcement-stack" role="region" aria-label="{% trans 'Announcements' %}">
+    {% for a in announcements %}
+    <div class="announcement-item flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4 py-2.5 bg-pink-600 text-white text-sm text-center"
+         data-announcement-slug="{{ a.announcement.slug }}">
+      <p class="font-medium">{{ a.message }}</p>
+      {% if a.link_url and a.link_text %}
+        <a href="{{ a.link_url }}" class="underline underline-offset-2 font-semibold hover:text-pink-100 whitespace-nowrap">{{ a.link_text }}</a>
+      {% endif %}
+      {% if a.announcement.is_dismissible %}
+      <button type="button"
+              class="announcement-dismiss ml-1 inline-flex items-center justify-center w-6 h-6 rounded-full hover:bg-pink-500 transition"
+              data-slug="{{ a.announcement.slug }}"
+              aria-label="{% trans 'Dismiss announcement' %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <!-- HEADER / NAV -->
   <header class="bg-white shadow-md sticky top-0 z-50">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center relative" aria-label="{% trans 'Primary navigation' %}">
@@ -91,7 +122,7 @@
         <!-- About & Contact link to dedicated static pages -->
         <a href="{% url 'about' %}" class="text-gray-600 hover:text-gray-800">{% trans "About" %}</a>
         <a href="{% url 'contact' %}" class="text-gray-600 hover:text-gray-800">{% trans "Contact" %}</a>
-        <a href="#faq" class="text-gray-600 hover:text-gray-800">{% trans "FAQs" %}</a>
+        <a href="{% url 'faq' %}" class="text-gray-600 hover:text-gray-800">{% trans "FAQs" %}</a>
       </div>
 
       <!-- Right side: booking status + language switcher (desktop) + hamburger (mobile) -->
@@ -161,7 +192,7 @@
               <a href="{% url 'about' %}" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "About" %}</a>
               <a href="{% url 'contact' %}" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "Contact" %}</a>
               <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "Providers" %}</a>
-              <a href="#" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "FAQs" %}</a> <!-- On mobile it will link to the real FAQ page -->
+              <a href="{% url 'faq' %}" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "FAQs" %}</a>
               <a href="{% url 'bookings:booking_status' %}" class="block text-gray-700 hover:text-blue-600 font-medium">{% trans "Check Booking Status" %}</a>
             </nav>
 
@@ -271,7 +302,7 @@
         <div id="faq">
           <h3 class="text-[1.3rem] font-bold text-pink-400 mb-4 border-b border-pink-500/30 pb-1">{% trans "Essentials" %}</h3>
           <ul class="space-y-4 text-sm">
-            <li><a href="#" class="hover:text-pink-400 transition">{% trans "FAQs" %}</a></li>
+            <li><a href="{% url 'faq' %}" class="hover:text-pink-400 transition">{% trans "FAQs" %}</a></li>
             <li><a href="{% url 'terms' %}" class="hover:text-pink-400 transition">{% trans "Terms & Conditions" %}</a></li>
             <li><a href="{% url 'privacy' %}" class="hover:text-pink-400 transition">{% trans "Privacy Policy" %}</a></li>
             <li><a href="/admin/" class="text-gray-500 hover:text-pink-400 transition text-xs">{% trans "Staff Login" %}</a></li>
@@ -425,6 +456,35 @@
         modal.classList.remove('hidden');
       }
     })();
+    // ── Announcement banners — client-side dismissal (localStorage per slug) ──
+    (function() {
+      function readDismissed() {
+        try {
+          const raw = JSON.parse(localStorage.getItem('dismissedAnnouncements') || '[]');
+          return Array.isArray(raw) ? raw : [];
+        } catch (e) { return []; }
+      }
+      function applyDismissed() {
+        const dismissed = readDismissed();
+        document.querySelectorAll('[data-announcement-slug]').forEach(function(el) {
+          if (dismissed.indexOf(el.getAttribute('data-announcement-slug')) !== -1) {
+            el.style.display = 'none';
+          }
+        });
+      }
+      document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.announcement-dismiss');
+        if (!btn) return;
+        const slug = btn.getAttribute('data-slug');
+        const dismissed = readDismissed();
+        if (dismissed.indexOf(slug) === -1) dismissed.push(slug);
+        localStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissed));
+        const item = btn.closest('[data-announcement-slug]');
+        if (item) item.style.display = 'none';
+      });
+      applyDismissed();
+    })();
+
   </script>
 
   {% block extra_js %}{% endblock %}

@@ -6,10 +6,13 @@ missing. ContentBlock/FAQ bodies are pre-sanitized by bleach on save, so they
 are rendered in templates with ``|safe``.
 """
 from django import template
+from django.db import models
+from django.utils import timezone
 from django.utils.translation import get_language
 
 from apps.site_config.constants import LanguageChoices
 from apps.site_config.models import (
+    Announcement,
     ContentBlock,
     ContentBlockTranslation,
     FAQ,
@@ -75,6 +78,38 @@ def get_faqs():
         trans = (
             faq.translations.filter(language=lang).first()
             or faq.translations.filter(language=BASE_LANGUAGE).first()
+        )
+        if trans:
+            result.append(trans)
+    return result
+
+
+@register.simple_tag
+def get_active_announcements():
+    """Return announcement translations for the active, in-window banners.
+
+    Filters: ``is_active``, plus the optional scheduling window
+    (``starts_at`` null-or-past, ``ends_at`` null-or-future), ordered by
+    ``display_order``. Each announcement resolves to its active-language
+    translation with HU fallback; untranslated announcements are skipped.
+
+    Returns the *translation* rows (``{{ a.message }}``, ``{{ a.link_url }}``,
+    ``{{ a.link_text }}``); the parent record (slug, ``is_dismissible``) is
+    reachable via ``{{ a.announcement.* }}``.
+    """
+    now = timezone.now()
+    banners = (
+        Announcement.objects.filter(is_active=True)
+        .filter(models.Q(starts_at__isnull=True) | models.Q(starts_at__lte=now))
+        .filter(models.Q(ends_at__isnull=True) | models.Q(ends_at__gte=now))
+        .order_by('display_order', 'pk')
+    )
+    lang = _active_language()
+    result = []
+    for banner in banners:
+        trans = (
+            banner.translations.filter(language=lang).first()
+            or banner.translations.filter(language=BASE_LANGUAGE).first()
         )
         if trans:
             result.append(trans)

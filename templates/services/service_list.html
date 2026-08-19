@@ -22,13 +22,14 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     
                     <!-- Category Switch Tab Group (admin-driven: one tab per ParentCategory, creation order) -->
+                    <!-- Mobile: horizontal scroll (SHEIN-style category bar); desktop: fits on one row -->
                     {% if parent_categories %}
-                    <div class="flex items-center gap-2 p-1.5 bg-gray-100 rounded-xl w-fit self-center md:self-auto">
+                    <div class="flex items-center gap-2 p-1.5 bg-gray-100 rounded-xl w-fit self-center md:self-auto max-w-full overflow-x-auto">
                         {% for parent in parent_categories %}
                         <button type="button" 
                                 data-cat-tab="{{ parent.pk }}"
                                 onclick="switchCategory('{{ parent.pk }}')"
-                                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 {% if parent.pk == active_parent_pk %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
+                                class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 whitespace-nowrap shrink-0 {% if parent.pk == active_parent_pk %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
                             {{ parent.name }}
                         </button>
                         {% endfor %}

@@ -1550,3 +1550,57 @@ msgid ""
 msgstr ""
 "Versuchen Sie, Ihre Filter anzupassen, Preise zu löschen oder ein neues "
 "Schlagwort einzugeben."
+
+msgid "Help Center"
+msgstr "Hilfe-Center"
+
+msgid "Frequently Asked Questions"
+msgstr "Häufig gestellte Fragen"
+
+msgid "Answers about booking, payments, services and more."
+msgstr "Antworten zu Buchung, Zahlung, Leistungen und mehr."
+
+msgid "Search FAQs..."
+msgstr "FAQs suchen..."
+
+msgid "Search FAQs"
+msgstr "FAQs durchsuchen"
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Show:"
+msgstr "Anzeigen:"
+
+msgid "Expand all"
+msgstr "Alle ausklappen"
+
+msgid "Collapse all"
+msgstr "Alle einklappen"
+
+msgid "General"
+msgstr "Allgemein"
+
+msgid "No FAQs match your search."
+msgstr "Keine Fragen entsprechen Ihrer Suche."
+
+msgid "Try a different keyword, or clear the search to browse all topics."
+msgstr "Versuchen Sie ein anderes Stichwort, oder löschen Sie die Suche, um alle Themen zu sehen."
+
+msgid "Clear search"
+msgstr "Suche löschen"
+
+msgid "FAQs are coming soon."
+msgstr "FAQs folgen in Kürze."
+
+msgid "In the meantime, feel free to contact us directly with any questions."
+msgstr "Bis dahin können Sie uns bei Fragen jederzeit direkt kontaktieren."
+
+msgid "Contact Us"
+msgstr "Kontaktieren Sie uns"
+
+msgid "Announcements"
+msgstr "Ankündigungen"
+
+msgid "Dismiss announcement"
+msgstr "Ankündigung schließen"

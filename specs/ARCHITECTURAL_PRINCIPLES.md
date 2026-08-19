@@ -1,7 +1,7 @@
 # Afrikai Hajfonás — Architectural Principles: Business-Managed Content & Configuration
 
-**Last Updated:** August 17, 2026 (Revision 4 — synced to `main` post-merge; Phase 7A–7E complete)
-**Status:** ✅ Implementation complete (Phase 7A–7E). Production-hardened, smoke-tested, 98 tests passing.
+**Last Updated:** August 19, 2026 (Revision 5 — FAQ topics + public `/faq/` page + announcement banner rendering + dead-artifact cleanup; see Decision #36)
+**Status:** ✅ Implementation complete (Phase 7A–7E + 2026-08-19 content/cleanup cycle). Production-hardened, smoke-tested, 167 tests passing.
 
 ---
 
@@ -563,8 +563,32 @@ The system renders templates with a controlled context dict. Admins can use any 
 ### 8.1 FAQ (Multilingual — Category B)
 
 ```python
+class FAQTopic(models.Model):
+    """Orderable, toggleable topic grouping for FAQs."""
+    display_order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+
+
+class FAQTopicTranslation(models.Model):
+    """One translation per language for a topic name."""
+    topic = models.ForeignKey(FAQTopic, related_name='translations', on_delete=models.CASCADE)
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ('topic', 'language')
+
+
 class FAQ(models.Model):
-    """Parent: ordering, active state."""
+    """Parent FAQ record. Optional topic grouping; orderable, toggleable."""
+    topic = models.ForeignKey(
+        FAQTopic, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='faqs',
+        help_text="Optional grouping. FAQs without a topic appear under 'General'.",
+    )
     display_order = models.PositiveSmallIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -582,6 +606,8 @@ class FAQTranslation(models.Model):
     class Meta:
         unique_together = ('faq', 'language')
 ```
+
+> **Public rendering (Aug 19, 2026):** `/faq/` (`site_config.faq_page`) groups active FAQs by active topic (display order); ungrouped FAQs fall into a final "General" section. Per-language with HU fallback. HTMX live search (question + stripped-answer substring, 400ms debounce, `#faq-list` outerHTML swap) with native GET fallback; `<details>` accordion + expand/collapse-all. See Decision #36.
 
 ### 8.2 Content Block (Multilingual — Category B)
 

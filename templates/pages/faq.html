@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<!-- HEADER -->
+<section class="text-white" style="background-color: #272e4b;">
+  <div class="max-w-4xl mx-auto px-6 py-16 text-center">
+    <span class="inline-block bg-pink-500/90 text-white text-xs font-semibold tracking-wider uppercase px-3 py-1 rounded-full">{% trans "Help Center" %}</span>
+    <h1 class="mt-4 text-4xl md:text-5xl font-extrabold break-words">{% trans "Frequently Asked Questions" %}</h1>
+    <p class="mt-4 text-gray-300">{% trans "Answers about booking, payments, services and more." %}</p>
+  </div>
+</section>
+
+<!-- SEARCH + FAQ ACCORDION -->
+<section class="bg-gray-100 py-12 md:py-16">
+  <div class="max-w-3xl mx-auto px-6">
+
+    <!-- Live search: HTMX swaps the accordion partial; without JS the form
+         falls back to a native GET with ?q= rendering the full page. -->
+    <form method="get" action="{% url 'faq' %}" role="search">
+      <div class="relative">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z"/>
+          </svg>
+        </span>
+        <input type="search" name="q" value="{{ query }}" autocomplete="off"
+               placeholder="{% trans 'Search FAQs...' %}"
+               aria-label="{% trans 'Search FAQs' %}"
+               class="w-full rounded-xl border border-gray-300 bg-white py-3.5 pl-12 pr-24 text-gray-900 shadow-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-200"
+               hx-get="{% url 'faq' %}"
+               hx-trigger="keyup changed delay:400ms, search"
+               hx-target="#faq-list"
+               hx-swap="outerHTML">
+        <button type="submit"
+                class="absolute right-3 top-1/2 -translate-y-1/2 bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition"
+                aria-label="{% trans 'Search' %}">
+          {% trans "Search" %}
+        </button>
+      </div>
+    </form>
+
+    {% include "pages/partials/faq_list.html" %}
+
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+<script>
+  // ── FAQ accordion: expand/collapse all (event delegation survives partial swaps) ──
+  (function () {
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-faq-expand-all], [data-faq-collapse-all]');
+      if (!btn) return;
+      var open = btn.hasAttribute('data-faq-expand-all');
+      document.querySelectorAll('#faq-list details').forEach(function (d) { d.open = open; });
+    });
+  })();
+</script>
+{% endblock %}

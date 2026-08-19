@@ -27,6 +27,7 @@ from apps.site_config.views import (
     contact_page,
     terms_page,
     privacy_page,
+    faq_page,
 )
 from . import admin_dashboard  # noqa: F401 — patches AdminSite.index on import
 
@@ -42,6 +43,7 @@ urlpatterns = [
     path('contact/', contact_page, name='contact'),
     path('terms/', terms_page, name='terms'),
     path('privacy/', privacy_page, name='privacy'),
+    path('faq/', faq_page, name='faq'),
     path('services/', include('apps.services.urls', namespace='services')),
     path('bookings/', include('apps.bookings.urls', namespace='bookings')),
     path('admin/', admin.site.urls),

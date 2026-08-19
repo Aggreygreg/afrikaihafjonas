@@ -194,7 +194,6 @@ if not DEBUG:
     # Disable if your front proxy/CDN (Cloudflare, etc.) handles SSL redirect
     # at the edge — set SECURE_SSL_REDIRECT=False in .env.
     SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True").lower() == "true"
-    SECURE_REDIRECT_EXEMPT = [r"^/health-check/?$"]
 
     # HSTS — tells browsers to always use HTTPS
     SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))

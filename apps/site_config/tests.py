@@ -711,3 +711,349 @@ class ResolveSEOServiceTests(TestCase):
         result = resolve_seo(service=svc, language='hu')
         global_trans = GlobalSEOTranslation.objects.get(language='hu')
         self.assertEqual(result['meta_title'], global_trans.default_meta_title)
+
+
+# ──────────────────────────────────────────────────────────────
+# Public FAQ page + FAQ topics (Phase 7F)
+# ──────────────────────────────────────────────────────────────
+from datetime import timedelta
+
+from django.urls import reverse
+from django.utils import timezone
+
+from apps.site_config.models import FAQTopic, FAQTopicTranslation
+from apps.site_config.templatetags.content_tags import get_active_announcements
+
+
+def _mk_topic(order, active=True, name_en=None):
+    topic = FAQTopic.objects.create(display_order=order, is_active=active)
+    FAQTopicTranslation.objects.create(
+        topic=topic, language=LanguageChoices.HU, name=f"Topic-HU-{order}"
+    )
+    if name_en:
+        FAQTopicTranslation.objects.create(
+            topic=topic, language=LanguageChoices.EN, name=name_en
+        )
+    return topic
+
+
+def _mk_faq(topic, order, question, answer="plain answer", active=True, lang=LanguageChoices.HU):
+    faq = FAQ.objects.create(topic=topic, display_order=order, is_active=active)
+    return FAQTranslation.objects.create(
+        faq=faq, language=lang, question=question, answer=answer
+    )
+
+
+class FAQTopicModelTests(TestCase):
+    """FAQTopic + FAQ.topic field mechanics."""
+
+    def test_str_prefers_hu_translation(self):
+        topic = FAQTopic.objects.create()
+        self.assertEqual(str(topic), f"FAQ topic #{topic.pk}")
+        FAQTopicTranslation.objects.create(
+            topic=topic, language=LanguageChoices.HU, name="Foglalás"
+        )
+        self.assertEqual(str(FAQTopic.objects.get(pk=topic.pk)), "Foglalás")
+
+    def test_unique_together_topic_language(self):
+        topic = FAQTopic.objects.create()
+        FAQTopicTranslation.objects.create(
+            topic=topic, language=LanguageChoices.HU, name="A"
+        )
+        with self.assertRaises(Exception):
+            FAQTopicTranslation.objects.create(
+                topic=topic, language=LanguageChoices.HU, name="B"
+            )
+
+    def test_deleting_topic_keeps_faq_and_nulls_topic(self):
+        topic = FAQTopic.objects.create()
+        faq = FAQ.objects.create(topic=topic)
+        topic.delete()
+        faq.refresh_from_db()
+        self.assertIsNone(faq.topic)
+        self.assertTrue(FAQ.objects.filter(pk=faq.pk).exists())
+
+
+class FAQPageTests(TestCase):
+    """Public /faq/ page: grouping, ordering, translations, search, HTMX."""
+
+    def setUp(self):
+        # Topic 1 (order 0) created AFTER Topic 2 (order 1) — pk order must not win.
+        self.topic_payments = _mk_topic(1, name_en="Payments")
+        self.topic_booking = _mk_topic(0, name_en="Booking")
+        _mk_faq(self.topic_booking, 1, "Cancel my request?")
+        _mk_faq(self.topic_booking, 0, "How do I request an appointment?")
+        _mk_faq(self.topic_payments, 0, "Which payment methods?", answer="<p>Card <strong>only</strong>.</p>")
+        _mk_faq(None, 0, "Where are you located?")  # ungrouped
+
+    def test_page_reverses_and_renders(self):
+        url = reverse("faq")
+        self.assertEqual(url, "/faq/")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="faq-list"')
+
+    def test_topics_ordered_by_display_order_not_pk(self):
+        response = self.client.get("/faq/")
+        html = response.content.decode()
+        self.assertIn("Topic-HU-0", html)
+        self.assertIn("Topic-HU-1", html)
+        self.assertLess(
+            html.index("Topic-HU-0"), html.index("Topic-HU-1"),
+            "topic display_order=0 must render before display_order=1",
+        )
+
+    def test_faq_ordering_within_topic(self):
+        html = self.client.get("/faq/").content.decode()
+        self.assertLess(
+            html.index("How do I request an appointment?"),
+            html.index("Cancel my request?"),
+        )
+
+    def test_ungrouped_faq_renders_last_under_general_section(self):
+        html = self.client.get("/faq/").content.decode()
+        self.assertIn("Where are you located?", html)
+        # General section (topicless) comes after both named topics.
+        self.assertGreater(
+            html.index("Where are you located?"), html.index("Topic-HU-1"),
+        )
+
+    def test_inactive_topic_hides_its_faqs(self):
+        self.topic_booking.is_active = False
+        self.topic_booking.save()
+        html = self.client.get("/faq/").content.decode()
+        self.assertNotIn("Topic-HU-0", html)
+        self.assertNotIn("How do I request an appointment?", html)
+        self.assertIn("Topic-HU-1", html)  # other topic unaffected
+
+    def test_inactive_faq_hidden(self):
+        faq = FAQ.objects.get(translations__question="Cancel my request?")
+        faq.is_active = False
+        faq.save()
+        html = self.client.get("/faq/").content.decode()
+        self.assertNotIn("Cancel my request?", html)
+
+    def test_topic_without_any_translation_hidden_with_its_faqs(self):
+        orphan = FAQTopic.objects.create(display_order=5)
+        FAQ.objects.create(topic=orphan, display_order=0)  # no translations anywhere
+        # Degenerate topic renders no heading; FAQ without translation is skipped.
+        html = self.client.get("/faq/").content.decode()
+        self.assertNotIn("FAQ topic #", html)
+
+    def test_active_language_translation_preferred(self):
+        html = self.client.get("/faq/", HTTP_ACCEPT_LANGUAGE="en").content.decode()
+        self.assertIn("Booking", html)
+        self.assertIn("Payments", html)
+        self.assertNotIn("Topic-HU-0", html)
+
+    def test_hu_fallback_when_translation_missing(self):
+        # A topic with only an HU name still renders its HU name under EN.
+        hu_only = _mk_topic(2)  # no name_en → HU-only
+        _mk_faq(hu_only, 0, "HU-only topic question?")
+        html = self.client.get("/faq/", HTTP_ACCEPT_LANGUAGE="en").content.decode()
+        self.assertIn("Topic-HU-2", html)
+
+    def test_answer_rendered_sanitized(self):
+        _mk_faq(None, 5, "Dangerous?", answer="<p>safe</p><script>alert(1)</script>")
+        response = self.client.get("/faq/")
+        self.assertNotContains(response, "<script>alert(1)", status_code=200)
+        self.assertContains(response, "<p>safe</p>", status_code=200)
+
+    def test_duplicate_questions_both_render(self):
+        _mk_faq(None, 1, "Where are you located?")
+        html = self.client.get("/faq/").content.decode()
+        self.assertEqual(html.count("Where are you located?"), 2)
+
+    # ── search ──────────────────────────────────────────────────
+    def test_search_matches_question(self):
+        response = self.client.get("/faq/", {"q": "appointment"})
+        self.assertContains(response, "How do I request an appointment?")
+        self.assertNotContains(response, "Which payment methods?", status_code=200)
+
+    def test_search_matches_answer_text_html_stripped(self):
+        response = self.client.get("/faq/", {"q": "card only"})
+        self.assertContains(response, "Which payment methods?")
+
+    def test_search_ignores_text_inside_html_tags(self):
+        # 'strong' exists only as a tag name in the sanitized answer markup.
+        response = self.client.get("/faq/", {"q": "strong"})
+        self.assertNotContains(response, "Which payment methods?", status_code=200)
+
+    def test_search_case_insensitive(self):
+        response = self.client.get("/faq/", {"q": "APPOINTMENT"})
+        self.assertContains(response, "How do I request an appointment?")
+
+    def test_search_no_results_state(self):
+        response = self.client.get("/faq/", {"q": "zebra-unicorn"})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("How do I request an appointment?", response.content.decode())
+
+    def test_search_query_escaped_not_reflected_raw(self):
+        response = self.client.get("/faq/", {"q": "<script>alert(1)</script>"})
+        self.assertNotContains(
+            response, "<script>alert(1)</script>", status_code=200,
+            msg_prefix="raw query must never be reflected unescaped: ",
+        )
+
+    def test_search_weird_but_harmless_query_values(self):
+        for q in ("", "  ", "%", "_", "%%%", "ø", "?q"):
+            response = self.client.get("/faq/", {"q": q})
+            self.assertEqual(response.status_code, 200, msg=f"q={q!r}")
+
+    def test_empty_query_returns_everything(self):
+        response = self.client.get("/faq/", {"q": ""})
+        self.assertContains(response, "How do I request an appointment?")
+
+    # ── HTMX ────────────────────────────────────────────────────
+    def test_htmx_request_returns_partial_only(self):
+        response = self.client.get("/faq/", {"q": "appointment"}, HTTP_HX_REQUEST="true")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="faq-list"')
+        self.assertNotContains(response, "<!DOCTYPE html>", status_code=200)
+
+    def test_plain_request_returns_full_page(self):
+        response = self.client.get("/faq/", {"q": "appointment"})
+        self.assertContains(response, "<!DOCTYPE html>")
+
+    def test_htmx_no_results_still_partial_with_state(self):
+        response = self.client.get("/faq/", {"q": "zebra"}, HTTP_HX_REQUEST="true")
+        self.assertContains(response, 'id="faq-list"')
+
+    # ── navigation & sitemap ────────────────────────────────────
+    def test_nav_links_point_at_faq_page(self):
+        html = self.client.get("/").content.decode()
+        self.assertIn('href="/faq/"', html)
+
+    def test_static_sitemap_includes_faq(self):
+        response = self.client.get("/sitemap-static.xml")
+        self.assertContains(response, "/faq/")
+
+
+class FAQPageEmptyTests(TestCase):
+    """Empty-site states: nothing invented, clear placeholders."""
+
+    def test_no_content_shows_empty_state_not_error(self):
+        response = self.client.get("/faq/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="faq-list"')
+        # No fabricated questions anywhere.
+        self.assertNotIn("<summary", response.content.decode())
+
+    def test_topic_without_faqs_renders_no_empty_section(self):
+        _mk_topic(0)
+        response = self.client.get("/faq/")
+        self.assertNotIn("Topic-HU-0", response.content.decode())
+
+
+# ──────────────────────────────────────────────────────────────
+# Site-wide announcement banner (Phase 7F public rendering)
+# ──────────────────────────────────────────────────────────────
+
+def _mk_announcement(order=0, active=True, dismissible=True,
+                     starts=None, ends=None, message="Spring offer!",
+                     lang=LanguageChoices.HU, slug=None):
+    slug = slug or f"banner-{order}-{LanguageChoices.values.index(lang)}"
+    ann = Announcement.objects.create(
+        slug=slug, is_active=active, is_dismissible=dismissible,
+        display_order=order, starts_at=starts, ends_at=ends,
+    )
+    AnnouncementTranslation.objects.create(
+        announcement=ann, language=lang, message=message,
+    )
+    return ann
+
+
+class GetActiveAnnouncementsTagTests(TestCase):
+    """Tag-level filtering: active flag, scheduling window, ordering, fallback."""
+
+    def test_returns_active_windowless_banner(self):
+        _mk_announcement()
+        result = get_active_announcements()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].message, "Spring offer!")
+
+    def test_excludes_inactive(self):
+        _mk_announcement(active=False)
+        self.assertEqual(get_active_announcements(), [])
+
+    def test_excludes_future_start(self):
+        _mk_announcement(starts=timezone.now() + timedelta(hours=1))
+        self.assertEqual(get_active_announcements(), [])
+
+    def test_includes_already_started(self):
+        _mk_announcement(starts=timezone.now() - timedelta(seconds=1))
+        self.assertEqual(len(get_active_announcements()), 1)
+
+    def test_excludes_past_end(self):
+        _mk_announcement(ends=timezone.now() - timedelta(seconds=1))
+        self.assertEqual(get_active_announcements(), [])
+
+    def test_includes_still_running(self):
+        _mk_announcement(
+            starts=timezone.now() - timedelta(hours=2),
+            ends=timezone.now() + timedelta(hours=2),
+        )
+        self.assertEqual(len(get_active_announcements()), 1)
+
+    def test_orders_by_display_order_not_pk(self):
+        _mk_announcement(order=1, message="Second")
+        _mk_announcement(order=0, message="First")
+        result = get_active_announcements()
+        self.assertEqual([t.message for t in result], ["First", "Second"])
+
+    def test_translation_language_resolution(self):
+        ann = _mk_announcement(message="HU message")
+        AnnouncementTranslation.objects.create(
+            announcement=ann, language=LanguageChoices.EN, message="EN message"
+        )
+        with override("en"):
+            result = get_active_announcements()
+        self.assertEqual(result[0].message, "EN message")
+
+    def test_hu_fallback_when_active_language_missing(self):
+        _mk_announcement(message="HU only")
+        with override("de"):
+            result = get_active_announcements()
+        self.assertEqual(result[0].language, LanguageChoices.HU)
+
+    def test_skips_announcement_without_any_translation(self):
+        Announcement.objects.create(slug="mute")  # no translations at all
+        self.assertEqual(get_active_announcements(), [])
+
+
+class AnnouncementBannerRenderTests(TestCase):
+    """Banner markup in base.html: presence, links, dismiss control."""
+
+    def test_active_banner_renders_on_homepage(self):
+        _mk_announcement(message="Nyitási akció!")
+        response = self.client.get("/")
+        self.assertContains(response, "Nyitási akció!", status_code=200)
+        self.assertContains(response, "announcement-item", status_code=200)
+
+    def test_no_banners_renders_no_banner_markup(self):
+        response = self.client.get("/")
+        self.assertNotContains(response, "announcement-item", status_code=200)
+
+    def test_banner_link_and_text_rendered(self):
+        ann = Announcement.objects.create(slug="promo")
+        AnnouncementTranslation.objects.create(
+            announcement=ann, language=LanguageChoices.HU, message="Akció",
+            link_url="https://example.com/deal", link_text="Részletek",
+        )
+        response = self.client.get("/")
+        self.assertContains(response, "https://example.com/deal", status_code=200)
+        self.assertContains(response, "Részletek", status_code=200)
+
+    def test_dismiss_button_only_when_dismissible(self):
+        # The JS in base.html always mentions .announcement-dismiss, so the
+        # assertion must target the *button markup* (data-slug), not the class name.
+        _mk_announcement(dismissible=True)
+        self.assertIn('data-slug="', self.client.get("/").content.decode())
+        Announcement.objects.all().delete()
+        _mk_announcement(dismissible=False)
+        self.assertNotIn('data-slug="', self.client.get("/").content.decode())
+
+    def test_message_is_escaped_not_injected(self):
+        _mk_announcement(message="<script>alert(1)</script>")
+        response = self.client.get("/")
+        self.assertNotContains(response, "<script>alert(1)", status_code=200)

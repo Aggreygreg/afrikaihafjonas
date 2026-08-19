@@ -370,3 +370,41 @@
 **Translation consequence (documented, NOT solved here):** Category labels are single-language DB values rendered verbatim (`{{ parent.name }}`). The previous `{% trans "Women's Braids" %}` wrappers were **inert** — those strings were never msgids in any `.po` file, so customers saw English tab labels in HU/EN/DE before this change too. Customer-visible behavior is identical; the fake translation wrappers are simply gone. If multilingual category names become a real requirement, apply the Category B pattern (parent + Translation records, per ARCHITECTURAL_PRINCIPLES) as a separately approved change. Do NOT assume category labels are translated.
 
 **Impact:** `apps/services/views.py` (ID-based `cat` param), `templates/services/service_list.html` (dynamic tab loop, `cat` hidden input, `switchCategory()`), `apps/services/tests.py` (rewritten + expanded). No migrations, no `.po` changes. Suite 102 → 123 tests.
+
+---
+
+### 36. Public FAQ Page + Announcement Rendering; Docker / Health-Check / Media Cleanup; Mobile Catalog & Info-Page Fixes
+**Date:** Aug 19, 2026 · **Branch:** `feature/public-faq-site-content` (off `main` @ `be80e7b`; not yet merged)
+
+**Context:** The prior-cycle audit (Decisions/Progress through #35) left three documented gaps: the `FAQ` model existed with no public page, the `Announcement` model existed but was never rendered, and scaffold-era dead artifacts (`Dockerfile`, `docker-compose.yml`, `SECURE_REDIRECT_EXEMPT` health-check line, legacy `media/` dir, broken `ServiceImage` rows) persisted. This decision closes those gaps and fixes two mobile visual defects surfaced during the final UI/UX QA.
+
+**36a — FAQ topics + public `/faq/` page (Category B, parent + translations):**
+- New `FAQTopic` (display_order/is_active) + `FAQTopicTranslation` (topic FK/language/name, unique_together). `FAQ.topic` is a nullable FK (`on_delete=SET_NULL`) so deleting a topic keeps its FAQs.
+- View `faq_page` (`site_config/views.py`): groups active FAQs under active topics (display order); ungrouped FAQs fall into a final "General" section. HU fallback per the project language rules. Search matches the question plus `strip_tags(answer)` substring (debounce 400ms, `#faq-list` outerHTML HTMX swap); native GET form fallback. Empty + no-results states. Sitemap entry added; nav placeholders (desktop/mobile/footer) → `{% url 'faq' %}`.
+- Templates: `templates/pages/faq.html` (hero + search box) + `templates/pages/partials/faq_list.html` (`<details>` accordion + expand/collapse-all via event delegation). Answer bodies render `|safe` (bleach-sanitized on save, same contract as `ContentBlock`).
+- Admin: `FAQTopicAdmin` (TabularInline ×3 languages) + topic added to `FAQAdmin` (list_display/list_filter).
+- Migration `site_config/0012_faq_topics`.
+
+**36b — Announcement banner rendering (existing model, newly surfaced):**
+- `Announcement`/`AnnouncementTranslation` were already complete (Phase 7D); this cycle renders them. New `get_active_announcements` template tag: active + `starts_at`/`ends_at` scheduling window, `display_order`, per-language with HU fallback, skips announcements without a usable translation.
+- `base.html` renders the banner stack above the sticky header; `is_dismissible` announcements get a dismiss button. Dismissal is **client-side** (localStorage keyed by slug) — no server round-trip, no per-user model. The `message` field is a plain `CharField` (intentionally **not** WYSIWYG — see admin comment), so `{{ message }}` auto-escaping is the correct safe-rendering contract (HTML/script-like content fails safe).
+
+**36c — Multilingual admin-content architecture verified (not reinvented):**
+- Confirmed `FAQ`/`FAQTopic`/`ContentBlock`/`Announcement`/`EmailTemplate`/SEO all follow the established **parent + per-language translation** pattern (Category B). No `{% trans %}` for DB-managed business content. Language fallback (active → HU base) verified live in EN and DE.
+
+**36d — Dead artifact cleanup:**
+- `Dockerfile` + `docker-compose.yml` removed (scaffold-born at `4c73354`, never developed — no CMD, no pip install; README/DEPLOYMENT have always documented the venv flow as supported). DEPLOYMENT.md had zero Docker references — no doc change needed.
+- `SECURE_REDIRECT_EXEMPT = [r"^/health-check/?$"]` removed from the `if not DEBUG` block (origin: `45f558b`; no consumer — gunicorn/nginx serve directly). `SECURE_SSL_REDIRECT` retained.
+- Legacy empty `media/` dir removed; 4 dev `ServiceImage` rows repointed to real tracked files in `mediafiles/`. **This is dev/demo data only** — no permanent production ownership of the current demo images is claimed; in production the administrator manages service images. Media architecture is unchanged.
+
+**36e — Mobile visual defects (final UI/UX QA):**
+- Catalog `/services/` parent-category pill bar overflowed 16px at 375px (4 pills, `w-fit`, no wrap). Fix: `max-w-full overflow-x-auto` on the bar + `whitespace-nowrap shrink-0` on pills (SHEIN-style horizontally-scrollable category bar; desktop unchanged).
+- Info-page hero `<h1>` overflowed 55px at 375px on long unhyphenated DE/HU words (e.g. "Datenschutzerklärung") because `whiteSpace:normal` wraps between words but not within. Fix: `break-words` (`overflow-wrap: break-word`) on all 5 hero h1s (about/contact/faq/privacy/terms) — activates only when a word would overflow, no layout change otherwise.
+
+**36f — Generic CMS / information-page architecture: evaluated and intentionally deferred.**
+- Final information-content audit (About, Terms, Privacy, FAQ, Contact, How-It-Works, booking/payment/cancellation info, announcements) confirms the existing **smallest-appropriate-architecture** is sufficient: `ContentBlock` for long-form static prose; `FAQ`+`FAQTopic` for knowledge-style expandable content; specialized models (`PaymentMethod`, `Service`, etc.) for structured business data; `Announcement` for temporary site-wide notices.
+- A generic CMS / reusable "topic page" abstraction was evaluated against the repository/specification and found **not required** by the current product. Deferred explicitly — do not introduce one without a proven spec requirement. No speculative informational pages were built.
+
+**Test-count clarification (no historical record altered):** Decision #35's "Suite 102 → 123 tests" is **correct** (74 site_config + 25 services + 18 bookings + 6 config = 123 across the 7 test modules, with `providers`/`users`/`payments` as empty stubs). An earlier internal note misread a 3-app partial count (117) as the "real baseline" and labelled 123 an overcount — that was wrong; 117 simply omitted `config/tests.py` (6 tests). The historical 123 stands uncorrected.
+
+**Impact:** `apps/site_config/` (models, admin, views, templatetags, tests), `config/` (settings, sitemaps, urls), 3× `.po` (+18 msgids each, compiled 341/341 ×3), `templates/base.html` + 5 info-page h1s + `service_list.html`, new `templates/pages/faq.html` + `partials/faq_list.html`, new migration `0012_faq_topics`. Suite 123 → **167 tests** (44 new site_config tests + 6 from `config/tests.py`, the latter always present but not previously run with the documented command). 48 applied migrations.

@@ -102,10 +102,57 @@ def sanitize_html(raw):
     )
 
 
+# ── FAQ Topic (Category B — parent + translations) ─────────────
+class FAQTopic(models.Model):
+    """Admin-managed grouping heading for FAQs (e.g. 'Booking', 'Payments').
+
+    Orderable, toggleable; topic names live in translations.
+    FAQs may exist without a topic (rendered under a 'General' section).
+    """
+
+    display_order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['display_order']
+        verbose_name = "FAQ topic"
+        verbose_name_plural = "FAQ topics"
+
+    def __str__(self):
+        # Prefer the base-language (HU) name for a readable admin label.
+        trans = self.translations.filter(language=LanguageChoices.HU).first()
+        return trans.name if trans else f"FAQ topic #{self.pk}"
+
+
+class FAQTopicTranslation(models.Model):
+    """One translation per language for a FAQ topic."""
+
+    topic = models.ForeignKey(
+        FAQTopic, related_name='translations', on_delete=models.CASCADE
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    name = models.CharField(max_length=200)
+
+    class Meta:
+        unique_together = ('topic', 'language')
+        verbose_name = "FAQ topic translation"
+        verbose_name_plural = "FAQ topic translations"
+
+    def __str__(self):
+        return f"{self.get_language_display()} — {self.name[:60]}"
+
+
 # ── FAQ (Category B — parent + translations) ───────────────────
 class FAQ(models.Model):
     """Parent FAQ record. Orderable, toggleable; text lives in translations."""
 
+    topic = models.ForeignKey(
+        FAQTopic,
+        null=True, blank=True,
+        on_delete=models.SET_NULL,  # deleting a topic keeps its FAQs (General)
+        related_name='faqs',
+        help_text="Optional grouping. FAQs without a topic appear under 'General'.",
+    )
     display_order = models.PositiveSmallIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 

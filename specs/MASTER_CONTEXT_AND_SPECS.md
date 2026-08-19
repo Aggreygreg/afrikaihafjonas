@@ -40,7 +40,7 @@ Afrikai Hajfónás is a premium hairstyle consultation and booking platform for 
 
 **Language codes:** `hu` (Hungarian), `en` (English), `de` (German)
 
-**Translations:** complete — 323 msgids × 3 languages (HU/EN/DE), managed via the polib script workflow (`_build_po.py` → `_apply_translations.py` → `_compile_mo.py`; `.mo` files are gitignored build artifacts — run the scripts after a fresh clone).
+**Translations:** complete — 341 msgids × 3 languages (HU/EN/DE), managed via the polib script workflow (`_build_po.py` → `_apply_translations.py` → `_compile_mo.py`; `.mo` files are gitignored build artifacts — run the scripts after a fresh clone).
 
 ---
 
@@ -65,9 +65,9 @@ apps/
 **SiteConfiguration (solo singleton — expanded in Phase 7A ✅):** business name, address, address description/directions, phone, email, business hours, Google Maps link, website URL, logo, favicon, hero title/subtitle/image, Instagram/TikTok/Facebook links.
 
 **Content models (all with parent + per-language translation records — see ARCHITECTURAL_PRINCIPLES §3/§4):**
-- `FAQ` + `FAQTranslation` — admin-managed FAQs (**note:** no public FAQ page is built yet; nav links are placeholders)
+- `FAQ` + `FAQTranslation` + `FAQTopic` + `FAQTopicTranslation` — admin-managed FAQs and topics, surfaced publicly at `/faq/` (Aug 19, 2026): topics group FAQs by `display_order` (active only); ungrouped FAQs fall into a "General" section last; per-language with HU fallback; HTMX live search (question + stripped-answer substring, debounce 400ms) with native GET fallback; `<details>` accordion + expand/collapse-all.
 - `ContentBlock` + `ContentBlockTranslation` — static page prose by slug (`about_page`, `terms_page`, `privacy_page`, `about_mission`; templates fall back to hardcoded copy when a block is inactive/missing)
-- `Announcement` + `AnnouncementTranslation` — site banner system
+- `Announcement` + `AnnouncementTranslation` — site banner system, rendered site-wide as a dismissible banner stack above the header (Aug 19, 2026): active + scheduling window (`starts_at`/`ends_at`), ordered, per-language with HU fallback, optional CTA link, dismissed client-side via localStorage keyed by slug (the `message` field is plain text, auto-escaped for safe rendering).
 - `EmailTemplate` + `EmailTemplateTranslation` — 8 transactional email types × 3 languages (seeded)
 - `GlobalSEO` + `GlobalSEOTranslation`, `PageSEO` + `PageSEOTranslation` — SEO metadata (Phase 7E)
 
@@ -367,6 +367,7 @@ Because ServiceOption groups are infinite (Color, Length, Cap Size, etc.), the S
 | `/contact/` | `site_config.contact_page` | Contact info (from `SiteConfiguration`) |
 | `/terms/` | `site_config.terms_page` | Terms & Conditions incl. deposit/refund policy |
 | `/privacy/` | `site_config.privacy_page` | Privacy Policy |
+| `/faq/` | `site_config.faq_page` | FAQ (admin-managed topics + Q&A, trilingual, HTMX search, accordion) |
 | `/services/` | `services.service_list_view` | Catalog with live HTMX filtering (script included on this template — fixed Aug 18, 2026); dynamic admin-defined parent-category tabs via `?cat=<pk>` |
 | `/services/<id>/` | `services.service_detail_view` | SHEIN-style product page with dynamic gallery |
 | `/bookings/book/<service_pk>/` | `bookings.consult_wizard_view` | Wizard Step 1 (options config) |
@@ -412,10 +413,10 @@ To prevent architectural bloat and LLM hallucinations, autonomous agents are str
 1. ~~**Catalog HTMX filtering non-functional**~~ — **FIXED Aug 18, 2026:** `service_list.html` now includes the HTMX runtime (`htmx.org@1.9.12`, per-template pattern like the wizard — the base template still does not bundle it). Verified live: gender tab click → XHR → partial swap; debounced search → swap; native no-JS form submit unaffected. Regression tests in `apps/services/tests.py`.
 2. ~~**Catalog gender matching is wrong**~~ — **FIXED Aug 18, 2026 (branch `feature/dynamic-parent-categories`):** the `name__icontains` lookup ("Men's Braids" matched "Women's Braids") was eliminated by the dynamic-category change: tabs are now generated from `ParentCategory` records and selected by primary key (`?cat=<pk>`); the old `gender` name param was removed entirely. See Decision #35.
 3. ~~**Gender tab highlight goes stale after an HTMX swap**~~ — **FIXED Aug 18, 2026 (same branch):** `switchCategory()` now syncs the active pill classes client-side (tabs sit outside the swapped `#services-wrapper`, so server-rendered classes cannot update on swap). Verified live in the browser.
-4. **No public FAQ page:** the `FAQ`/`FAQTranslation` models and admin exist, but no view/template renders them; nav "FAQs" links point to `#faq` anchors or `#` placeholders.
-5. **`SECURE_REDIRECT_EXEMPT` lists `/health-check/`** in `settings.py` but no such URL route exists (harmless dead config).
-6. **`Dockerfile` is a minimal stub** (no pip install / CMD); the `docker-compose.yml` references it but the supported setup is the venv flow.
-7. **Legacy `media/` directory** at repo root (contains `service_images`); the real `MEDIA_ROOT` is `mediafiles/`. Seeded service images reference `/media/service_images/…` and 404 in dev.
+4. ~~**No public FAQ page**~~ — **FIXED Aug 19, 2026:** the `FAQ`/`FAQTranslation` models now also have `FAQTopic`/`FAQTopicTranslation`, and a public `/faq/` view + templates render them (topics group FAQs, trilingual with HU fallback, HTMX search, accordion). Nav links resolve to the real page; sitemap includes it. See Decision #36.
+5. ~~**`SECURE_REDIRECT_EXEMPT` lists `/health-check/`**~~ — **FIXED Aug 19, 2026:** the dead config line was removed (no consumer; gunicorn/nginx serve directly). See Decision #36.
+6. ~~**`Dockerfile` is a minimal stub**~~ — **FIXED Aug 19, 2026:** the scaffold-era `Dockerfile` and `docker-compose.yml` were removed entirely (never functional; the venv flow is the only supported setup). See Decision #36.
+7. ~~**Legacy `media/` directory**~~ — **FIXED Aug 19, 2026:** the legacy empty `media/` dir was removed, and the 4 dev `ServiceImage` rows were repointed to real tracked files in `mediafiles/`. This is dev/demo data — in production the administrator manages service images; no permanent production ownership of the current demo images is claimed. See Decision #36.
 
 ---
 

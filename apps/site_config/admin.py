@@ -13,6 +13,8 @@ from .models import (
     EmailTemplate,
     EmailTemplateTranslation,
     FAQ,
+    FAQTopic,
+    FAQTopicTranslation,
     FAQTranslation,
     GlobalSEO,
     GlobalSEOTranslation,
@@ -64,12 +66,27 @@ class FAQTranslationInline(admin.StackedInline):
 
 @admin.register(FAQ)
 class FAQAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'topic', 'display_order', 'is_active')
+    list_editable = ('display_order', 'is_active')
+    list_display_links = ('__str__',)
+    list_filter = ('is_active', 'topic')
+    search_fields = ('translations__question',)
+    inlines = [FAQTranslationInline]
+
+
+# ── FAQ Topic ──────────────────────────────────────────────────
+class FAQTopicTranslationInline(admin.TabularInline):
+    model = FAQTopicTranslation
+    extra = 3  # one row per language (hu/en/de)
+
+
+@admin.register(FAQTopic)
+class FAQTopicAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'display_order', 'is_active')
     list_editable = ('display_order', 'is_active')
     list_display_links = ('__str__',)
     list_filter = ('is_active',)
-    search_fields = ('translations__question',)
-    inlines = [FAQTranslationInline]
+    inlines = [FAQTopicTranslationInline]
 
 
 # ── ContentBlock ───────────────────────────────────────────────

@@ -464,6 +464,30 @@ Test breakdown by module:
 
 ---
 
+## Public FAQ Page + Announcement Rendering + Cleanup ✅ (Aug 19, 2026 — branch `feature/public-faq-site-content`, NOT yet merged)
+
+**Goal:** Close three documented gaps from the prior-cycle audit — (1) `FAQ` model had no public page; (2) `Announcement` model was never rendered; (3) scaffold-era dead artifacts (`Dockerfile`, `docker-compose.yml`, `SECURE_REDIRECT_EXEMPT` health-check line, legacy `media/` dir, broken `ServiceImage` rows) persisted. Plus the final UI/UX visual QA pass. Full scope/rejected-alternatives in **Decision #36**.
+
+**36a — FAQ topics + public `/faq/` page (Category B):** New `FAQTopic` + `FAQTopicTranslation`; `FAQ.topic` nullable FK (`SET_NULL`). `faq_page` view groups active FAQs by active topic (display order), ungrouped → final "General" section, HU fallback, HTMX live search (question + `strip_tags(answer)` substring, 400ms debounce, `#faq-list` outerHTML swap) with native GET fallback, empty + no-results states. Templates `pages/faq.html` + `pages/partials/faq_list.html` (`<details>` accordion + expand/collapse-all). Sitemap + 3 nav links (`{% url 'faq' %}`). Admin `FAQTopicAdmin` (inline ×3) + topic on `FAQAdmin`. Migration `site_config/0012_faq_topics`.
+
+**36b — Announcement banner rendering:** Existing `Announcement`/`AnnouncementTranslation` now rendered. `get_active_announcements` tag (active + scheduling window + display order + per-language HU fallback + skip-no-translation). `base.html` banner stack above header; `is_dismissible` → client-side localStorage (slug-keyed, no server round-trip). `message` is plain `CharField` (not WYSIWYG) → `{{ message }}` auto-escaping is the correct safe contract.
+
+**36c — Multilingual admin-content architecture verified:** `FAQ`/`FAQTopic`/`ContentBlock`/`Announcement`/`EmailTemplate`/SEO all confirmed on the parent + per-language translation pattern. No `{% trans %}` for DB-managed business content. Live EN/DE fallback verified.
+
+**36d — Dead artifact cleanup:** `Dockerfile` + `docker-compose.yml` removed (never functional — scaffold at `4c73354`); `SECURE_REDIRECT_EXEMPT` health-check line removed (no consumer); legacy `media/` dir removed + 4 dev `ServiceImage` rows repointed to real tracked files in `mediafiles/` (dev/demo data only — no production ownership claimed). DEPLOYMENT.md had zero Docker refs → no change.
+
+**36e — Mobile visual defects (final UI/UX QA):** (1) Catalog `/services/` parent-category pill bar overflowed 16px @375px → `max-w-full overflow-x-auto` bar + `whitespace-nowrap shrink-0` pills (SHEIN-style scroll bar; desktop unchanged). (2) Info-page hero `<h1>` overflowed 55px @375px on long DE/HU words ("Datenschutzerklärung") → `break-words` on all 5 hero h1s (about/contact/faq/privacy/terms; activates only when a word would overflow).
+
+**36f — Generic CMS / information-page architecture: evaluated, intentionally deferred.** Final information-content audit confirms the existing smallest-appropriate-architecture is sufficient (ContentBlock for long-form, FAQ+topic for knowledge, specialized models for structured business data, Announcement for temporary notices). No generic CMS / reusable "topic page" abstraction introduced — no current spec requires it; deferred until a proven requirement.
+
+**Test-count clarification (no historical record altered):** Decision #35's "102 → 123" is **correct** (74 site_config + 25 services + 18 bookings + 6 config = 123; `providers`/`users`/`payments` are empty stubs). An earlier internal note misread a 3-app partial count (117, omitting `config/tests.py`) as the "real baseline" and labelled 123 an overcount — that was wrong. 123 stands uncorrected.
+
+**Files:** `apps/site_config/` (models, admin, views, templatetags, tests), `config/` (settings, sitemaps, urls), 3× `.po` (+18 msgids each → 341/341 ×3 compiled), `templates/base.html` + 5 info-page h1s + `service_list.html`, new `templates/pages/faq.html` + `partials/faq_list.html`, new migration `0012_faq_topics`. Plus spec sync: README, MASTER_CONTEXT, ARCHITECTURAL_PRINCIPLES §8.1, DECISIONS (#36), EXECUTION_RULES, this file.
+
+**Verification:** baseline 123/123 → **167/167** (44 new site_config tests + `config/tests.py` always had 6 but the documented command previously omitted its path); `makemigrations --check` clean; `manage.py check` 0 issues; **fresh-DB migrate clean** (backup → delete → `migrate --noinput` → all 12 site_config migrations apply incl `0012_faq_topics` → 4 FAQ tables confirmed → dev DB restored); 48 applied migrations. Live acceptance: FAQ topics ordered/grouped, inactive excluded, EN→HU + DE→HU fallback, HTMX partial search (no reload, filter accurate, input retained), no-results state, `<script>`/SQL injection probes all fail safe; banner scheduling window + future-exclusion + HTML-escape safe + dismiss + localStorage persistence across reload. Visual QA desktop 1280×800 + mobile 375×667 across homepage/catalog/SHEIN gallery/info pages/FAQ/wizard/guest-lookup → 2 defects found & fixed (36e). All acceptance test content purged (FAQ/Topic/Announcement → 0/0/0); empty state verified. All temp artifacts removed.
+
+---
+
 ## Session Management Policy (for HICLAW)
 
 **Context windows fill up.** When working on a long project like this, sessions accumulate context. Here's the policy:

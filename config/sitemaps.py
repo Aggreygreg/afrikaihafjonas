@@ -27,6 +27,7 @@ class StaticViewSitemap(Sitemap):
             "contact",
             "terms",
             "privacy",
+            "faq",
             "services:service_list",
         ]
 
