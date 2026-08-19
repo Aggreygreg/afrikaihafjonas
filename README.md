@@ -41,7 +41,7 @@ A customer-facing appointment **request** platform for an African hair braiding 
 | Admin content editing | django-summernote (limited toolbar) + bleach sanitization | Website content only — never email templates |
 | Site configuration | django-solo | `SiteConfiguration` singleton |
 | i18n tooling | polib (custom scripts) | No GNU gettext required |
-| Testing | pytest + pytest-django | 167 tests (incl. `config/tests.py`) |
+| Testing | pytest + pytest-django | 170 tests (incl. `config/tests.py`) |
 
 Key dependencies are managed with pip-tools: edit `requirements.in`, then recompile with `pip-compile requirements.in --output-file=requirements.txt`. Never edit `requirements.txt` by hand.
 
@@ -217,7 +217,7 @@ python manage.py makemigrations --check   # "No changes detected" expected
 python manage.py showmigrations           # 48 applied, 0 pending
 ```
 
-Current state: **167/167 tests pass** (services 25, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 48 applied migrations; seed data present: 4 payment methods, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO).
+Current state: **170/170 tests pass** (services 28, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 48 applied migrations; seed data present: 4 payment methods, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO).
 
 > Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **48** applied migrations across active apps.
 
@@ -236,7 +236,7 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 
 ## Branch Strategy
 
-- **`main`** — the stable, production branch. All Phase 1–7 work is merged here (`ef16dc7`, Aug 17, 2026) and verified (167 tests, migration-integrity check, fresh-DB migrate).
+- **`main`** — the stable, production branch. All Phase 1–7 work is merged here (`ef16dc7`, Aug 17, 2026) and verified (170 tests, migration-integrity check, fresh-DB migrate).
 - **`main4qp`** — the *former* integration branch used during parallel agent-driven development. Fully merged into `main`; kept only for history. New work should branch from `main`.
 - Feature branches are deleted after merging.
 

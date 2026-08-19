@@ -407,4 +407,37 @@
 
 **Test-count clarification (no historical record altered):** Decision #35's "Suite 102 → 123 tests" is **correct** (74 site_config + 25 services + 18 bookings + 6 config = 123 across the 7 test modules, with `providers`/`users`/`payments` as empty stubs). An earlier internal note misread a 3-app partial count (117) as the "real baseline" and labelled 123 an overcount — that was wrong; 117 simply omitted `config/tests.py` (6 tests). The historical 123 stands uncorrected.
 
-**Impact:** `apps/site_config/` (models, admin, views, templatetags, tests), `config/` (settings, sitemaps, urls), 3× `.po` (+18 msgids each, compiled 341/341 ×3), `templates/base.html` + 5 info-page h1s + `service_list.html`, new `templates/pages/faq.html` + `partials/faq_list.html`, new migration `0012_faq_topics`. Suite 123 → **167 tests** (44 new site_config tests + 6 from `config/tests.py`, the latter always present but not previously run with the documented command). 48 applied migrations.
+**Impact:** `apps/site_config/` (models, admin, views, templatetags, tests), `config/` (settings, sitemaps, urls), 3× `.po` (+18 msgids each, compiled 341/341 ×3), `templates/base.html` + 5 info-page h1s + `service_list.html`, new `templates/pages/faq.html` + `partials/faq_list.html`, new migration `0012_faq_topics`.
+
+---
+
+## Decision #37 — ServiceImage admin dropdown fix + DATABASE_URL safe default (2026-08-19)
+
+**37a — ServiceImage `linked_options` dropdowns render in admin (bug fix):**
+
+`DynamicServiceImageForm.__init__` builds per-group `_opt_{slug}` dropdown fields when `parent_service` is provided, but three gaps prevented them from rendering in the admin change form:
+
+1. `ServiceImageInline` had no `get_fieldsets` override. Django's default fieldset only listed `Meta.fields` (`["image", "order"]`) + readonly `image_preview`, so `_opt_*` fields never appeared in the rendered HTML.
+2. Naively overriding `get_fieldsets` alone caused `FieldError`: `get_formset` derives its `fields` list from `flatten_fieldsets(get_fieldsets(...))` and passes it to `modelform_factory`, which validates field names against the model. `_opt_*` are not model fields.
+3. `ServiceImageInlineFormSet._construct_form` passed `parent_service` to regular forms, but the admin's `empty_form` property (used for the JavaScript "add" form) calls `get_form_kwargs(None)` directly, bypassing `_construct_form`. The empty form had no `_opt_*` fields, causing `KeyError` during rendering.
+
+Fix (3 changes in `apps/services/admin.py`):
+
+1. **`get_fieldsets` override on `ServiceImageInline`**: computes `_opt_{slug}` field names from `obj.get_options_grouped()` and includes them in the fieldset for rendering. `obj` is the parent **Service** (Django passes the parent model to inline `get_fieldsets`, not the inline's own instance). Falls back to base fields when `obj` is None (add view) or has no option groups.
+2. **`get_formset` override on `ServiceImageInline`**: passes `fields=list(self.form._meta.fields)` explicitly to `super().get_formset()` so `modelform_factory` sees only real model fields (`["image", "order"]`), while `get_fieldsets` still controls rendering.
+3. **`get_form_kwargs` override on `ServiceImageInlineFormSet`** (replacing the old `_construct_form` override): injects `parent_service=self.instance` into the form kwargs. This is the correct hook because `get_form_kwargs` is called by BOTH `_construct_form` (regular/extra forms) AND `empty_form` (add form), so all forms receive the parent Service and build the dynamic dropdowns.
+
+Verified: admin change form renders `<select name="images-0-_opt_color">`, `<select name="images-0-_opt_length">`, `<select name="images-__prefix__-_opt_color">`, `<select name="images-__prefix__-_opt_length">`. Both the existing form and the add form show the dropdowns with correct option labels (including `+{price} Ft` suffixes).
+
+**37b — `.env.example` DATABASE_URL safe default (footgun fix):**
+
+Fresh-clone audit found that `.env.example` had `DATABASE_URL=` (empty string). `dj_database_url.config()` returns `{}` when the env var is set to empty (even with a `default=` parameter, because `os.environ.get()` returns the actual empty string, not the default). Django then crashes: "improperly configured. Please supply the ENGINE value."
+
+Fix (2 changes):
+
+1. `.env.example`: changed `DATABASE_URL=` to `DATABASE_URL=sqlite:///db.sqlite3` (working dev default; the comments above already explained the format).
+2. `config/settings.py`: replaced `dj_database_url.config(conn_max_age=600, ssl_require=False)` with `dj_database_url.parse(os.environ.get("DATABASE_URL", "").strip() or "sqlite:///db.sqlite3", conn_max_age=600, ssl_require=False)`. Uses `parse()` directly with a computed URL, handling all cases: unset env var, empty string, or a real PostgreSQL/SQLite URL.
+
+Fresh-clone impact: `cp .env.example .env && python manage.py migrate` now works immediately without manually setting `DATABASE_URL`.
+
+**Impact:** `apps/services/admin.py`, `config/settings.py`, `.env.example`, `apps/services/tests.py`, `specs/DECISIONS.md`. Suite 167 to **170 tests** (3 new `ServiceImageDropdownTests`: dropdown fields render, option values present, no-dropdowns for services without options). 48 applied migrations (unchanged -- no model changes).

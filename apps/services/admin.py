@@ -85,11 +85,18 @@ class DynamicServiceImageForm(forms.ModelForm):
 
 
 class ServiceImageInlineFormSet(forms.BaseInlineFormSet):
-    """Passes the parent Service to each inline form for dynamic fields."""
+    """Passes the parent Service to every inline form — including the
+    empty (add) form — so dynamic _opt_* dropdown fields are always built.
 
-    def _construct_form(self, i, **kwargs):
+    Uses get_form_kwargs instead of _construct_form because the admin's
+    empty_form property calls get_form_kwargs(None) directly, bypassing
+    _construct_form entirely.
+    """
+
+    def get_form_kwargs(self, i):
+        kwargs = super().get_form_kwargs(i)
         kwargs["parent_service"] = self.instance
-        return super()._construct_form(i, **kwargs)
+        return kwargs
 
 
 class ServiceImageInline(admin.StackedInline):
@@ -101,6 +108,53 @@ class ServiceImageInline(admin.StackedInline):
 
     # Read-only preview of the uploaded image
     readonly_fields = ("image_preview",)
+
+    def get_fieldsets(self, request, obj=None):
+        """
+        Inject the dynamic ``_opt_{slug}`` dropdown fields into the fieldset
+        so they render in the admin form.
+
+        Django's default ``get_fieldsets`` builds the field list from
+        ``form._meta.fields`` (``["image", "order"]``) + readonly fields —
+        the ``_opt_*`` fields added per-instance in the form's ``__init__``
+        never appear.  By computing them here from the parent Service
+        (``obj``), the rendered fieldset matches what the form instance
+        provides.
+
+        ``obj`` is the parent **Service** instance (Django passes the parent
+        model, not the inline's own instance) or ``None`` on the add view.
+        """
+        base_fields = ("image", "order", "image_preview")
+
+        if obj and obj.pk:
+            dynamic = []
+            seen = set()
+            for group in obj.get_options_grouped():
+                field_name = f"_opt_{slugify(group['group_name'])}"
+                if field_name not in seen:
+                    seen.add(field_name)
+                    dynamic.append(field_name)
+            if dynamic:
+                return [(None, {"fields": (*base_fields, *dynamic)})]
+
+        return [(None, {"fields": base_fields})]
+
+    def get_formset(self, request, obj=None, **kwargs):
+        """
+        Pass only the real model fields (``Meta.fields``) to
+        ``modelform_factory``.
+
+        ``get_formset`` normally derives its ``fields`` list from
+        ``flatten_fieldsets(get_fieldsets(...))`` — which now includes the
+        dynamic ``_opt_*`` names.  Those are not model fields, so
+        ``ModelFormMetaclass`` raises ``FieldError``.  By passing
+        ``fields`` explicitly from the form's ``Meta.fields``, the factory
+        sees only real fields while ``get_fieldsets`` still controls
+        rendering.
+        """
+        if "fields" not in kwargs:
+            kwargs["fields"] = list(self.form._meta.fields)
+        return super().get_formset(request, obj, **kwargs)
 
     def image_preview(self, obj):
         if obj and obj.pk and obj.image:

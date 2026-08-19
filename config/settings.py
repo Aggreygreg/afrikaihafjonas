@@ -83,10 +83,12 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-# The database is now configured via the DATABASE_URL in your .env file
+# Database — configured via DATABASE_URL in .env.
+# Falls back to SQLite for development when DATABASE_URL is unset or empty
+# (prevents the "improperly configured" crash on fresh clones — see .env.example).
+_db_url = os.environ.get("DATABASE_URL", "").strip() or "sqlite:///db.sqlite3"
 DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600, ssl_require=False)
+    'default': dj_database_url.parse(_db_url, conn_max_age=600, ssl_require=False)
 }
 
 # Email backend — console for dev, SMTP for production.

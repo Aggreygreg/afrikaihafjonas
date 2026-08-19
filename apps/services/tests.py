@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils.html import escape
 
-from apps.services.models import ParentCategory, ServiceCategory, Service
+from apps.services.models import ParentCategory, ServiceCategory, Service, ServiceOption
 
 # NOTE: responses render in the project default language (hu) when compiled
 # .mo catalogs are present, so never assert on {% trans %} literals — assert
@@ -317,3 +317,71 @@ class AdminCategoryCrudTests(CatalogFixtureMixin, TestCase):
         catalog = self.client.get("/services/")
         self.assertNotContains(catalog, "Children's Braids")
         self.assertContains(catalog, self.womens_service.title)
+
+
+class ServiceImageDropdownTests(CatalogFixtureMixin, TestCase):
+    """Regression tests for the ServiceImage admin inline dropdown rendering.
+
+    Bug fixed 2026-08-19: ``DynamicServiceImageForm`` built per-group
+    dropdown fields (``_opt_{slug}``) in ``__init__``, but
+    ``ServiceImageInline`` had no ``get_fieldsets`` override — Django's
+    default fieldset only listed ``Meta.fields`` (``["image", "order"]``),
+    so the dropdowns never rendered in the admin change form.  The fix
+    overrides ``get_fieldsets`` to inject the dynamic field names computed
+    from the parent Service's option groups.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.admin = get_user_model().objects.create_superuser(
+            "imgadmin", "imgadmin@example.com", "pw-12345")
+        # Two option groups on the women's service
+        ServiceOption.objects.create(
+            service=cls.womens_service, group_name="Color",
+            value="Black", additional_price=0)
+        ServiceOption.objects.create(
+            service=cls.womens_service, group_name="Color",
+            value="Brown", additional_price=2000)
+        ServiceOption.objects.create(
+            service=cls.womens_service, group_name="Length",
+            value="Shoulder", additional_price=0)
+        ServiceOption.objects.create(
+            service=cls.womens_service, group_name="Length",
+            value="Waist", additional_price=5000)
+
+    def setUp(self):
+        self.client.force_login(self.admin)
+
+    def test_dropdown_fields_render_in_admin_change_form(self):
+        """The ``_opt_color`` and ``_opt_length`` select fields must appear
+        in the Service admin change form's ServiceImage inline."""
+        response = self.client.get(
+            "/admin/services/service/%d/change/" % self.womens_service.pk)
+        self.assertEqual(response.status_code, 200)
+        # Admin inline prefixes field names (e.g. ``images-0-_opt_color``),
+        # so we check for the field name as a substring.
+        self.assertContains(response, "_opt_color")
+        self.assertContains(response, "_opt_length")
+        # Both the existing form (index 0) and the empty/add form
+        # (__prefix__) must render the dropdowns.
+        self.assertContains(response, "images-0-_opt_color")
+        self.assertContains(response, "images-__prefix__-_opt_color")
+
+    def test_dropdown_includes_option_values(self):
+        """Dropdown option labels include the option values."""
+        response = self.client.get(
+            "/admin/services/service/%d/change/" % self.womens_service.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Black")
+        self.assertContains(response, "Brown")
+        self.assertContains(response, "Shoulder")
+        self.assertContains(response, "Waist")
+
+    def test_service_without_options_renders_without_dropdowns(self):
+        """A Service with no options must still render the inline — no
+        crash, no orphan ``_opt_`` fields."""
+        response = self.client.get(
+            "/admin/services/service/%d/change/" % self.mens_service.pk)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'name="_opt_')
