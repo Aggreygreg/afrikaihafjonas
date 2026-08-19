@@ -576,7 +576,7 @@ class FAQTopicTranslation(models.Model):
     """One translation per language for a topic name."""
     topic = models.ForeignKey(FAQTopic, related_name='translations', on_delete=models.CASCADE)
     language = models.CharField(max_length=2, choices=LanguageChoices.choices)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
 
     class Meta:
         unique_together = ('topic', 'language')
