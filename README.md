@@ -130,7 +130,7 @@ Language selection uses the appointment's stored `customer_language` (captured a
 - **First-visit modal:** `base.html` renders a language modal shown when the `django_language` cookie is absent; each choice POSTs to `set_language`. A header dropdown switcher is also available.
 - **Two translation systems by design** (see `specs/ARCHITECTURAL_PRINCIPLES.md` §3):
   - *Developer UI strings* → `{% trans %}` + `.po` files (Category A).
-  - *Admin-authored content* (FAQ, page prose, emails, SEO) **and all customer-facing catalog content** (parent categories, service categories, service titles/descriptions, option labels, payment methods, payment detail fields, site configuration, provider bios, TextChoices labels) → parent + per-language DB records or `gettext_lazy` (Category B); never `{% trans %}`. Decisions #38–#39.
+  - *Admin-authored content* (FAQ, page prose, emails, SEO) **and all customer-facing catalog content** (parent categories, service categories, service titles/descriptions, option labels, payment methods, payment detail fields, site configuration, **provider bios**, TextChoices labels) → parent + per-language DB records or `gettext_lazy` (Category B); never `{% trans %}`. Decisions #38–#40.
   - *Free-form admin text* (e.g. `AppointmentRequest.admin_notes` shown on Guest Lookup) → accepted limitation; admin should write in the customer's language or HU (Category C). Decision #39.
 - **polib workflow (no GNU gettext needed):** `.mo` files are gitignored build artifacts. After cloning or after editing translations run:
   ```
@@ -215,12 +215,12 @@ python -m pytest apps/bookings/tests.py apps/site_config/tests.py apps/payments/
 
 python manage.py check                    # 0 issues expected
 python manage.py makemigrations --check   # "No changes detected" expected
-python manage.py showmigrations           # 48 applied, 0 pending
+python manage.py showmigrations           # 60 applied, 0 pending
 ```
 
-Current state: **170/170 tests pass** (services 28, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 59 applied migrations; seed data present: 4 parent categories, 4 service categories, 3 services, 10 service options, 4 payment methods, 8 payment detail fields, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO, 1 site configuration — all with HU translations seeded).
+Current state: **170/170 tests pass** (services 28, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 60 applied migrations; seed data present: 4 parent categories, 4 service categories, 3 services, 10 service options, 4 payment methods, 8 payment detail fields, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO, 1 site configuration — all with HU translations seeded).
 
-> Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **59** applied migrations across active apps (48 original + 9 multilingual translation migrations + 2 cross-cutting audit migrations).
+> Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **60** applied migrations across active apps (48 original + 9 multilingual translation migrations + 2 cross-cutting audit migrations + 1 ProviderTranslation migration).
 
 ## Management Commands & Cron
 
@@ -243,7 +243,7 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 
 ## Implemented vs. Deferred
 
-**Implemented and verified:** catalog + SHEIN-style detail page, full 4-step wizard with payments + snapshots, confirmation, guest lookup, admin dashboard + review/refund workflow, auto-expire + reminders, all 8 transactional emails, trilingual UI (341 strings ×3), admin-managed business content (7A–7E) **including public FAQ page + announcement banner rendering (Aug 19, 2026)**, SEO models + sitemap/robots/JSON-LD, production security settings, deployment guide.
+**Implemented and verified:** catalog + SHEIN-style detail page, full 4-step wizard with payments + snapshots, confirmation, guest lookup, admin dashboard + review/refund workflow, auto-expire + reminders, all 8 transactional emails, trilingual UI (365 strings ×3), admin-managed business content (7A–7E) **including public FAQ page + announcement banner rendering (Aug 19, 2026)**, full multilingual catalog via Translation models (Aug 20, 2026 — Decisions #38/#39/#40), SEO models + sitemap/robots/JSON-LD, production security settings, deployment guide.
 
 **Known gaps / deferred (do not assume these work):**
 
@@ -264,7 +264,7 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 |---|---|
 | `specs/MASTER_CONTEXT_AND_SPECS.md` | Source of truth: philosophy, models, business rules, journeys, URLs |
 | `specs/ARCHITECTURAL_PRINCIPLES.md` | Business-managed content architecture (Phases 7A–7E), content categories, snapshots, emails, SEO |
-| `specs/DECISIONS.md` | Decision log with rationale (#1–#35) |
+| `specs/DECISIONS.md` | Decision log with rationale (#1–#40) |
 | `specs/PROGRESS_HISTORY.md` | Phase-by-phase build history and verification results |
 | `specs/EXECUTION_RULES.md` | Guardrails for builder agents |
 | `specs/DEPLOYMENT.md` | Production deployment guide |

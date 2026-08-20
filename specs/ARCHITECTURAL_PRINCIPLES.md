@@ -1,7 +1,7 @@
 # Afrikai Hajfonás — Architectural Principles: Business-Managed Content & Configuration
 
-**Last Updated:** August 19, 2026 (Revision 5 — FAQ topics + public `/faq/` page + announcement banner rendering + dead-artifact cleanup; see Decision #36)
-**Status:** ✅ Implementation complete (Phase 7A–7E + 2026-08-19 content/cleanup cycle). Production-hardened, smoke-tested, 167 tests passing.
+**Last Updated:** August 20, 2026 (Revision 6 — deep audit: Provider.bio converted to ProviderTranslation for architectural consistency; all stale spec counts corrected)
+**Status:** ✅ Implementation complete (Phase 7A–7E + 2026-08-19 content/cleanup cycle + 2026-08-20 multilingual + deep audit). Production-hardened, 170 tests passing.
 
 ---
 
@@ -211,13 +211,13 @@ class SomethingTranslationInline(admin.StackedInline):
 
 **Multilingual?** Business info (name, address, phone, hours) is **primarily operational data**, not prose. A phone number is a phone number in every language. However, **address description/directions** and **working hours descriptions** may benefit from per-language variants.
 
-**Decision:** `SiteConfiguration` remains a singleton with single-language fields. If address descriptions or hours descriptions need translation, use ContentBlocks (Phase 7D) keyed by slug. This keeps the singleton simple and avoids over-engineering.
+**Decision:** `SiteConfiguration` remains a singleton. Operational data (phone, address, hours) is single-language. **Customer-facing text** (business name, hero title, hero subtitle) lives in `SiteConfigurationTranslation` (HU/EN/DE) — Decision #38, implemented ✅. This keeps the singleton focused on operational data while still providing multilingual customer-facing text.
 
-**Fields (all implemented ✅ — Phase 7A):**
+**Fields (all implemented ✅ — Phase 7A + Decision #38 multilingual):**
 
 | Field | Type | Multilingual? | Current State |
 |---|---|---|---|
-| Business name | CharField | No | ✅ `business_name` |
+| Business name | CharField | ✅ `SiteConfigurationTranslation` (Category B) | ✅ `display_business_name` property |
 | Address | CharField | No | ✅ `salon_address` |
 | Address description/directions | TextField | Optional (via ContentBlock) | ✅ `address_description` |
 | Phone number | CharField | No | ✅ `salon_phone` |
@@ -227,10 +227,11 @@ class SomethingTranslationInline(admin.StackedInline):
 | Website URL | URLField | No | ✅ `website_url` |
 | Logo | ImageField | No | ✅ `logo` |
 | Favicon | ImageField | No | ✅ `favicon` |
-| Hero title / subtitle / image | CharField / ImageField | `{% trans %}` | ✅ `hero_title`, `hero_subtitle`, `hero_image` |
-| Instagram URL | URLField | No | ✅ `instagram_url` |
-| Facebook URL | URLField | No | ✅ `facebook_url` |
-| TikTok URL | URLField | No | ✅ `tiktok_url` |
+| Hero title / subtitle | CharField / TextField | ✅ `SiteConfigurationTranslation` (Category B) | ✅ `display_hero_title`/`display_hero_subtitle` properties |
+| Hero image | ImageField | No | ✅ `hero_image` |
+| Instagram URL | URLField | No | ✅ `social_instagram` |
+| Facebook URL | URLField | No | ✅ `social_facebook` |
+| TikTok URL | URLField | No | ✅ `social_tiktok` |
 | Global SEO fields (title, description, OG) | Various | `GlobalSEO` + translations (Phase 7E ✅) | ✅ `GlobalSEO` model |
 
 **Rule:** Changes automatically reflect everywhere the data is used — templates AND email templates (via placeholder system).

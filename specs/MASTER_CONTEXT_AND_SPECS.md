@@ -1,6 +1,6 @@
 # AFRIKAI HAJFONÁS – MASTER PROJECT CONTEXT & SPECIFICATION
 
-**Last Updated:** August 17, 2026 (synced to `main` @ post-merge state)
+**Last Updated:** August 20, 2026 (synced to `main` @ post-audit state)
 **Role/Purpose:** This document is the absolute source of truth for all autonomous coding agents and developers working on this repository. If a feature or approach contradicts this document, this document wins.
 
 > **See also:** `ARCHITECTURAL_PRINCIPLES.md` — comprehensive specification for Phase 7 (A-E). Covers: business-managed content principle, three content categories (developer UI / admin reusable / appointment-specific), multilingual content strategy (parent + translation records, NOT `{% trans %}` for admin content), payment method architecture with mandatory historical snapshots, appointment language persistence, transactional email system, and SEO configuration. Read before implementing any Phase 7 work.
@@ -40,7 +40,7 @@ Afrikai Hajfónás is a premium hairstyle consultation and booking platform for 
 
 **Language codes:** `hu` (Hungarian), `en` (English), `de` (German)
 
-**Translations:** complete — 341 msgids × 3 languages (HU/EN/DE), managed via the polib script workflow (`_build_po.py` → `_apply_translations.py` → `_compile_mo.py`; `.mo` files are gitignored build artifacts — run the scripts after a fresh clone).
+**Translations:** complete — 365 msgids × 3 languages (HU/EN/DE), managed via the polib script workflow (`_build_po.py` → `_apply_translations.py` → `_compile_mo.py`; `.mo` files are gitignored build artifacts — run the scripts after a fresh clone).
 
 ---
 
@@ -76,13 +76,13 @@ apps/
 ### apps.users & apps.providers
 **User:** Standard custom user model for admin access. No client accounts — clients are anonymous consultation submitters.
 
-**Provider:** Stylist profiles.
+**Provider:** Stylist profiles. Structural fields only (`display_name`, `user`, `profile_image`); customer-facing bio lives in `ProviderTranslation` (HU/EN/DE with HU fallback) — Decision #40.
 
 **AvailabilityRule:** Recurring weekly shift. Fields: `provider`, `day_of_week` (0=Mon, 6=Sun), `start_time`, `end_time`.
 
 ### apps.services (The E-Commerce Engine)
 
-**ParentCategory:** Dynamic and admin-defined (Decision #35, Aug 18, 2026 — supersedes the original "exactly three entries" rule). Any number of entries; every record renders automatically as a top-level tab on `/services/` in creation order (pk). The classic seed trio Women's → Men's → Children's preserves the original presentation; admin-created categories (e.g., "Bridal", "Locs") append at the end. Tab selection is ID-based (`?cat=<pk>`); category names are display-only and never used for query matching. Labels are single-language DB values — see Decision #35 for the translation consequence.
+**ParentCategory:** Dynamic and admin-defined (Decision #35, Aug 18, 2026 — supersedes the original "exactly three entries" rule). Any number of entries; every record renders automatically as a top-level tab on `/services/` in creation order (pk). The classic seed trio Women's → Men's → Children's preserves the original presentation; admin-created categories (e.g., "Bridal", "Locs") append at the end. Tab selection is ID-based (`?cat=<pk>`); category names are display-only and never used for query matching. Labels are fully translated via `ParentCategoryTranslation` (HU/EN/DE with HU fallback) — Decisions #38/#39.
 
 **ServiceCategory:** The specific braid style linked to a parent (e.g., "Knotless Box Braids").
 
@@ -142,7 +142,7 @@ pending_verification → pending_review → approved
 ### apps.payments (DECOMMISSIONED)
 Stripe/PayPal gateways removed in Phase 0 (commit `e2687c8`). The app directory remains as an empty, documented shell to avoid import errors; it is **commented out of `INSTALLED_APPS`** and its two migration files were **intentionally deleted**. Payment logic lives on `AppointmentRequest` + `PaymentMethod`/`PaymentDetailField`/`AppointmentPaymentSnapshot` in `apps.bookings`. Payments are manually verified using administrator-configured payment methods and instructions. No automated third-party payment gateway integrations.
 
-> **Migration note:** the canonical applied-migration count across active apps is **47**. Any count of 49 includes the two deleted `payments` migrations from before the decommission.
+> **Migration note:** the canonical applied-migration count across active apps is **60** (48 original + 9 multilingual translation + 2 cross-cutting audit + 1 ProviderTranslation). Any count of 49 includes the two deleted `payments` migrations from before the decommission.
 
 ### apps.reviews (DELETED)
 Intentionally scrapped. No star ratings, comments, or review system.

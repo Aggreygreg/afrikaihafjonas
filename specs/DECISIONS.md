@@ -514,3 +514,32 @@ Fresh-clone impact: `cp .env.example .env && python manage.py migrate` now works
 **Tests:** 170/170 pass (no test changes needed — no tests directly reference choice labels or hardcoded view strings).
 
 **Impact:** `apps/bookings/{models,views}.py`, `apps/providers/{models,admin}.py`, `templates/base.html`, `templates/bookings/partials/{wizard_step_1,wizard_step_2,wizard_step_3}.html`, 2 migration files, 3 .po files, 3 .mo files. `specs/DECISIONS.md`, `README.md`.
+
+---
+
+## Decision #40 — Provider.bio: convert to ProviderTranslation for architectural consistency (2026-08-20)
+
+**Greg required:** deep audit of the entire project — verify multilingual completeness, review whether `Provider.bio`'s `bio_en`/`bio_de` scheme conforms to the established translation architecture. **"Do NOT introduce a second translation pattern unless necessary."**
+
+**Finding:** Decision #39 added `bio`/`bio_en`/`bio_de` fields to `Provider` — a "column-per-language" pattern. This is architecturally inconsistent with `ARCHITECTURAL_PRINCIPLES.md` §4, which mandates the **parent + Translation** pattern for ALL admin-managed multilingual content. All 7 other multilingual content types use parent+Translation models (even `PaymentMethodTranslation`, which has just one field `name`). Provider.bio was the ONLY model using a second pattern.
+
+**Decision:** **Convert** to `ProviderTranslation` model (provider FK + language + bio). This eliminates the second translation pattern and makes Provider consistent with all other Category B models.
+
+**What changed:**
+1. `Provider` model: removed `bio`/`bio_en`/`bio_de` fields; added `get_translation()` method + `display_bio` property using the standard fallback chain (active → HU → first available). Provider now has structural fields only (`display_name`, `user`, `profile_image`).
+2. New `ProviderTranslation` model: `provider` FK (related_name=`translations`), `language` (LanguageChoices), `bio` (TextField). `unique_together = (provider, language)`.
+3. `ProviderAdmin`: added `ProviderTranslationInline` (StackedInline, extra=3 for HU/EN/DE); updated fieldsets to remove bio fields.
+4. Migration `0005_provider_translation`: CreateModel(ProviderTranslation) → RunPython (copy bio→HU, bio_en→EN, bio_de→DE) → RemoveField(bio, bio_en, bio_de). Data migration preserves existing bio content.
+5. Template `wizard_step_2.html`: already used `{{ providers.0.display_bio }}` — no change needed.
+
+**Deep audit — additional findings (all documentation staleness, all fixed):**
+- `EXECUTION_RULES.md`: Rule 9 (i18n) updated from "341 msgids, wrap now/translate later" to "365 msgids, FULLY BUILT with catalog Translation models". Known Gotcha #2 corrected (labels ARE translated, not single-language). Migration count 48→60. Test count 167→170. Builder Agent Context + Worktree sections: `main4qp` → `main`.
+- `MASTER_CONTEXT_AND_SPECS.md`: §2 translations 341→365. §3 ParentCategory "single-language" → "fully translated". §3 migration count 47→60. §3 Provider description updated to mention ProviderTranslation.
+- `ARCHITECTURAL_PRINCIPLES.md`: header updated (Aug 20, Rev 6, 170 tests). §5 SiteConfiguration table corrected: business_name/hero_title/hero_subtitle now shown as SiteConfigurationTranslation (Category B), not single-language or `{% trans %}`.
+- `README.md`: showmigrations 48→60. i18n strings 341→365. Decision range #1–#35→#1–#40. Migration count note 59→60.
+
+**Migrations:** 1 new — `providers/0005_provider_translation`. Total: 59 + 1 = **60 applied migrations**.
+
+**Tests:** 170/170 pass. `makemigrations --check`: clean. `django check`: 0 issues.
+
+**Impact:** `apps/providers/{models,admin}.py`, `apps/providers/migrations/0005_provider_translation.py`, `specs/{ARCHITECTURAL_PRINCIPLES,DECISIONS,EXECUTION_RULES,MASTER_CONTEXT_AND_SPECS}.md`, `README.md`.

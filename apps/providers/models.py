@@ -13,6 +13,13 @@ def _active_lang():
 
 
 class Provider(models.Model):
+    """Stylist profile.
+
+    Structural fields only (display_name, user, profile_image). The
+    customer-facing bio lives in ProviderTranslation (HU/EN/DE) — Category B,
+    consistent with all other admin-managed multilingual content
+    (ARCHITECTURAL_PRINCIPLES.md §4).
+    """
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -21,9 +28,6 @@ class Provider(models.Model):
         help_text="Optional link to a user account for future provider dashboard."
     )
     display_name = models.CharField(max_length=100)
-    bio = models.TextField(blank=True, help_text="Hungarian bio (base language).")
-    bio_en = models.TextField(blank=True, default="", help_text="English bio.")
-    bio_de = models.TextField(blank=True, default="", help_text="German bio.")
     profile_image = models.ImageField(
         upload_to='provider_images/',
         blank=True,
@@ -37,15 +41,38 @@ class Provider(models.Model):
     def __str__(self):
         return self.display_name
 
+    def get_translation(self, lang=None):
+        """Return the best available translation for the active language."""
+        lang = lang or _active_lang()
+        return (
+            self.translations.filter(language=lang).first()
+            or self.translations.filter(language=LanguageChoices.HU).first()
+            or self.translations.first()
+        )
+
     @property
     def display_bio(self):
         """Return the bio in the active language, falling back to HU."""
-        lang = _active_lang()
-        if lang == "en" and self.bio_en:
-            return self.bio_en
-        if lang == "de" and self.bio_de:
-            return self.bio_de
-        return self.bio
+        trans = self.get_translation()
+        return trans.bio if trans else ""
+
+
+class ProviderTranslation(models.Model):
+    """One per language for a Provider's bio (Category B — parent+Translation)."""
+    provider = models.ForeignKey(
+        Provider, related_name='translations', on_delete=models.CASCADE,
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    bio = models.TextField(blank=True, help_text="Stylist bio in this language.")
+
+    class Meta:
+        unique_together = ('provider', 'language')
+        verbose_name = "Provider translation"
+        verbose_name_plural = "Provider translations"
+
+    def __str__(self):
+        return f"{self.provider.display_name} — {self.get_language_display()}"
+
 
 class AvailabilityRule(models.Model):
     """
