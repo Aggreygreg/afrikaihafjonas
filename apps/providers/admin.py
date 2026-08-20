@@ -17,6 +17,6 @@ class ProviderAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('user', 'display_name', 'bio', 'profile_image')
+            'fields': ('user', 'display_name', 'bio', 'bio_en', 'bio_de', 'profile_image')
         }),
     )

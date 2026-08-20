@@ -4,7 +4,7 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
-from django.utils.translation import get_language
+from django.utils.translation import get_language, gettext_lazy as _
 
 from apps.providers.models import Provider
 from apps.services.models import Service
@@ -163,22 +163,22 @@ class AppointmentRequest(models.Model):
     """
 
     class Status(models.TextChoices):
-        PENDING_VERIFICATION = "pending_verification", "Pending Verification"
-        PENDING_REVIEW = "pending_review", "Pending Review"
-        APPROVED = "approved", "Approved"
-        REJECTED = "rejected", "Rejected"
-        EXPIRED = "expired", "Expired"
+        PENDING_VERIFICATION = "pending_verification", _("Pending Verification")
+        PENDING_REVIEW = "pending_review", _("Pending Review")
+        APPROVED = "approved", _("Approved")
+        REJECTED = "rejected", _("Rejected")
+        EXPIRED = "expired", _("Expired")
 
     class HairLength(models.TextChoices):
-        EAR = "ear", "Ear Length"
-        CHIN = "chin", "Chin Length"
-        NECK = "neck", "Neck Length"
-        SHOULDER = "shoulder", "Shoulder Length"
-        ARMPIT = "armpit", "Armpit Length"
-        BRA_STRAP = "bra_strap", "Bra Strap Length"
-        MID_BACK = "mid_back", "Mid Back Length"
-        WAIST = "waist", "Waist Length"
-        HIP = "hip", "Hip Length"
+        EAR = "ear", _("Ear")
+        CHIN = "chin", _("Chin")
+        NECK = "neck", _("Neck")
+        SHOULDER = "shoulder", _("Shoulder")
+        ARMPIT = "armpit", _("Armpit")
+        BRA_STRAP = "bra_strap", _("Bra Strap")
+        MID_BACK = "mid_back", _("Mid Back")
+        WAIST = "waist", _("Waist")
+        HIP = "hip", _("Hip")
 
     # Legacy TextChoices — KEPT for data migration reference only.
     # The actual field has been replaced by payment_method_fk.

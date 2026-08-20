@@ -1634,3 +1634,57 @@ msgid "%(d)d min"
 msgid_plural "%(d)d mins"
 msgstr[0] "%(d)d Min."
 msgstr[1] "%(d)d Min."
+
+msgid "Ear"
+msgstr "Ohr"
+
+msgid "Chin"
+msgstr "Kinn"
+
+msgid "Neck"
+msgstr "Nacken"
+
+msgid "Shoulder"
+msgstr "Schulter"
+
+msgid "Armpit"
+msgstr "Achsel"
+
+msgid "Bra Strap"
+msgstr "BH-Träger"
+
+msgid "Mid Back"
+msgstr "Mittlerer Rücken"
+
+msgid "Waist"
+msgstr "Taille"
+
+msgid "Hip"
+msgstr "Hüfte"
+
+msgid "Pending Verification"
+msgstr "Ausstehende Überprüfung"
+
+msgid "Pending Review"
+msgstr "Ausstehende Prüfung"
+
+msgid "Approved"
+msgstr "Genehmigt"
+
+msgid "Rejected"
+msgstr "Abgelehnt"
+
+msgid "Expired"
+msgstr "Abgelaufen"
+
+msgid "Please select a stylist and date first."
+msgstr "Bitte wählen Sie zunächst einen Stylisten und ein Datum."
+
+msgid "Invalid booking parameters selected."
+msgstr "Ungültige Buchungsparameter ausgewählt."
+
+msgid "Invalid action"
+msgstr "Ungültige Aktion"
+
+msgid "Braids that rhyme with time."
+msgstr "Zöpfe, die mit der Zeit reimen."

@@ -1,6 +1,16 @@
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils.translation import get_language
+
+from apps.site_config.constants import LanguageChoices
+
+
+def _active_lang():
+    """Return the current 2-letter language code, defaulting to HU (base)."""
+    lang = get_language() or LanguageChoices.HU
+    return lang[:2]
+
 
 class Provider(models.Model):
     user = models.OneToOneField(
@@ -11,14 +21,14 @@ class Provider(models.Model):
         help_text="Optional link to a user account for future provider dashboard."
     )
     display_name = models.CharField(max_length=100)
-    bio = models.TextField(blank=True)
-    display_name = models.CharField(max_length=100)
-    bio = models.TextField(blank=True)
+    bio = models.TextField(blank=True, help_text="Hungarian bio (base language).")
+    bio_en = models.TextField(blank=True, default="", help_text="English bio.")
+    bio_de = models.TextField(blank=True, default="", help_text="German bio.")
     profile_image = models.ImageField(
         upload_to='provider_images/',
         blank=True,
         null=True
-    )# profile_image_url handled by an ImageField
+    )
 
     class Meta:
         verbose_name = "Provider"
@@ -26,6 +36,16 @@ class Provider(models.Model):
 
     def __str__(self):
         return self.display_name
+
+    @property
+    def display_bio(self):
+        """Return the bio in the active language, falling back to HU."""
+        lang = _active_lang()
+        if lang == "en" and self.bio_en:
+            return self.bio_en
+        if lang == "de" and self.bio_de:
+            return self.bio_de
+        return self.bio
 
 class AvailabilityRule(models.Model):
     """

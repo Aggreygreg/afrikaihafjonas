@@ -171,7 +171,7 @@ def consult_wizard_view(request, service_pk):
         return render(request, "bookings/partials/wizard_step_1.html", context)
 
     # Fallback for unknown actions.
-    return HttpResponse("Invalid action", status=400)
+    return HttpResponse(str(_("Invalid action")), status=400)
 
 
 def load_available_slots_view(request):
@@ -184,14 +184,14 @@ def load_available_slots_view(request):
     service_id = request.GET.get('service')
 
     if not (provider_id and date_str and service_id):
-        return HttpResponse('<p class="text-sm text-gray-500">Please select a stylist and date first.</p>')
+        return HttpResponse('<p class="text-sm text-gray-500">' + str(_("Please select a stylist and date first.")) + '</p>')
 
     try:
         provider = Provider.objects.get(pk=provider_id)
         service = Service.objects.get(pk=service_id)
         target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     except (ValueError, Provider.DoesNotExist, Service.DoesNotExist):
-        return HttpResponse('<p class="text-sm text-red-500">Invalid booking parameters selected.</p>')
+        return HttpResponse('<p class="text-sm text-red-500">' + str(_("Invalid booking parameters selected.")) + '</p>')
 
     slots = get_available_slots(provider, target_date, service)
 

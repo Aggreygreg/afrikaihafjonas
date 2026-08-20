@@ -480,3 +480,37 @@ Fresh-clone impact: `cp .env.example .env && python manage.py migrate` now works
 **Tests:** All test helpers (`make_service`, `make_parent_category`, `make_service_category`, `make_service_option`) now create parent + Translation in one step. Admin CRUD tests use inline formset POST data (prefix = `translations`, from `related_name`). 170/170 tests pass.
 
 **Impact:** `apps/services/{models,admin,views,tests}.py`, `apps/bookings/{models,admin,views,forms,notifications,tests}.py`, `apps/bookings/management/commands/send_expiry_reminders.py`, `apps/site_config/{models,admin,context_processors,tests}.py`, `config/tests.py`, 13 template files, 9 migration files, 3 .po files. `specs/DECISIONS.md`, `README.md`.
+
+---
+
+## Decision #39 — Cross-cutting customer-facing multilingual audit & fixes (2026-08-20)
+
+**Greg required: don't assume the multilingual work (Decision #38) is complete.** A cross-cutting audit of every customer-facing surface — every URL, template, partial, view, form, model choice, email, JS string, and admin-entered free text — was performed to find remaining gaps.
+
+**Audit method:** Read every customer-facing template, every view, every form, every model with customer-visible choices, the email notification pipeline, and the JSON-LD context processor. Classified findings into:
+- **Category A** — hardcoded strings not wrapped in `gettext_lazy`/`{% trans %}` (fix: wrap + add to .po)
+- **Category B** — database content not backed by a Translation model (fix: add multilingual fields)
+- **Category C** — free-form admin text shown to customers (no technical fix — documented as known limitation)
+
+**Gaps found and fixed (Category A — 7 gaps):**
+1. `AppointmentRequest.HairLength` choices — were plain English strings ("Ear Length", etc.) with a `{{ label|cut:" Length" }}` template hack. Fixed: wrapped with `gettext_lazy`, changed to short-form labels ("Ear", "Chin", etc.), removed the `|cut` hack.
+2. `AppointmentRequest.Status` choices — were plain English strings ("Pending Verification", etc.). Shown to customers via `get_status_display()` on the Guest Lookup badge. Fixed: wrapped with `gettext_lazy`.
+3. `load_available_slots_view` — hardcoded English HTML error messages. Fixed: wrapped with `_()`.
+4. `consult_wizard_view` — hardcoded `"Invalid action"` response. Fixed: wrapped with `_()`.
+5. `base.html` footer tagline — "Braids that rhyme with time." was hardcoded. Fixed: wrapped with `{% trans %}`.
+6. `base.html` footer copyright — hardcoded "Afrikai Hajfonás" instead of using SiteConfiguration. Fixed: uses `{{ config.display_business_name }}`.
+7. `wizard_step_1.html` group heading — used `{{ group.group_name }}` (structural HU key) instead of `{{ group.display_group_name }}` (translated). Fixed.
+
+**Gaps found and fixed (Category B — 1 gap):**
+8. `Provider.bio` — customer-visible in wizard Step 2 (`{{ providers.0.bio }}`), was single-language. Provider model also had duplicate `display_name`/`bio` field declarations. Fixed: added `bio_en`/`bio_de` fields + `display_bio` property with HU fallback; removed duplicate declarations; updated admin fieldsets and template.
+
+**Known limitation (Category C — 1 item):**
+9. `AppointmentRequest.admin_notes` — free-form TextField, admin-entered, shown to customers on Guest Lookup page. Cannot be translated per-instance. Documented as accepted limitation: admin should write notes in the customer's language or in HU (base language).
+
+**i18n:** 18 new msgids added to all 3 .po files (347 → 365 entries each). 9 HairLength labels, 5 Status labels, 3 view strings, 1 footer tagline. Compiled via `_compile_mo.py`.
+
+**Migrations:** 2 new — `providers/0004_add_provider_multilingual_bio` + `bookings/0011_alter_hair_length_choices_multilingual`. Total: 57 + 2 = **59 applied migrations**.
+
+**Tests:** 170/170 pass (no test changes needed — no tests directly reference choice labels or hardcoded view strings).
+
+**Impact:** `apps/bookings/{models,views}.py`, `apps/providers/{models,admin}.py`, `templates/base.html`, `templates/bookings/partials/{wizard_step_1,wizard_step_2,wizard_step_3}.html`, 2 migration files, 3 .po files, 3 .mo files. `specs/DECISIONS.md`, `README.md`.

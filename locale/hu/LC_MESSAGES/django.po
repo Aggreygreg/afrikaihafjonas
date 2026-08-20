@@ -1613,3 +1613,57 @@ msgid "%(d)d min"
 msgid_plural "%(d)d mins"
 msgstr[0] "%(d)d perc"
 msgstr[1] "%(d)d perc"
+
+msgid "Ear"
+msgstr "Fül"
+
+msgid "Chin"
+msgstr "Áll"
+
+msgid "Neck"
+msgstr "Nyak"
+
+msgid "Shoulder"
+msgstr "Váll"
+
+msgid "Armpit"
+msgstr "Hónalj"
+
+msgid "Bra Strap"
+msgstr "Melltartópánt"
+
+msgid "Mid Back"
+msgstr "Középhát"
+
+msgid "Waist"
+msgstr "Derék"
+
+msgid "Hip"
+msgstr "Csípő"
+
+msgid "Pending Verification"
+msgstr "Függőben lévő ellenőrzés"
+
+msgid "Pending Review"
+msgstr "Függőben lévő értékelés"
+
+msgid "Approved"
+msgstr "Jóváhagyva"
+
+msgid "Rejected"
+msgstr "Elutasítva"
+
+msgid "Expired"
+msgstr "Lejárt"
+
+msgid "Please select a stylist and date first."
+msgstr "Kérjük, előbb válasszon fodrászt és dátumot."
+
+msgid "Invalid booking parameters selected."
+msgstr "Érvénytelen foglalási paraméterek kiválasztva."
+
+msgid "Invalid action"
+msgstr "Érvénytelen művelet"
+
+msgid "Braids that rhyme with time."
+msgstr "Fonatok, amelyek rímelnek az időre."

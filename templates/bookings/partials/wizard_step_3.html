@@ -84,7 +84,7 @@
                                        {% if form.hair_length.value|stringformat:"s" == value %}checked{% endif %}
                                        class="sr-only peer">
                                 <span class="absolute inset-0 rounded-xl peer-checked:border-2 peer-checked:border-blue-600 peer-checked:bg-blue-50/30 pointer-events-none"></span>
-                                <span class="relative text-xs font-medium text-gray-700 peer-checked:text-blue-700">{{ label|cut:" Length" }}</span>
+                                <span class="relative text-xs font-medium text-gray-700 peer-checked:text-blue-700">{{ label }}</span>
                             </label>
                         {% endfor %}
                     </div>

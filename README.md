@@ -130,7 +130,8 @@ Language selection uses the appointment's stored `customer_language` (captured a
 - **First-visit modal:** `base.html` renders a language modal shown when the `django_language` cookie is absent; each choice POSTs to `set_language`. A header dropdown switcher is also available.
 - **Two translation systems by design** (see `specs/ARCHITECTURAL_PRINCIPLES.md` §3):
   - *Developer UI strings* → `{% trans %}` + `.po` files (Category A).
-  - *Admin-authored content* (FAQ, page prose, emails, SEO) **and all customer-facing catalog content** (parent categories, service categories, service titles/descriptions, option labels, payment methods, payment detail fields, site configuration) → parent + per-language DB records (Category B); never `{% trans %}`. Decision #38.
+  - *Admin-authored content* (FAQ, page prose, emails, SEO) **and all customer-facing catalog content** (parent categories, service categories, service titles/descriptions, option labels, payment methods, payment detail fields, site configuration, provider bios, TextChoices labels) → parent + per-language DB records or `gettext_lazy` (Category B); never `{% trans %}`. Decisions #38–#39.
+  - *Free-form admin text* (e.g. `AppointmentRequest.admin_notes` shown on Guest Lookup) → accepted limitation; admin should write in the customer's language or HU (Category C). Decision #39.
 - **polib workflow (no GNU gettext needed):** `.mo` files are gitignored build artifacts. After cloning or after editing translations run:
   ```
   python _build_po.py            # rebuild .po from source strings
@@ -217,9 +218,9 @@ python manage.py makemigrations --check   # "No changes detected" expected
 python manage.py showmigrations           # 48 applied, 0 pending
 ```
 
-Current state: **170/170 tests pass** (services 28, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 57 applied migrations; seed data present: 4 parent categories, 4 service categories, 3 services, 10 service options, 4 payment methods, 8 payment detail fields, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO, 1 site configuration — all with HU translations seeded).
+Current state: **170/170 tests pass** (services 28, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 59 applied migrations; seed data present: 4 parent categories, 4 service categories, 3 services, 10 service options, 4 payment methods, 8 payment detail fields, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO, 1 site configuration — all with HU translations seeded).
 
-> Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **57** applied migrations across active apps (48 original + 9 multilingual translation migrations).
+> Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **59** applied migrations across active apps (48 original + 9 multilingual translation migrations + 2 cross-cutting audit migrations).
 
 ## Management Commands & Cron
 
@@ -255,6 +256,7 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 7. **~~`media/` directory at repo root + seeded service images 404~~ — FIXED (Aug 19, 2026):** the legacy empty `media/` dir was removed, and the 4 dev `ServiceImage` rows were repointed to real tracked files in `mediafiles/`. Note: this is dev/demo data — in production the administrator manages service images; no permanent production ownership of the current demo images is claimed (Decision #36).
 8. **~~Gender tab highlight goes stale after an HTMX swap~~ — FIXED (Aug 18, 2026, same branch):** `switchCategory()` now syncs the active pill classes client-side.
 9. **~~Category labels are single-language~~ — FIXED (Aug 20, 2026):** all customer-facing catalog content (parent categories, service categories, service titles/descriptions, option labels, payment methods, payment detail fields, site configuration) is now fully multilingual via Translation models (HU/EN/DE with HU fallback). Decision #38 supersedes the deferral in Decision #35.
+10. **`admin_notes` free-form text is not translated (accepted limitation):** admin-entered notes on `AppointmentRequest` are shown to customers on the Guest Lookup page. This is free-form text that cannot be translated per-instance. Admin should write notes in the customer's language or in HU (base). Category C, Decision #39.
 
 ## Project Documentation
 
