@@ -554,8 +554,6 @@ class PageSEOConstraintTests(TestCase):
     def setUpTestData(cls):
         from apps.services.models import Service
         cls.service = Service.objects.create(
-            title="Test Braids",
-            description="Test description",
             base_price=50000,
             duration_minutes=240,
         )
@@ -679,8 +677,6 @@ class ResolveSEOServiceTests(TestCase):
     def setUpTestData(cls):
         from apps.services.models import Service
         cls.service = Service.objects.create(
-            title="Test Braids",
-            description="Test description",
             base_price=50000,
             duration_minutes=240,
         )
@@ -694,12 +690,12 @@ class ResolveSEOServiceTests(TestCase):
         )
         PageSEOTranslation.objects.create(
             page_seo=page, language='hu',
-            meta_title=f"Custom SEO for {svc.title}",
+            meta_title=f"Custom SEO for {svc.display_title}",
             meta_description="Service-specific description",
         )
 
         result = resolve_seo(service=svc, language='hu')
-        self.assertEqual(result['meta_title'], f"Custom SEO for {svc.title}")
+        self.assertEqual(result['meta_title'], f"Custom SEO for {svc.display_title}")
 
     def test_service_without_seo_falls_back(self):
         """Service with no PageSEO → global defaults."""

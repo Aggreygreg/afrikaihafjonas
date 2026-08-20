@@ -21,17 +21,23 @@ from .models import (
     PageSEO,
     PageSEOTranslation,
     SiteConfiguration,
+    SiteConfigurationTranslation,
 )
+
+
+class SiteConfigurationTranslationInline(admin.StackedInline):
+    model = SiteConfigurationTranslation
+    extra = 3  # HU, EN, DE
 
 
 @admin.register(SiteConfiguration)
 class SiteConfigurationAdmin(SingletonModelAdmin):
     fieldsets = (
         ('Branding', {
-            'fields': ('business_name', 'logo', 'favicon'),
+            'fields': ('logo', 'favicon'),
         }),
         ('Hero Section', {
-            'fields': ('hero_title', 'hero_subtitle', 'hero_image'),
+            'fields': ('hero_image',),
         }),
         ('Contact Info', {
             'fields': ('salon_address', 'address_description', 'salon_phone', 'salon_email'),
@@ -46,6 +52,7 @@ class SiteConfigurationAdmin(SingletonModelAdmin):
             'fields': ('social_instagram', 'social_facebook', 'social_tiktok'),
         }),
     )
+    inlines = [SiteConfigurationTranslationInline]
 
 
 # ── Shared inline config ───────────────────────────────────────
@@ -225,12 +232,12 @@ class PageSEOAdmin(admin.ModelAdmin):
     list_display = ('target_display', 'is_active', 'translation_count')
     list_filter = ('is_active',)
     list_editable = ('is_active',)
-    search_fields = ('url_path', 'service__title')
+    search_fields = ('url_path', 'service__translations__title')
     inlines = [PageSEOTranslationInline]
 
     def target_display(self, obj):
         if obj.service_id:
-            return f"Service: {obj.service.title}"
+            return f"Service: {obj.service.display_title}"
         return obj.url_path or '(empty)'
     target_display.short_description = "Target"
 

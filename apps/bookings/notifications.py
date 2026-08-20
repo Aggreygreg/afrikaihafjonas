@@ -70,7 +70,7 @@ def _build_context(appointment, request=None):
     except Exception:
         config = None
 
-    salon_name = getattr(config, "business_name", "") or "Afrikai Hajfonás"
+    salon_name = config.display_business_name if config else "Afrikai Hajfonás"
 
     # Build absolute URLs for customer-facing links
     guest_lookup_url = ""
@@ -92,12 +92,12 @@ def _build_context(appointment, request=None):
         payment_method_name = snapshot.payment_method_name
     elif getattr(appointment, "payment_method_fk_id", None):
         if appointment.payment_method_fk:
-            payment_method_name = appointment.payment_method_fk.name
+            payment_method_name = appointment.payment_method_fk.display_name
 
     # Service info
     service = appointment.service
-    service_name = service.title if service else ""
-    service_description = getattr(service, "description", "") or "" if service else ""
+    service_name = service.display_title if service else ""
+    service_description = service.display_description if service else ""
     service_duration = service.formatted_duration if service else ""
     service_price = service.formatted_discounted_price if service else ""
 
@@ -194,7 +194,7 @@ def send_appointment_email(appointment, email_type, request=None):
 
     try:
         config = SiteConfiguration.get_solo()
-        from_name = config.business_name or "Afrikai Hajfonás"
+        from_name = config.display_business_name
     except Exception:
         from_name = "Afrikai Hajfonás"
 

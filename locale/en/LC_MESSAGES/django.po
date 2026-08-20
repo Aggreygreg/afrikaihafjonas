@@ -1565,3 +1565,31 @@ msgstr "Announcements"
 
 msgid "Dismiss announcement"
 msgstr "Dismiss announcement"
+
+#. Decision #38: multilingual models
+msgid "Adults (16+)"
+msgstr "Adults (16+)"
+
+#. Decision #38: multilingual models
+msgid "Children (8-15)"
+msgstr "Children (8-15)"
+
+#. Decision #38: multilingual models
+msgid "Everyone (8+)"
+msgstr "Everyone (8+)"
+
+#. Decision #38: multilingual models
+msgid "0 mins"
+msgstr "0 mins"
+
+#. Decision #38: multilingual models
+msgid "%(d)d hour"
+msgid_plural "%(d)d hours"
+msgstr[0] "%(d)d hour"
+msgstr[1] "%(d)d hours"
+
+#. Decision #38: multilingual models
+msgid "%(d)d min"
+msgid_plural "%(d)d mins"
+msgstr[0] "%(d)d min"
+msgstr[1] "%(d)d mins"

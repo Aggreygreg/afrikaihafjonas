@@ -1585,7 +1585,9 @@ msgid "No FAQs match your search."
 msgstr "Keine Fragen entsprechen Ihrer Suche."
 
 msgid "Try a different keyword, or clear the search to browse all topics."
-msgstr "Versuchen Sie ein anderes Stichwort, oder löschen Sie die Suche, um alle Themen zu sehen."
+msgstr ""
+"Versuchen Sie ein anderes Stichwort, oder löschen Sie die Suche, um alle "
+"Themen zu sehen."
 
 msgid "Clear search"
 msgstr "Suche löschen"
@@ -1604,3 +1606,31 @@ msgstr "Ankündigungen"
 
 msgid "Dismiss announcement"
 msgstr "Ankündigung schließen"
+
+#. Decision #38: multilingual models
+msgid "Adults (16+)"
+msgstr "Erwachsene (16+)"
+
+#. Decision #38: multilingual models
+msgid "Children (8-15)"
+msgstr "Kinder (8-15)"
+
+#. Decision #38: multilingual models
+msgid "Everyone (8+)"
+msgstr "Alle (8+)"
+
+#. Decision #38: multilingual models
+msgid "0 mins"
+msgstr "0 Min."
+
+#. Decision #38: multilingual models
+msgid "%(d)d hour"
+msgid_plural "%(d)d hours"
+msgstr[0] "%(d)d Stunde"
+msgstr[1] "%(d)d Stunden"
+
+#. Decision #38: multilingual models
+msgid "%(d)d min"
+msgid_plural "%(d)d mins"
+msgstr[0] "%(d)d Min."
+msgstr[1] "%(d)d Min."

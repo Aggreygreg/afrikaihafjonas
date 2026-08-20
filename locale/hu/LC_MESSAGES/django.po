@@ -1537,7 +1537,8 @@ msgid "Frequently Asked Questions"
 msgstr "Gyakran Ismételt Kérdések"
 
 msgid "Answers about booking, payments, services and more."
-msgstr "Válaszok a foglalásról, a fizetésről, a szolgáltatásokról és egyebekről."
+msgstr ""
+"Válaszok a foglalásról, a fizetésről, a szolgáltatásokról és egyebekről."
 
 msgid "Search FAQs..."
 msgstr "Keresés a GYIK-ben..."
@@ -1564,7 +1565,8 @@ msgid "No FAQs match your search."
 msgstr "Nincs a keresésnek megfelelő kérdés."
 
 msgid "Try a different keyword, or clear the search to browse all topics."
-msgstr "Próbáljon más kulcsszót, vagy törölje a keresést a témák böngészéséhez."
+msgstr ""
+"Próbáljon más kulcsszót, vagy törölje a keresést a témák böngészéséhez."
 
 msgid "Clear search"
 msgstr "Keresés törlése"
@@ -1583,3 +1585,31 @@ msgstr "Közlemények"
 
 msgid "Dismiss announcement"
 msgstr "Közlemény bezárása"
+
+#. Decision #38: multilingual models
+msgid "Adults (16+)"
+msgstr "Felnőttek (16+)"
+
+#. Decision #38: multilingual models
+msgid "Children (8-15)"
+msgstr "Gyermekek (8-15)"
+
+#. Decision #38: multilingual models
+msgid "Everyone (8+)"
+msgstr "Mindenki (8+)"
+
+#. Decision #38: multilingual models
+msgid "0 mins"
+msgstr "0 perc"
+
+#. Decision #38: multilingual models
+msgid "%(d)d hour"
+msgid_plural "%(d)d hours"
+msgstr[0] "%(d)d óra"
+msgstr[1] "%(d)d óra"
+
+#. Decision #38: multilingual models
+msgid "%(d)d min"
+msgid_plural "%(d)d mins"
+msgstr[0] "%(d)d perc"
+msgstr[1] "%(d)d perc"

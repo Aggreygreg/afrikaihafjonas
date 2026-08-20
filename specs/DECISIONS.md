@@ -441,3 +441,42 @@ Fix (2 changes):
 Fresh-clone impact: `cp .env.example .env && python manage.py migrate` now works immediately without manually setting `DATABASE_URL`.
 
 **Impact:** `apps/services/admin.py`, `config/settings.py`, `.env.example`, `apps/services/tests.py`, `specs/DECISIONS.md`. Suite 167 to **170 tests** (3 new `ServiceImageDropdownTests`: dropdown fields render, option values present, no-dropdowns for services without options). 48 applied migrations (unchanged -- no model changes).
+
+---
+
+## Decision #38 — Full customer-facing multilingual support (2026-08-20)
+
+**Greg explicitly overrules Decision #35's deferral.** All customer-visible text — not just developer UI strings — must be available in HU/EN/DE.
+
+**Scope:** Every piece of text a customer sees on the website is now backed by Translation models:
+- `ParentCategoryTranslation` (name)
+- `ServiceCategoryTranslation` (name)
+- `ServiceTranslation` (title, description, best_for_hair_types, suitability_warning)
+- `ServiceOptionTranslation` (group_name display, value)
+- `PaymentMethodTranslation` (name)
+- `PaymentDetailFieldTranslation` (label)
+- `SiteConfigurationTranslation` (business_name, hero_title, hero_subtitle)
+
+**Design pattern (Category B — parent + translations):**
+- Each parent model retains only structural fields (ordering keys, FKs, pricing). All text fields are removed and moved to a per-language Translation model.
+- Each Translation model has `unique_together = (parent_fk, language)` and uses `LanguageChoices` (HU/EN/DE).
+- `get_translation(lang=None)` resolves active language with HU fallback.
+- `display_*` properties (e.g., `display_name`, `display_title`) expose the resolved translation for templates and views — keeping templates skinny.
+- `ServiceOption.group_name` is retained as a structural grouping key (like `FAQTopic.display_order`); the customer-visible display name lives in the translation.
+- `_build_options_snapshot` stores `display_group_name`/`display_value` at booking time — correct frozen historical snapshot behavior.
+- Template category matching switched from string-based (`{% if "Women" in parent.name %}`) to pk-based (`{% if parent.pk == 1 %}`) — language-agnostic.
+
+**Migration strategy (3 phases per app):**
+1. Create Translation model tables (no parent change)
+2. Data migration: copy existing HU values into translations
+3. Remove old text fields from parent models + update Meta
+
+9 new migrations across 3 apps: `services` (0007-0009), `bookings` (0008-0010), `site_config` (0013-0015). Total: 48 + 9 = **57 applied migrations**.
+
+**Admin:** TabularInline/StackedInline for each Translation model (extra=3 for HU/EN/DE). Parent admins show `display_*` in `list_display`/`search_fields`. `ServiceOptionTranslation` and `PaymentDetailFieldTranslation` registered as independent admin pages (Django does not support nested inlines). `TARGET_AUDIENCE_CHOICES` wrapped with `gettext_lazy`; `formatted_duration` uses `ngettext` for plural forms.
+
+**i18n:** 6 new msgids added to all 3 .po files (341 to 347 entries each). Compiled via `_compile_mo.py` (polib).
+
+**Tests:** All test helpers (`make_service`, `make_parent_category`, `make_service_category`, `make_service_option`) now create parent + Translation in one step. Admin CRUD tests use inline formset POST data (prefix = `translations`, from `related_name`). 170/170 tests pass.
+
+**Impact:** `apps/services/{models,admin,views,tests}.py`, `apps/bookings/{models,admin,views,forms,notifications,tests}.py`, `apps/bookings/management/commands/send_expiry_reminders.py`, `apps/site_config/{models,admin,context_processors,tests}.py`, `config/tests.py`, 13 template files, 9 migration files, 3 .po files. `specs/DECISIONS.md`, `README.md`.

@@ -40,13 +40,13 @@ def service_list_view(request):
     else:
         subcategories = ServiceCategory.objects.none()
 
-    # 5. Search Filter (Title & Description)
+    # 5. Search Filter (Title & Description via translations)
     search_query = request.GET.get('q', '').strip()
     if search_query:
         services = services.filter(
-            Q(title__icontains=search_query) | 
-            Q(description__icontains=search_query)
-        )
+            Q(translations__title__icontains=search_query) | 
+            Q(translations__description__icontains=search_query)
+        ).distinct()
 
     # 6. Braid Type (Subcategory) Filter
     subcategory_id = request.GET.get('category', '')
@@ -75,7 +75,7 @@ def service_list_view(request):
     # 9. Sort Options
     sort_by = request.GET.get('sort_by', 'popular')
     if sort_by == 'popular':
-        services = services.order_by('-is_popular', 'title')
+        services = services.order_by('-is_popular', 'pk')
     elif sort_by == 'price_asc':
         services = services.order_by('base_price')
     elif sort_by == 'price_desc':

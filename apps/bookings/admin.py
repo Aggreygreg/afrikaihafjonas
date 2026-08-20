@@ -7,7 +7,9 @@ from .models import (
     AppointmentRequest,
     AppointmentPaymentSnapshot,
     PaymentDetailField,
+    PaymentDetailFieldTranslation,
     PaymentMethod,
+    PaymentMethodTranslation,
     RefundQueue,
 )
 from .notifications import send_appointment_email
@@ -372,27 +374,50 @@ class RefundQueueAdmin(admin.ModelAdmin):
 # Payment Method Configuration (Admin-Managed)
 # ──────────────────────────────────────────────────────────────
 
+class PaymentDetailFieldTranslationInline(admin.TabularInline):
+    model = PaymentDetailFieldTranslation
+    extra = 3  # HU, EN, DE
+
+
 class PaymentDetailFieldInline(admin.TabularInline):
     """Inline detail fields for a payment method (IBAN, QR, etc.)."""
     model = PaymentDetailField
     extra = 1
-    fields = ("label", "field_type", "value", "image_value", "display_order", "is_active")
+    fields = ("field_type", "value", "image_value", "display_order", "is_active")
     ordering = ("display_order",)
+
+
+class PaymentMethodTranslationInline(admin.TabularInline):
+    model = PaymentMethodTranslation
+    extra = 3  # HU, EN, DE
 
 
 @admin.register(PaymentMethod)
 class PaymentMethodAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "is_active", "display_order", "field_count")
+    list_display = ("display_name", "slug", "is_active", "display_order", "field_count")
     list_filter = ("is_active",)
     list_editable = ("is_active", "display_order")
-    search_fields = ("name", "slug")
-    prepopulated_fields = {"slug": ("name",)}
-    inlines = [PaymentDetailFieldInline]
-    ordering = ("display_order", "name")
+    search_fields = ("translations__name", "slug")
+    inlines = [PaymentDetailFieldInline, PaymentMethodTranslationInline]
+    ordering = ("display_order", "pk")
 
     def field_count(self, obj):
         return obj.detail_fields.count()
     field_count.short_description = "Detail Fields"
+
+
+@admin.register(PaymentDetailFieldTranslation)
+class PaymentDetailFieldTranslationAdmin(admin.ModelAdmin):
+    """Translations for PaymentDetailField labels (IBAN, Account Holder, etc.).
+
+    Registered as a separate admin page because Django admin does not
+    support nested inlines (PaymentDetailField is already an inline of
+    PaymentMethod).
+    """
+    list_display = ("payment_detail_field", "language", "label")
+    list_filter = ("language",)
+    search_fields = ("label",)
+    list_editable = ("label",)
 
 
 # ──────────────────────────────────────────────────────────────

@@ -15,14 +15,14 @@ from django.core import mail
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from apps.bookings.models import AppointmentRequest, PaymentMethod
+from apps.bookings.models import AppointmentRequest, PaymentMethod, PaymentMethodTranslation
 from apps.bookings.notifications import (
     send_appointment_email,
     _build_context,
     _format_selected_options,
 )
 from apps.providers.models import Provider
-from apps.services.models import Service
+from apps.services.models import Service, ServiceTranslation
 from apps.site_config.models import EmailTemplate
 
 
@@ -34,16 +34,22 @@ class NotificationTests(TestCase):
     def setUpTestData(cls):
         cls.provider = Provider.objects.create(display_name="Anna Stylist")
         cls.service = Service.objects.create(
-            title="Knotless Box Braids",
-            description="Beautiful knotless braids.",
             base_price=55000,
             duration_minutes=360,
         )
+        ServiceTranslation.objects.create(
+            service=cls.service, language="hu",
+            title="Knotless Box Braids",
+            description="Beautiful knotless braids.",
+        )
         cls.payment_method = PaymentMethod.objects.create(
-            name="Test Wise",
             slug="test-wise",
             is_active=True,
             display_order=99,
+        )
+        PaymentMethodTranslation.objects.create(
+            payment_method=cls.payment_method, language="hu",
+            name="Test Wise",
         )
         cls.appointment = AppointmentRequest.objects.create(
             service=cls.service,

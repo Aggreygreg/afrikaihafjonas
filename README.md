@@ -74,7 +74,7 @@ Core tenets (enforced across the codebase):
 ## Customer Journey
 
 1. **Home (`/`)** — hero (content from `SiteConfiguration`), popular services, language modal for first-time visitors.
-2. **Catalog (`/services/`)** — browse by parent category tabs (dynamic, admin-defined — every `ParentCategory` record renders as a tab in creation order; the seeded trio is Women's / Men's / Children's Braids and admin-created categories appear automatically), keyword search, price range, subcategory filters. Tab selection is ID-based (`?cat=<pk>`). Live HTMX filtering (category tabs, debounced search); native "Apply Filters" form submit works without JS. *(Note: category labels are single-language DB values — see [Decision #35](specs/DECISIONS.md).)*
+2. **Catalog (`/services/`)** — browse by parent category tabs (dynamic, admin-defined — every `ParentCategory` record renders as a tab in creation order; the seeded trio is Women's / Men's / Children's Braids and admin-created categories appear automatically), keyword search, price range, subcategory filters. Tab selection is ID-based (`?cat=<pk>`). Live HTMX filtering (category tabs, debounced search); native "Apply Filters" form submit works without JS. *(Note: all catalog content — category names, service titles/descriptions, option labels, payment methods — is now fully multilingual via Translation models (HU/EN/DE with HU fallback); see [Decision #38](specs/DECISIONS.md).)*
 3. **Service detail (`/services/<id>/`)** — SHEIN-style product page: dynamic image gallery that switches with selected options, suitability info, option cards (radio ≤4 options, dropdown >4).
 4. **Consultation wizard (`/bookings/book/<service_pk>/`)** — 4 steps:
    - **Step 1 — Configure:** service options (radio cards / dropdowns / add-on checkboxes), live price total.
@@ -130,7 +130,7 @@ Language selection uses the appointment's stored `customer_language` (captured a
 - **First-visit modal:** `base.html` renders a language modal shown when the `django_language` cookie is absent; each choice POSTs to `set_language`. A header dropdown switcher is also available.
 - **Two translation systems by design** (see `specs/ARCHITECTURAL_PRINCIPLES.md` §3):
   - *Developer UI strings* → `{% trans %}` + `.po` files (Category A).
-  - *Admin-authored content* (FAQ, page prose, emails, SEO) → parent + per-language DB records (Category B); never `{% trans %}`.
+  - *Admin-authored content* (FAQ, page prose, emails, SEO) **and all customer-facing catalog content** (parent categories, service categories, service titles/descriptions, option labels, payment methods, payment detail fields, site configuration) → parent + per-language DB records (Category B); never `{% trans %}`. Decision #38.
 - **polib workflow (no GNU gettext needed):** `.mo` files are gitignored build artifacts. After cloning or after editing translations run:
   ```
   python _build_po.py            # rebuild .po from source strings
@@ -217,9 +217,9 @@ python manage.py makemigrations --check   # "No changes detected" expected
 python manage.py showmigrations           # 48 applied, 0 pending
 ```
 
-Current state: **170/170 tests pass** (services 28, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 48 applied migrations; seed data present: 4 payment methods, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO).
+Current state: **170/170 tests pass** (services 28, site_config 118, bookings 18, config 6; the `providers`/`users`/`payments` test modules are empty stubs); migration graph verified from a fresh database (migrate-from-zero succeeds; 57 applied migrations; seed data present: 4 parent categories, 4 service categories, 3 services, 10 service options, 4 payment methods, 8 payment detail fields, 24 email translations, 4 content blocks, 6 PageSEO, 1 GlobalSEO, 1 site configuration — all with HU translations seeded).
 
-> Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **48** applied migrations across active apps.
+> Note on migration counts: the `payments` app was decommissioned early (Phase 0) and its 2 migrations intentionally deleted. The canonical count is **57** applied migrations across active apps (48 original + 9 multilingual translation migrations).
 
 ## Management Commands & Cron
 
@@ -247,14 +247,14 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 **Known gaps / deferred (do not assume these work):**
 
 1. **~~Catalog live filtering is broken~~ — FIXED (Aug 18, 2026):** `service_list.html` now loads the HTMX runtime (per-template include, same pattern as the wizard). Gender tabs and debounced search swap results via the `service_grid.html` partial; the native no-JS "Apply Filters" submit still works. Covered by `apps/services/tests.py`.
-2. **~~Catalog gender matching is wrong~~ — FIXED (Aug 18, 2026, branch `feature/dynamic-parent-categories`):** the `name__icontains` lookup ("Men's Braids" matched "Women's Braids") was eliminated by making catalog tabs dynamic and ID-based (`?cat=<pk>`); the old `gender` name param was removed. See Decision #35.
+2. **~~Catalog gender matching is wrong~~ — FIXED (Aug 18, 2026, branch `feature/dynamic-parent-categories`):** the `name__icontains` lookup ("Men's Braids" matched "Women's Braids") was eliminated by making catalog tabs dynamic and ID-based (`?cat=<pk>`); the old `gender` name param was removed. See Decision #35; multilingual labels added in Decision #38.
 3. **~~No public FAQ page~~ — FIXED (Aug 19, 2026):** the `FAQ` + `FAQTopic` models are now surfaced at `/faq/` (admin-managed topics grouping, trilingual with HU fallback, HTMX search, accordion, expand/collapse-all). Nav links point to the real page; sitemap includes it. See Decision #36.
 4. **hreflang tags:** deferred (needs URL-based i18n).
 5. **~~`settings.py` exempts `/health-check/` from SSL redirect but no such URL exists~~ — FIXED (Aug 19, 2026):** the dead `SECURE_REDIRECT_EXEMPT` entry was removed (no consumer; gunicorn/nginx serve directly). See Decision #36.
 6. **~~`Dockerfile` is a stub; Docker flow is not supported~~ — FIXED (Aug 19, 2026):** the scaffold-era `Dockerfile` and `docker-compose.yml` were removed entirely (never functional: no CMD / no pip install; README has always documented the venv flow). See Decision #36.
 7. **~~`media/` directory at repo root + seeded service images 404~~ — FIXED (Aug 19, 2026):** the legacy empty `media/` dir was removed, and the 4 dev `ServiceImage` rows were repointed to real tracked files in `mediafiles/`. Note: this is dev/demo data — in production the administrator manages service images; no permanent production ownership of the current demo images is claimed (Decision #36).
 8. **~~Gender tab highlight goes stale after an HTMX swap~~ — FIXED (Aug 18, 2026, same branch):** `switchCategory()` now syncs the active pill classes client-side.
-9. **Category labels are single-language (not a bug — documented):** dynamic category names are DB values rendered verbatim; they were effectively English-only before this change too (the old `{% trans %}` wrappers had no msgids in any `.po`). Multilingual category names = Category B translation pattern, deferred unless separately approved (Decision #35).
+9. **~~Category labels are single-language~~ — FIXED (Aug 20, 2026):** all customer-facing catalog content (parent categories, service categories, service titles/descriptions, option labels, payment methods, payment detail fields, site configuration) is now fully multilingual via Translation models (HU/EN/DE with HU fallback). Decision #38 supersedes the deferral in Decision #35.
 
 ## Project Documentation
 

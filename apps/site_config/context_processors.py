@@ -30,7 +30,7 @@ def _build_jsonld_localbusiness(config):
     data = {
         "@context": "https://schema.org",
         "@type": "HairSalon",
-        "name": config.business_name or "Afrikai Hajfonás",
+        "name": config.display_business_name,
         "priceRange": "$$",
     }
 

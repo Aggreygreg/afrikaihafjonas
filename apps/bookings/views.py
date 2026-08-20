@@ -36,8 +36,8 @@ def _build_options_snapshot(service, selected_ids):
     return [
         {
             "id": opt.id,
-            "group": opt.group_name,
-            "value": opt.value,
+            "group": opt.display_group_name,
+            "value": opt.display_value,
             "price": str(opt.additional_price),
         }
         for opt in options
@@ -306,7 +306,7 @@ def _lookup_appointment(email, reference):
     if snapshot:
         payment_method_display = snapshot.payment_method_name
     elif appointment.payment_method_fk:
-        payment_method_display = appointment.payment_method_fk.name
+        payment_method_display = appointment.payment_method_fk.display_name
 
     return {
         "appointment": appointment,

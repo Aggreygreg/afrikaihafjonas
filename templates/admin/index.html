@@ -239,7 +239,7 @@
                 <tr>
                     <td><strong>{{ req.payment_reference }}</strong></td>
                     <td>{{ req.client_name }}</td>
-                    <td>{{ req.service.title|truncatechars:30 }}</td>
+                    <td>{{ req.service.display_title|truncatechars:30 }}</td>
                     <td>{{ req.deposit_amount|intcomma }} Ft</td>
                     <td><strong style="color: #dc2626;">{{ req.expires_in }}</strong></td>
                     <td><span class="status-badge badge-{{ req.status }}">{{ req.get_status_display }}</span></td>
@@ -269,7 +269,7 @@
                 <tr>
                     <td><strong>{{ appt.target_time|time:"H:i" }}</strong></td>
                     <td>{{ appt.client_name }}</td>
-                    <td>{{ appt.service.title|truncatechars:35 }}</td>
+                    <td>{{ appt.service.display_title|truncatechars:35 }}</td>
                     <td>{{ appt.provider.display_name }}</td>
                     <td>{{ appt.deposit_amount|intcomma }} Ft</td>
                     <td>{{ appt.payment_reference }}</td>
@@ -303,7 +303,7 @@
                 <tr>
                     <td><strong>{{ req.payment_reference }}</strong></td>
                     <td>{{ req.client_name }}</td>
-                    <td>{{ req.service.title|truncatechars:25 }}</td>
+                    <td>{{ req.service.display_title|truncatechars:25 }}</td>
                     <td>{{ req.target_date|date:"M j" }} {{ req.target_time|time:"H:i" }}</td>
                     <td>{{ req.deposit_amount|intcomma }} Ft</td>
                     <td><span class="status-badge badge-{{ req.status }}">{{ req.get_status_display }}</span></td>

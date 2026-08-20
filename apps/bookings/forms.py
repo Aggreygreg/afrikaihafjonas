@@ -211,7 +211,7 @@ class WizardStep4Form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["payment_method_fk"].required = True
-        self.fields["payment_method_fk"].label_from_instance = lambda obj: obj.name
+        self.fields["payment_method_fk"].label_from_instance = lambda obj: obj.display_name
         self.fields["payment_method_fk"].empty_label = None
         # Use RadioSelect so the template can iterate choices as <input type="radio">.
         # Must be set BEFORE queryset so choices propagate to the widget.

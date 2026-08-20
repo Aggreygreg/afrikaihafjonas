@@ -25,7 +25,7 @@
                         class="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
                     <option value="">{% trans "All Types" %}</option>
                     {% for sub in subcategories %}
-                        <option value="{{ sub.id }}" {% if selected_category == sub.id|stringformat:"i" %}selected{% endif %}>{{ sub.name }}</option>
+                        <option value="{{ sub.id }}" {% if selected_category == sub.id|stringformat:"i" %}selected{% endif %}>{{ sub.display_name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -94,7 +94,7 @@
                         <div class="h-48 relative flex items-center justify-center overflow-hidden bg-gray-100">
                             {% with img=service.images.all|first %}
                                 {% if img %}
-                                    <img src="{{ img.image.url }}" alt="{{ service.title }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                                    <img src="{{ img.image.url }}" alt="{{ service.display_title }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                                 {% else %}
                                     <svg class="w-10 h-10 text-gray-400 group-hover:scale-105 transition duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
@@ -110,15 +110,15 @@
                             <div>
                                 {% if service.category %}
                                     <span class="text-xs font-semibold uppercase tracking-wider mb-1 block
-                                        {% if service.category.parent.name == "Women's Braids" %}text-pink-500
-                                        {% elif service.category.parent.name == "Men's Braids" %}text-blue-500
-                                        {% elif service.category.parent.name == "Children's Braids" %}text-amber-500
+                                        {% if service.category.parent.pk == 1 %}text-pink-500
+                                        {% elif service.category.parent.pk == 2 %}text-blue-500
+                                        {% elif service.category.parent.pk == 3 %}text-amber-500
                                         {% else %}text-gray-500{% endif %}">
-                                        {{ service.category.name }}
+                                        {{ service.category.display_name }}
                                     </span>
                                 {% endif %}
-                                <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition duration-200">{{ service.title }}</h3>
-                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ service.description }}</p>
+                                <h3 class="text-lg font-bold text-gray-900 group-hover:text-blue-600 transition duration-200">{{ service.display_title }}</h3>
+                                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ service.display_description }}</p>
                             </div>
                             <div class="mt-4 pt-4 border-t border-gray-50 flex items-end justify-between">
                                 <span class="text-sm text-gray-500">{{ service.formatted_duration }}</span>

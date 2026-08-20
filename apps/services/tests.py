@@ -2,7 +2,11 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils.html import escape
 
-from apps.services.models import ParentCategory, ServiceCategory, Service, ServiceOption
+from apps.services.models import (
+    ParentCategory, ParentCategoryTranslation,
+    ServiceCategory, ServiceCategoryTranslation,
+    Service, ServiceOption, ServiceOptionTranslation, ServiceTranslation,
+)
 
 # NOTE: responses render in the project default language (hu) when compiled
 # .mo catalogs are present, so never assert on {% trans %} literals — assert
@@ -13,16 +17,61 @@ E = escape
 
 def make_service(category, title, price=10000, duration=120, discount=0,
                  description="", popular=False):
-    return Service.objects.create(
+    svc = Service.objects.create(
         category=category,
-        title=title,
-        description=description or f"Description for {title}",
         target_audience="Adults",
         base_price=price,
         discount_percentage=discount,
         duration_minutes=duration,
         is_popular=popular,
     )
+    ServiceTranslation.objects.create(
+        service=svc, language="hu",
+        title=title,
+        description=description or f"Description for {title}",
+    )
+    return svc
+
+
+
+def make_parent_category(name, language="hu"):
+    """Create a ParentCategory + HU translation (replaces old .create(name=))."""
+    pc = ParentCategory.objects.create()
+    ParentCategoryTranslation.objects.create(
+        parent_category=pc, language=language, name=name)
+    return pc
+
+
+def make_service_category(parent, name, language="hu"):
+    """Create a ServiceCategory + HU translation (replaces old .create(name=))."""
+    sc = ServiceCategory.objects.create(parent=parent)
+    ServiceCategoryTranslation.objects.create(
+        service_category=sc, language=language, name=name)
+    return sc
+
+
+def make_service_option(service, group_name, value, additional_price=0, language="hu"):
+    """Create a ServiceOption + HU translation (replaces old .create(value=))."""
+    opt = ServiceOption.objects.create(
+        service=service, group_name=group_name, additional_price=additional_price)
+    ServiceOptionTranslation.objects.create(
+        service_option=opt, language=language, group_name=group_name, value=value)
+    return opt
+
+
+def _inline_data(prefix, total, initial=0, rows=None):
+    """Build inline formset management-form + row data for admin POST tests."""
+    data = {
+        f"{prefix}-TOTAL_FORMS": str(total),
+        f"{prefix}-INITIAL_FORMS": str(initial),
+        f"{prefix}-MIN_NUM_FORMS": "0",
+        f"{prefix}-MAX_NUM_FORMS": "1000",
+    }
+    if rows:
+        for index, row in rows.items():
+            for key, val in row.items():
+                data[f"{prefix}-{index}-{key}"] = str(val)
+    return data
 
 
 class CatalogFixtureMixin:
@@ -31,13 +80,19 @@ class CatalogFixtureMixin:
 
     @classmethod
     def setUpTestData(cls):
-        cls.women = ParentCategory.objects.create(name="Women's Braids")
-        cls.men = ParentCategory.objects.create(name="Men's Braids")
-        cls.children = ParentCategory.objects.create(name="Children's Braids")
+        cls.women = ParentCategory.objects.create()
+        ParentCategoryTranslation.objects.create(parent_category=cls.women, language="hu", name="Women's Braids")
+        cls.men = ParentCategory.objects.create()
+        ParentCategoryTranslation.objects.create(parent_category=cls.men, language="hu", name="Men's Braids")
+        cls.children = ParentCategory.objects.create()
+        ParentCategoryTranslation.objects.create(parent_category=cls.children, language="hu", name="Children's Braids")
 
-        cls.womens_cat = ServiceCategory.objects.create(parent=cls.women, name="Knotless Box Braids")
-        cls.mens_cat = ServiceCategory.objects.create(parent=cls.men, name="Men's Cornrows")
-        cls.childrens_cat = ServiceCategory.objects.create(parent=cls.children, name="Kids Cornrows")
+        cls.womens_cat = ServiceCategory.objects.create(parent=cls.women)
+        ServiceCategoryTranslation.objects.create(service_category=cls.womens_cat, language="hu", name="Knotless Box Braids")
+        cls.mens_cat = ServiceCategory.objects.create(parent=cls.men)
+        ServiceCategoryTranslation.objects.create(service_category=cls.mens_cat, language="hu", name="Men's Cornrows")
+        cls.childrens_cat = ServiceCategory.objects.create(parent=cls.children)
+        ServiceCategoryTranslation.objects.create(service_category=cls.childrens_cat, language="hu", name="Kids Cornrows")
 
         cls.womens_service = make_service(
             cls.womens_cat, "Knotless Box Braids - Medium", price=45000,
@@ -67,7 +122,7 @@ class DynamicCategoryTabsTests(CatalogFixtureMixin, TestCase):
 
     def test_newly_created_category_appears_automatically(self):
         """An admin-created ParentCategory becomes a tab with no code change."""
-        bridal = ParentCategory.objects.create(name="Bridal")
+        bridal = make_parent_category("Bridal")
         response = self.client.get("/services/")
         self.assertContains(response, "Bridal")
         self.assertContains(response, 'data-cat-tab="%d"' % bridal.pk)
@@ -84,9 +139,9 @@ class DynamicCategoryTabsTests(CatalogFixtureMixin, TestCase):
         """No `cat` param -> first category in creation order is active and
         its services shown (legacy default: Women's Braids)."""
         response = self.client.get("/services/")
-        self.assertContains(response, self.womens_service.title)
-        self.assertNotContains(response, self.mens_service.title)
-        self.assertNotContains(response, self.childrens_service.title)
+        self.assertContains(response, self.womens_service.display_title)
+        self.assertNotContains(response, self.mens_service.display_title)
+        self.assertNotContains(response, self.childrens_service.display_title)
 
     def test_hidden_input_carries_active_pk(self):
         response = self.client.get("/services/", {"cat": self.men.pk})
@@ -97,14 +152,14 @@ class DynamicCategoryTabsTests(CatalogFixtureMixin, TestCase):
         for bad in ("abc", "-1", "99999", ""):
             response = self.client.get("/services/", {"cat": bad})
             self.assertEqual(response.status_code, 200, "cat=%r must not crash" % bad)
-            self.assertContains(response, self.womens_service.title)
+            self.assertContains(response, self.womens_service.display_title)
 
     def test_legacy_gender_param_is_ignored(self):
         """The removed name-based `gender` param must NOT filter (and must
         never resolve Men's -> Women's again)."""
         response = self.client.get("/services/", {"gender": "Men's Braids"})
-        self.assertContains(response, self.womens_service.title)
-        self.assertNotContains(response, self.mens_service.title)
+        self.assertContains(response, self.womens_service.display_title)
+        self.assertNotContains(response, self.mens_service.display_title)
 
 
 class CategoryFilteringTests(CatalogFixtureMixin, TestCase):
@@ -115,25 +170,25 @@ class CategoryFilteringTests(CatalogFixtureMixin, TestCase):
         """THE regression: 'Men's Braids' icontains-matched 'Women's Braids'
         (substring). ID-based selection must never cross-match."""
         response = self.client.get("/services/", {"cat": self.men.pk})
-        self.assertContains(response, self.mens_service.title)
+        self.assertContains(response, self.mens_service.display_title)
         self.assertNotContains(
-            response, self.womens_service.title,
+            response, self.womens_service.display_title,
             msg_prefix="'Men's Braids' resolved to 'Women's Braids' — substring collision")
 
     def test_substring_named_categories_do_not_collide(self):
         """Categories whose names are substrings of each other stay isolated."""
-        long_cat_parent = ParentCategory.objects.create(name="Braids")
-        short_cat_parent = ParentCategory.objects.create(name="Long Braids")
-        c1 = ServiceCategory.objects.create(parent=long_cat_parent, name="Sub A")
-        c2 = ServiceCategory.objects.create(parent=short_cat_parent, name="Sub B")
+        long_cat_parent = make_parent_category("Braids")
+        short_cat_parent = make_parent_category("Long Braids")
+        c1 = make_service_category(long_cat_parent, "Sub A")
+        c2 = make_service_category(short_cat_parent, "Sub B")
         s1 = make_service(c1, "Service In Braids")
         s2 = make_service(c2, "Service In Long Braids")
         r1 = self.client.get("/services/", {"cat": long_cat_parent.pk})
-        self.assertContains(r1, s1.title)
-        self.assertNotContains(r1, s2.title)
+        self.assertContains(r1, s1.display_title)
+        self.assertNotContains(r1, s2.display_title)
         r2 = self.client.get("/services/", {"cat": short_cat_parent.pk})
-        self.assertContains(r2, s2.title)
-        self.assertNotContains(r2, s1.title)
+        self.assertContains(r2, s2.display_title)
+        self.assertNotContains(r2, s1.display_title)
 
     def test_each_category_filters_correctly(self):
         pairs = [
@@ -143,26 +198,26 @@ class CategoryFilteringTests(CatalogFixtureMixin, TestCase):
         ]
         for parent, service in pairs:
             response = self.client.get("/services/", {"cat": parent.pk})
-            self.assertContains(response, service.title,
-                                msg_prefix="service for %s missing" % parent.name)
+            self.assertContains(response, service.display_title,
+                                msg_prefix="service for %s missing" % parent.display_name)
             for other_parent, other_service in pairs:
                 if other_parent is not parent:
-                    self.assertNotContains(response, other_service.title)
+                    self.assertNotContains(response, other_service.display_title)
 
     def test_subcategory_sidebar_follows_selected_parent(self):
         """Sidebar dropdown lists ONLY the active parent's subcategories."""
         response = self.client.get("/services/", {"cat": self.men.pk})
-        self.assertContains(response, E(self.mens_cat.name))
-        self.assertNotContains(response, E(self.womens_cat.name))
-        self.assertNotContains(response, E(self.childrens_cat.name))
+        self.assertContains(response, E(self.mens_cat.display_name))
+        self.assertNotContains(response, E(self.womens_cat.display_name))
+        self.assertNotContains(response, E(self.childrens_cat.display_name))
 
     def test_subcategory_filter_applies_within_parent(self):
         """?cat=X&category=Y filters to subcategory Y under parent X."""
-        second_womens = ServiceCategory.objects.create(parent=self.women, name="Goddess Locs")
+        second_womens = make_service_category(self.women, "Goddess Locs")
         make_service(second_womens, "Goddess Locs Style", price=30000)
         response = self.client.get("/services/", {
             "cat": self.women.pk, "category": self.womens_cat.pk})
-        self.assertContains(response, self.womens_service.title)
+        self.assertContains(response, self.womens_service.display_title)
         self.assertNotContains(response, "Goddess Locs Style")
 
     def test_search_sort_price_still_work(self):
@@ -170,27 +225,27 @@ class CategoryFilteringTests(CatalogFixtureMixin, TestCase):
         knot_womens = make_service(self.womens_cat, "Goddess Locs Premium", price=90000)
         # Search within Women's tab
         r = self.client.get("/services/", {"cat": self.women.pk, "q": "Knotless"})
-        self.assertContains(r, self.womens_service.title)
-        self.assertNotContains(r, knot_womens.title)
+        self.assertContains(r, self.womens_service.display_title)
+        self.assertNotContains(r, knot_womens.display_title)
         # Price ceiling excludes the premium style
         r = self.client.get("/services/", {"cat": self.women.pk, "price_max": "50000"})
-        self.assertContains(r, self.womens_service.title)
-        self.assertNotContains(r, knot_womens.title)
+        self.assertContains(r, self.womens_service.display_title)
+        self.assertNotContains(r, knot_womens.display_title)
         # Sort ascending by price: Knotless (45000) first, then Goddess (90000)
         r = self.client.get("/services/", {"cat": self.women.pk, "sort_by": "price_asc"})
         html = r.content.decode()
-        self.assertLess(html.index(self.womens_service.title), html.index(knot_womens.title))
+        self.assertLess(html.index(self.womens_service.display_title), html.index(knot_womens.display_title))
         # Discounted-only: only the Children's service has a discount
         r = self.client.get("/services/", {"cat": self.children.pk, "discounted_only": "1"})
-        self.assertContains(r, self.childrens_service.title)
+        self.assertContains(r, self.childrens_service.display_title)
 
     def test_new_category_tab_filters_to_its_own_services(self):
         """An admin-created category shows only its own services (empty state
         included) when selected."""
-        bridal = ParentCategory.objects.create(name="Bridal")
+        bridal = make_parent_category("Bridal")
         r = self.client.get("/services/", {"cat": bridal.pk})
         self.assertEqual(list(r.context["services"]), [])
-        self.assertNotContains(r, self.womens_service.title)
+        self.assertNotContains(r, self.womens_service.display_title)
 
 
 class EmptyCatalogTests(TestCase):
@@ -198,12 +253,12 @@ class EmptyCatalogTests(TestCase):
 
     def test_no_parent_categories_renders_unfiltered(self):
         """Zero ParentCategories: page renders, no tab bar, services shown."""
-        orphan_cat = ServiceCategory.objects.create(parent=None, name="Orphan Type")
+        orphan_cat = make_service_category(None, "Orphan Type")
         orphan = make_service(orphan_cat, "Orphan Service")
         response = self.client.get("/services/")
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'data-cat-tab="')
-        self.assertContains(response, orphan.title)
+        self.assertContains(response, orphan.display_title)
 
     def test_completely_empty_database(self):
         response = self.client.get("/services/")
@@ -255,12 +310,12 @@ class ServiceListHTMXTests(CatalogFixtureMixin, TestCase):
         partial = self.client.get(
             "/services/", {"cat": self.children.pk}, HTTP_HX_REQUEST="true"
         )
-        self.assertContains(partial, self.childrens_service.title)
-        self.assertNotContains(partial, self.womens_service.title)
+        self.assertContains(partial, self.childrens_service.display_title)
+        self.assertNotContains(partial, self.womens_service.display_title)
 
         full = self.client.get("/services/", {"cat": self.children.pk})
-        self.assertContains(full, self.childrens_service.title)
-        self.assertNotContains(full, self.womens_service.title)
+        self.assertContains(full, self.childrens_service.display_title)
+        self.assertNotContains(full, self.womens_service.display_title)
 
 
 class AdminCategoryCrudTests(CatalogFixtureMixin, TestCase):
@@ -282,22 +337,31 @@ class AdminCategoryCrudTests(CatalogFixtureMixin, TestCase):
         self.assertContains(response, E("Women's Braids"))
 
     def test_admin_can_create_parent_category(self):
+        data = _inline_data("translations", 3,
+            rows={0: {"language": "hu", "name": "Locs"}})
+        data["_save"] = "Save"
         response = self.client.post(
             "/admin/services/parentcategory/add/",
-            {"name": "Locs", "_save": "Save"},
+            data,
             follow=True,
         )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(ParentCategory.objects.filter(name="Locs").exists())
+        self.assertTrue(
+            ParentCategory.objects.filter(translations__name="Locs").exists())
 
         # New category immediately selectable on the catalog page
         catalog = self.client.get("/services/")
         self.assertContains(catalog, "Locs")
 
     def test_admin_can_rename_parent_category(self):
+        trans = self.children.translations.get(language="hu")
+        data = _inline_data("translations", 4, initial=1,
+            rows={0: {"id": trans.pk, "parent_category": self.children.pk,
+                      "language": "hu", "name": "Kids Braids"}})
+        data["_save"] = "Save"
         response = self.client.post(
             "/admin/services/parentcategory/%d/change/" % self.children.pk,
-            {"name": "Kids Braids", "_save": "Save"},
+            data,
             follow=True,
         )
         self.assertEqual(response.status_code, 200)
@@ -316,7 +380,7 @@ class AdminCategoryCrudTests(CatalogFixtureMixin, TestCase):
         # Catalog still renders; children's services disappear with the cascade
         catalog = self.client.get("/services/")
         self.assertNotContains(catalog, "Children's Braids")
-        self.assertContains(catalog, self.womens_service.title)
+        self.assertContains(catalog, self.womens_service.display_title)
 
 
 class ServiceImageDropdownTests(CatalogFixtureMixin, TestCase):
@@ -337,18 +401,10 @@ class ServiceImageDropdownTests(CatalogFixtureMixin, TestCase):
         cls.admin = get_user_model().objects.create_superuser(
             "imgadmin", "imgadmin@example.com", "pw-12345")
         # Two option groups on the women's service
-        ServiceOption.objects.create(
-            service=cls.womens_service, group_name="Color",
-            value="Black", additional_price=0)
-        ServiceOption.objects.create(
-            service=cls.womens_service, group_name="Color",
-            value="Brown", additional_price=2000)
-        ServiceOption.objects.create(
-            service=cls.womens_service, group_name="Length",
-            value="Shoulder", additional_price=0)
-        ServiceOption.objects.create(
-            service=cls.womens_service, group_name="Length",
-            value="Waist", additional_price=5000)
+        make_service_option(cls.womens_service, "Color", "Black", additional_price=0)
+        make_service_option(cls.womens_service, "Color", "Brown", additional_price=2000)
+        make_service_option(cls.womens_service, "Length", "Shoulder", additional_price=0)
+        make_service_option(cls.womens_service, "Length", "Waist", additional_price=5000)
 
     def setUp(self):
         self.client.force_login(self.admin)

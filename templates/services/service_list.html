@@ -30,7 +30,7 @@
                                 data-cat-tab="{{ parent.pk }}"
                                 onclick="switchCategory('{{ parent.pk }}')"
                                 class="px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 whitespace-nowrap shrink-0 {% if parent.pk == active_parent_pk %}bg-gray-900 text-white shadow-md scale-[1.02]{% else %}text-gray-600 hover:bg-gray-50 hover:text-gray-900{% endif %}">
-                            {{ parent.name }}
+                            {{ parent.display_name }}
                         </button>
                         {% endfor %}
                     </div>

@@ -5,10 +5,14 @@ from django.utils.text import slugify
 
 from .models import (
     ParentCategory,
+    ParentCategoryTranslation,
     Service,
     ServiceCategory,
+    ServiceCategoryTranslation,
     ServiceImage,
     ServiceOption,
+    ServiceOptionTranslation,
+    ServiceTranslation,
 )
 
 
@@ -46,9 +50,9 @@ class DynamicServiceImageForm(forms.ModelForm):
                 if field_name in self.fields:
                     continue  # skip duplicates from slug collisions
 
-                choices = [("", f"— Any {group_name} —")]
+                choices = [("", f"— Any {group['display_group_name']} —")]
                 for opt in group["options"]:
-                    label = opt.value
+                    label = opt.display_value or group_name
                     if opt.additional_price > 0:
                         label += f" (+{int(opt.additional_price):,} Ft)"
                     choices.append((opt.id, label))
@@ -56,7 +60,7 @@ class DynamicServiceImageForm(forms.ModelForm):
                 self.fields[field_name] = forms.ChoiceField(
                     choices=choices,
                     required=False,
-                    label=group_name,
+                    label=group["display_group_name"],
                 )
                 self._group_fields.append((field_name, group_name))
 
@@ -172,10 +176,15 @@ class ServiceOptionInline(admin.TabularInline):
     extra = 1
 
 
+class ServiceTranslationInline(admin.TabularInline):
+    model = ServiceTranslation
+    extra = 3  # HU, EN, DE
+
+
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = (
-        "title",
+        "display_title",
         "category",
         "target_audience",
         "base_price",
@@ -192,16 +201,20 @@ class ServiceAdmin(admin.ModelAdmin):
         "discount_percentage",
     )
     list_editable = ("discount_percentage",)  # Quick-edit in list view
-    search_fields = ("title", "description")
+    search_fields = ("translations__title", "translations__description")
     filter_horizontal = ("providers",)
-    inlines = [ServiceImageInline, ServiceOptionInline]
+    inlines = [
+        ServiceImageInline,
+        ServiceOptionInline,
+        ServiceTranslationInline,
+    ]
 
     fieldsets = (
         (None, {
-            "fields": ("title", "description", "category", "is_popular"),
+            "fields": ("category", "is_popular"),
         }),
         ("Suitability & Requirements", {
-            "fields": ("target_audience", "best_for_hair_types", "suitability_warning"),
+            "fields": ("target_audience",),
         }),
         ("Pricing & Duration", {
             "fields": ("base_price", "discount_percentage", "duration_minutes"),
@@ -255,15 +268,40 @@ class ServiceAdmin(admin.ModelAdmin):
     discount_display.short_description = "Discount"
 
 
+class ParentCategoryTranslationInline(admin.TabularInline):
+    model = ParentCategoryTranslation
+    extra = 3  # HU, EN, DE
+
+
 @admin.register(ParentCategory)
 class ParentCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name",)
+    list_display = ("display_name",)
+    search_fields = ("translations__name",)
+    inlines = [ParentCategoryTranslationInline]
+
+
+class ServiceCategoryTranslationInline(admin.TabularInline):
+    model = ServiceCategoryTranslation
+    extra = 3  # HU, EN, DE
 
 
 @admin.register(ServiceCategory)
 class ServiceCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "parent")
+    list_display = ("display_name", "parent")
     list_filter = ("parent",)
-    search_fields = ("name",)
-    ordering = ("parent", "name")
+    search_fields = ("translations__name",)
+    ordering = ("parent", "pk")
+    inlines = [ServiceCategoryTranslationInline]
+
+
+@admin.register(ServiceOptionTranslation)
+class ServiceOptionTranslationAdmin(admin.ModelAdmin):
+    """Translations for ServiceOption values (e.g., Color: Black/EN/HU/DE).
+
+    Registered as a separate admin page because Django admin does not
+    support nested inlines (ServiceOption is already an inline of Service).
+    """
+    list_display = ("service_option", "language", "group_name", "value")
+    list_filter = ("language",)
+    search_fields = ("group_name", "value")
+    list_editable = ("group_name", "value")

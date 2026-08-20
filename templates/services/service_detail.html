@@ -16,7 +16,7 @@
                         <div class="aspect-square w-full rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
                             <img id="hero-image"
                                  src="{{ service.images.all.0.image.url }}"
-                                 alt="{{ service.title }}"
+                                 alt="{{ service.display_title }}"
                                  class="w-full h-full object-cover transition-opacity duration-300">
                         </div>
 
@@ -27,7 +27,7 @@
                                     class="thumb-btn aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-400 transition {% if forloop.first %}thumb-active ring-2 ring-primary-500/30 border-primary-500{% endif %}"
                                     data-hero-src="{{ image.image.url }}">
                                 <img src="{{ image.image.url }}"
-                                     alt="{{ service.title }} thumbnail {{ forloop.counter }}"
+                                     alt="{{ service.display_title }} thumbnail {{ forloop.counter }}"
                                      class="w-full h-full object-cover"
                                      data-linked-options="{{ image.linked_options_json }}">
                             </button>
@@ -51,7 +51,7 @@
 
                 <!-- ── 1. Title + Price ── -->
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">{{ service.title }}</h1>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">{{ service.display_title }}</h1>
 
                     <div class="mt-3 flex items-baseline gap-3 flex-wrap">
                         {% if service.has_discount %}
@@ -89,7 +89,7 @@
 
                     {% for group_name, options in grouped_options.items %}
                     <div class="option-group" data-group-name="{{ group_name }}">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ group_name }}</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ options.0.display_group_name }}</label>
 
                         {% if options|length <= 4 %}
                             <!-- Radio Cards (4 or fewer options) -->
@@ -102,7 +102,7 @@
                                        class="peer sr-only option-input">
                                 <label for="opt-{{ option.pk }}"
                                        class="peer-checked:border-primary-500 peer-checked:ring-2 peer-checked:ring-primary-500/20 border-2 border-gray-200 rounded-lg p-3 cursor-pointer transition block">
-                                    <span class="font-medium text-sm">{{ option.value }}</span>
+                                    <span class="font-medium text-sm">{{ option.display_value }}</span>
                                     {% if option.additional_price > 0 %}
                                     <span class="block text-xs text-gray-500 mt-0.5">+{{ option.additional_price|floatformat:0 }} Ft</span>
                                     {% endif %}
@@ -113,10 +113,10 @@
                             <!-- Select Dropdown (more than 4 options) -->
                             <select name="{{ group_name }}"
                                     class="option-input mt-1 block w-full p-2.5 border-2 border-gray-200 rounded-lg text-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition">
-                                <option value="" selected>{% trans "Select" %} {{ group_name }}…</option>
+                                <option value="" selected>{% trans "Select" %} {{ options.0.display_group_name }}…</option>
                                 {% for option in options %}
                                 <option value="{{ option.pk }}">
-                                    {{ option.value }}
+                                    {{ option.display_value }}
                                     {% if option.additional_price > 0 %}(+{{ option.additional_price|floatformat:0 }} Ft){% endif %}
                                 </option>
                                 {% endfor %}
@@ -133,7 +133,7 @@
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 mb-3">{% trans "Style Details" %}</h2>
                     <div class="text-gray-700 leading-relaxed prose prose-sm max-w-none">
-                        {{ service.description|linebreaks }}
+                        {{ service.display_description|linebreaks }}
                     </div>
                 </div>
 
@@ -149,8 +149,8 @@
                         <div class="flex flex-col sm:flex-row sm:gap-3">
                             <dt class="text-sm font-medium text-gray-500 sm:w-40 shrink-0">{% trans "Best For" %}</dt>
                             <dd class="text-sm text-gray-800">
-                                {% if service.best_for_hair_types %}
-                                    {{ service.best_for_hair_types }}
+                                {% if service.display_best_for_hair_types %}
+                                    {{ service.display_best_for_hair_types }}
                                 {% else %}
                                     <span class="text-gray-400">{% trans "Not specified" %}</span>
                                 {% endif %}
@@ -158,7 +158,7 @@
                         </div>
                     </dl>
 
-                    {% if service.suitability_warning %}
+                    {% if service.display_suitability_warning %}
                     <div class="mt-4 flex gap-3 bg-amber-50 border border-amber-200 rounded-lg p-4">
                         <svg class="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                             <path fill-rule="evenodd"
@@ -167,7 +167,7 @@
                         </svg>
                         <div>
                             <h3 class="text-sm font-bold text-amber-800 uppercase tracking-wide">{% trans "IMPORTANT" %}</h3>
-                            <p class="text-sm text-amber-700 mt-1">{{ service.suitability_warning }}</p>
+                            <p class="text-sm text-amber-700 mt-1">{{ service.display_suitability_warning }}</p>
                         </div>
                     </div>
                     {% endif %}

@@ -4,10 +4,17 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import get_language
 
 from apps.providers.models import Provider
 from apps.services.models import Service
 from apps.site_config.constants import LanguageChoices
+
+
+def _active_lang():
+    """Return the current 2-letter language code, defaulting to HU (base)."""
+    lang = get_language() or LanguageChoices.HU
+    return lang[:2]
 
 
 def _default_held_until():
@@ -23,23 +30,40 @@ class PaymentMethod(models.Model):
     These are SEED DATA, not architectural constants. The four initial methods
     (Revolut, Wise, TransferGo, Bank Transfer) are seeded at migration time.
     The admin may delete them and create entirely different ones.
+
+    Decision #38: ``name`` is in PaymentMethodTranslation (HU/EN/DE).
     """
-    name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=100, unique=True)
     is_active = models.BooleanField(default=True)
     display_order = models.PositiveSmallIntegerField(default=0)
     icon = models.ImageField(upload_to='payment_icons/', blank=True, null=True)
 
     class Meta:
-        ordering = ['display_order', 'name']
+        ordering = ['display_order', 'pk']
 
     def __str__(self):
-        return self.name
+        trans = self.translations.filter(language=LanguageChoices.HU).first()
+        return trans.name if trans else f"Payment Method #{self.pk}"
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            trans = self.translations.filter(language=LanguageChoices.HU).first()
+            base = trans.name if trans else f"payment-method-{self.pk or 'new'}"
+            self.slug = slugify(base)
         super().save(*args, **kwargs)
+
+    def get_translation(self, lang=None):
+        if lang is None:
+            lang = _active_lang()
+        return (
+            self.translations.filter(language=lang).first()
+            or self.translations.filter(language=LanguageChoices.HU).first()
+        )
+
+    @property
+    def display_name(self):
+        trans = self.get_translation()
+        return trans.name if trans else str(self)
 
 
 class PaymentDetailField(models.Model):
@@ -61,7 +85,6 @@ class PaymentDetailField(models.Model):
     payment_method = models.ForeignKey(
         PaymentMethod, related_name='detail_fields', on_delete=models.CASCADE
     )
-    label = models.CharField(max_length=100)
     field_type = models.CharField(max_length=20, choices=FIELD_TYPES, default='text')
     value = models.TextField(blank=True)
     image_value = models.ImageField(
@@ -73,10 +96,24 @@ class PaymentDetailField(models.Model):
 
     class Meta:
         ordering = ['display_order']
-        unique_together = ('payment_method', 'label')
 
     def __str__(self):
-        return f"{self.payment_method.name} — {self.label}"
+        trans = self.translations.filter(language=LanguageChoices.HU).first()
+        label = trans.label if trans else f"Field #{self.pk}"
+        return f"{self.payment_method} — {label}"
+
+    def get_translation(self, lang=None):
+        if lang is None:
+            lang = _active_lang()
+        return (
+            self.translations.filter(language=lang).first()
+            or self.translations.filter(language=LanguageChoices.HU).first()
+        )
+
+    @property
+    def display_label(self):
+        trans = self.get_translation()
+        return trans.label if trans else str(self)
 
 
 class AppointmentPaymentSnapshot(models.Model):
@@ -259,7 +296,7 @@ class AppointmentRequest(models.Model):
         verbose_name_plural = "Appointment Requests"
 
     def __str__(self):
-        return f"{self.payment_reference} — {self.client_name} — {self.service.title}"
+        return f"{self.payment_reference} — {self.client_name} — {self.service.display_title}"
 
     def save(self, *args, **kwargs):
         if not self.payment_reference:
@@ -299,7 +336,7 @@ class AppointmentRequest(models.Model):
 
         for field in pm.detail_fields.filter(is_active=True).order_by('display_order'):
             entry = {
-                'label': field.label,
+                'label': field.display_label,
                 'field_type': field.field_type,
                 'value': '',
             }
@@ -308,7 +345,7 @@ class AppointmentRequest(models.Model):
                 src_path = field.image_value.path
                 if os.path.exists(src_path):
                     ext = os.path.splitext(src_path)[1]
-                    new_name = f"{slugify(field.label)}{ext}"
+                    new_name = f"{slugify(field.display_label)}{ext}"
                     dest_path = f"payment_snapshots/{ref}/{new_name}"
                     with open(src_path, 'rb') as f:
                         saved_path = default_storage.save(dest_path, ContentFile(f.read()))
@@ -320,7 +357,7 @@ class AppointmentRequest(models.Model):
         snapshot, created = AppointmentPaymentSnapshot.objects.update_or_create(
             appointment=self,
             defaults={
-                'payment_method_name': pm.name,
+                'payment_method_name': pm.display_name,
                 'payment_method_slug': pm.slug,
                 'detail_fields_snapshot': detail_snapshot,
             },
@@ -355,3 +392,45 @@ class RefundQueue(AppointmentRequest):
         verbose_name = "Refund Queue Item"
         verbose_name_plural = "Refund Queue"
         ordering = ["-created_at"]
+
+
+# ── Payment Translation Models (Category B) ───────────────────
+# Decision #38: Full customer-facing multilingual support (HU/EN/DE).
+# Payment method names and field labels are customer-visible and must
+# be translated. PaymentDetailField.value is operational data (IBAN,
+# account numbers) and is NOT translated.
+
+class PaymentMethodTranslation(models.Model):
+    """One translation per language for a PaymentMethod."""
+
+    payment_method = models.ForeignKey(
+        PaymentMethod, related_name='translations', on_delete=models.CASCADE,
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    name = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ('payment_method', 'language')
+        verbose_name = "Payment method translation"
+        verbose_name_plural = "Payment method translations"
+
+    def __str__(self):
+        return f"{self.get_language_display()} — {self.name}"
+
+
+class PaymentDetailFieldTranslation(models.Model):
+    """One translation per language for a PaymentDetailField label."""
+
+    payment_detail_field = models.ForeignKey(
+        PaymentDetailField, related_name='translations', on_delete=models.CASCADE,
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    label = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ('payment_detail_field', 'language')
+        verbose_name = "Payment detail field translation"
+        verbose_name_plural = "Payment detail field translations"
+
+    def __str__(self):
+        return f"{self.get_language_display()} — {self.label}"

@@ -9,7 +9,7 @@ Covers:
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 
-from apps.services.models import Service
+from apps.services.models import Service, ServiceTranslation
 from apps.site_config.models import SiteConfiguration
 
 
@@ -20,10 +20,13 @@ class SitemapTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.service = Service.objects.create(
-            title="Knotless Box Braids",
-            description="Test service.",
             base_price=55000,
             duration_minutes=360,
+        )
+        ServiceTranslation.objects.create(
+            service=cls.service, language="hu",
+            title="Knotless Box Braids",
+            description="Test service.",
         )
 
     def test_sitemap_index_returns_xml(self):

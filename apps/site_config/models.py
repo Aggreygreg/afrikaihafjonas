@@ -1,23 +1,26 @@
 import bleach
 from django.db import models
+from django.utils.translation import get_language
 from solo.models import SingletonModel
 
 from .constants import LanguageChoices
+
+
+def _active_lang():
+    """Return the current 2-letter language code, defaulting to HU (base)."""
+    lang = get_language() or LanguageChoices.HU
+    return lang[:2]
 
 
 class SiteConfiguration(SingletonModel):
     """Singleton — all customer-facing business information in one place.
 
     Operational data (phone, email, address) is single-language.
-    For per-language prose (directions, hours descriptions), use ContentBlocks
-    (Phase 7D) keyed by slug — not this model.
+    Customer-facing text (business name, hero title/subtitle) lives in
+    SiteConfigurationTranslation (HU/EN/DE) — Decision #38.
     """
 
     # ── Branding ───────────────────────────────────────────────
-    business_name = models.CharField(
-        max_length=200, default="Afrikai Hajfonás",
-        help_text="The salon's business name, shown in the header, footer, and emails.",
-    )
     logo = models.ImageField(
         upload_to='branding/', blank=True, null=True,
         help_text="Site logo. Recommended: transparent PNG, max height 48px.",
@@ -28,14 +31,6 @@ class SiteConfiguration(SingletonModel):
     )
 
     # ── Hero Section ───────────────────────────────────────────
-    hero_title = models.CharField(
-        max_length=200,
-        default="Authentic African Braiding in the Heart of Budapest"
-    )
-    hero_subtitle = models.TextField(
-        blank=True,
-        default="Experience timeless beauty and intricate designs, handcrafted with passion and tradition."
-    )
     hero_image = models.ImageField(
         upload_to='hero/', blank=True, null=True,
         help_text="Upload the main background image for the homepage hero section."
@@ -75,7 +70,59 @@ class SiteConfiguration(SingletonModel):
         verbose_name = "Site Configuration"
 
     def __str__(self):
-        return "Site Configuration"
+        trans = self.translations.filter(language=LanguageChoices.HU).first()
+        return trans.business_name if trans else "Site Configuration"
+
+    def get_translation(self, lang=None):
+        """Return the translation for the active language, HU fallback."""
+        if lang is None:
+            lang = _active_lang()
+        return (
+            self.translations.filter(language=lang).first()
+            or self.translations.filter(language=LanguageChoices.HU).first()
+        )
+
+    @property
+    def display_business_name(self):
+        trans = self.get_translation()
+        return trans.business_name if trans else "Afrikai Hajfonás"
+
+    @property
+    def display_hero_title(self):
+        trans = self.get_translation()
+        return trans.hero_title if trans else ""
+
+    @property
+    def display_hero_subtitle(self):
+        trans = self.get_translation()
+        return trans.hero_subtitle if trans else ""
+
+
+class SiteConfigurationTranslation(models.Model):
+    """One translation per language for the SiteConfiguration singleton.
+
+    Holds the per-language business_name, hero_title, and hero_subtitle.
+    At most 3 rows (HU/EN/DE), each with FK to the singleton.
+    """
+
+    site_configuration = models.ForeignKey(
+        SiteConfiguration, related_name='translations', on_delete=models.CASCADE,
+    )
+    language = models.CharField(max_length=2, choices=LanguageChoices.choices)
+    business_name = models.CharField(
+        max_length=200,
+        help_text="The salon's business name in this language.",
+    )
+    hero_title = models.CharField(max_length=200)
+    hero_subtitle = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('site_configuration', 'language')
+        verbose_name = "Site configuration translation"
+        verbose_name_plural = "Site configuration translations"
+
+    def __str__(self):
+        return f"{self.get_language_display()} — {self.business_name}"
 
 
 # ── Bleach sanitization (Decision #33) ─────────────────────────
