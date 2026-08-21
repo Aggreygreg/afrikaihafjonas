@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Progress History
 
-**Last Updated:** August 17, 2026
+**Last Updated:** August 21, 2026
 
 ---
 
@@ -485,6 +485,31 @@ Test breakdown by module:
 **Files:** `apps/site_config/` (models, admin, views, templatetags, tests), `config/` (settings, sitemaps, urls), 3× `.po` (+18 msgids each → 341/341 ×3 compiled), `templates/base.html` + 5 info-page h1s + `service_list.html`, new `templates/pages/faq.html` + `partials/faq_list.html`, new migration `0012_faq_topics`. Plus spec sync: README, MASTER_CONTEXT, ARCHITECTURAL_PRINCIPLES §8.1, DECISIONS (#36), EXECUTION_RULES, this file.
 
 **Verification:** baseline 123/123 → **167/167** (44 new site_config tests + `config/tests.py` always had 6 but the documented command previously omitted its path); `makemigrations --check` clean; `manage.py check` 0 issues; **fresh-DB migrate clean** (backup → delete → `migrate --noinput` → all 12 site_config migrations apply incl `0012_faq_topics` → 4 FAQ tables confirmed → dev DB restored); 48 applied migrations. Live acceptance: FAQ topics ordered/grouped, inactive excluded, EN→HU + DE→HU fallback, HTMX partial search (no reload, filter accurate, input retained), no-results state, `<script>`/SQL injection probes all fail safe; banner scheduling window + future-exclusion + HTML-escape safe + dismiss + localStorage persistence across reload. Visual QA desktop 1280×800 + mobile 375×667 across homepage/catalog/SHEIN gallery/info pages/FAQ/wizard/guest-lookup → 2 defects found & fixed (36e). All acceptance test content purged (FAQ/Topic/Announcement → 0/0/0); empty state verified. All temp artifacts removed.
+
+---
+
+## Full Customer-Facing Multilingual ✅ COMPLETE (Aug 20, 2026 — Decisions #38–#40)
+
+**Decision #38 — catalog multilingual (commit `089b122`):** Greg superseded Decision #35 (which had kept the catalog single-language). ALL customer-facing catalog content moved to the parent + Translation pattern (Category B): 7 new Translation models (ParentCategory, ServiceCategory, Service, ServiceOption, PaymentMethod, PaymentDetailField, SiteConfiguration), 9 migrations (add models → seed HU translations from existing column data → drop the old single-language columns), admin translation inlines (`extra=3` HU/EN/DE, formset prefix = `related_name` = `translations`), `get_translation()` + `display_*` properties with the standard fallback chain (active → HU → first), templates/views/tests converted to `display_*`. Suite 167→170.
+
+**Decision #39 — cross-cutting audit (commit `a0ee563`):** audited EVERY customer-visible surface (templates, views, forms, model choices, emails, JS, SEO, Category C fields). 8 gaps fixed — 7 Category A (HairLength/Status choices wrapped `gettext_lazy` + removed a `|cut` template hack, hardcoded view strings, footer tagline, footer business name via `display_business_name`, wizard group heading via `display_group_name`) and 1 Category B (`Provider.bio` + `bio_en`/`bio_de` columns added at the time). 1 known limitation documented: `admin_notes` is free-form admin text (Category C) — admin writes it in the customer's language. 18 new msgids ×3 (365 total), 2 migrations (59 total).
+
+**Decision #40 — deep audit + ProviderTranslation (commit `6ea1605`):** deep project audit (spec vs implementation, model/template/view/admin, security, unused code). `Provider.bio` converted from the per-language-column scheme to a `ProviderTranslation` model (provider FK + language + bio, `unique_together`), eliminating the second translation pattern — 8 Translation models total, 60 migrations. All stale spec documentation corrected (EXECUTION_RULES counts/branch names, MASTER_CONTEXT, ARCHITECTURAL_PRINCIPLES header + §5 table, README). Audit verdict: no production risks, no unused code.
+
+---
+
+## Least-Change Ruling + Provider Bio Verification ✅ COMPLETE (Aug 21, 2026 — Decision #41, commit `4cdea1e` + follow-up)
+
+**Decision #41 — audit findings classified under Greg's least-change rule (commit `4cdea1e`):** every deep-audit finding classified per the three-category rule — (a) docs-only → the #40 stale-doc fixes were correct, no code touched; (b) real implementation contradiction → the Provider.bio conversion (the columns were a same-day deviation from the mandated pattern, and the "no second pattern" instruction preceded the conversion) — **stands, no rollback** (rollback would be more change/risk for zero gain); (c) historical divergence → old DECISIONS entries preserved as historical truth. Also fixed the DECISIONS.md header date missed in #40's sweep.
+
+**Provider bio verification (this cycle, follow-up commit):** Greg asked whether HU was missing since `bio_hu` couldn't be found. Verified facts:
+- `bio_hu` **never existed** — the pre-#40 scheme was `bio` (HU base, no suffix) + `bio_en` + `bio_de`.
+- Migration `0005_provider_translation` maps `bio` → `ProviderTranslation(language="hu")`, copying each column **only when non-empty** (no blank rows pollute the fallback chain).
+- The live DB audit showed the migration preserved **100% of existing data**: only a `hu` row existed because `bio_en`/`bio_de` had been blank since their creation in `0004` (never populated). Nothing was lost.
+- Fixed the dev demo data (local DB only, not tracked): provider "Amina" now has genuine HU/EN/DE bios.
+- **Regression tests added** — `apps/providers/tests.py` was an empty stub; now 6 tests pinning the fallback contract: HU-only served in every language, all-three each served, missing middle language falls back to HU (not first-available), zero-rows → empty string, explicit `get_translation(lang)`, and `(provider, language)` uniqueness. Suite 170 → **176**.
+
+**Fresh-clone verification (Aug 21):** temp-DB `migrate` from zero = all 60 migrations apply cleanly (the `0005` data copy is a safe no-op over an empty table), `makemigrations --check` clean, `manage.py check` 0 issues. Full suite 176/176. Temp DB deleted. `main` is ready for a fresh local clone and end-to-end testing.
 
 ---
 

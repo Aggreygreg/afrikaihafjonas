@@ -1,7 +1,7 @@
 # Afrikai Hajfonás — Architectural Principles: Business-Managed Content & Configuration
 
-**Last Updated:** August 20, 2026 (Revision 6 — deep audit: Provider.bio converted to ProviderTranslation for architectural consistency; all stale spec counts corrected)
-**Status:** ✅ Implementation complete (Phase 7A–7E + 2026-08-19 content/cleanup cycle + 2026-08-20 multilingual + deep audit). Production-hardened, 170 tests passing.
+**Last Updated:** August 21, 2026 (Revision 6 — deep audit: Provider.bio converted to ProviderTranslation for architectural consistency; all stale spec counts corrected; ProviderTranslation fallback regression tests added)
+**Status:** ✅ Implementation complete (Phase 7A–7E + 2026-08-19 content/cleanup cycle + 2026-08-20 multilingual + deep audit). Production-hardened, 176 tests passing.
 
 ---
 
