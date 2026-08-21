@@ -1,6 +1,6 @@
 # Afrikai Hajfonás — Key Decisions & Rationale
 
-**Last Updated:** August 17, 2026
+**Last Updated:** August 21, 2026
 
 ---
 
@@ -543,3 +543,32 @@ Fresh-clone impact: `cp .env.example .env && python manage.py migrate` now works
 **Tests:** 170/170 pass. `makemigrations --check`: clean. `django check`: 0 issues.
 
 **Impact:** `apps/providers/{models,admin}.py`, `apps/providers/migrations/0005_provider_translation.py`, `specs/{ARCHITECTURAL_PRINCIPLES,DECISIONS,EXECUTION_RULES,MASTER_CONTEXT_AND_SPECS}.md`, `README.md`.
+
+---
+
+## Decision #41 — Audit findings classified under the least-change rule; ProviderTranslation stands (2026-08-21)
+
+**Greg's directive (Aug 20):** resolve identified contradictions based on what is best for the project, not theoretical uniformity. Prioritize implemented, tested, explicitly approved functionality. Choose the solution requiring the least change while remaining correct, stable, maintainable. Classify every contradiction as: (a) docs-only → fix docs, not code; (b) real implementation contradiction → minimal safe fix; (c) historical divergence → keep old record as historical truth, add new record as superseding.
+
+**Classification of every deep-audit finding:**
+
+| Finding | Class | Resolution |
+|---|---|---|
+| Provider.bio used a second translation pattern (bio/bio_en/bio_de columns) while §4 mandated parent+Translation | **(b) real implementation contradiction** | Converted in #40 — see ruling below. **Stands.** |
+| EXECUTION_RULES stale counts/labels/branch names (6 items) | (a) docs-only | Fixed in #40, no code touched. Correct approach. |
+| MASTER_CONTEXT stale counts/labels (3 items) | (a) docs-only | Fixed in #40, no code touched. Correct approach. |
+| ARCHITECTURAL_PRINCIPLES stale header + §5 table (2 items) | (a) docs-only | Fixed in #40, no code touched. Correct approach. |
+| README stale counts + decision range (3 items) | (a) docs-only | Fixed in #40, no code touched. Correct approach. |
+| `admin_notes` not translatable | Accepted limitation (not a contradiction) | Unchanged — admin writes in customer's language. Correct under least-change. |
+| Security / payments shell / unused code / production risks | No contradiction found | Verified clean. No action. |
+
+**Ruling on the #40 conversion (honest assessment):**
+- The conversion was **not** theoretical uniformity: the `bio_en`/`bio_de` columns were introduced in #39 as a deviation from the already-mandated single pattern (§4), and Greg's audit instruction ("do NOT introduce a second translation pattern unless necessary", Aug 20 11:09) explicitly required eliminating the second pattern — before the conversion ran. The least-change-correct fix for a pattern deviation is conformance to the mandated pattern, executed minimally: one migration, data-preserving, 170/170 tests.
+- Acknowledged: an alternative existed (reclassify the columns as a documented exception, category (a)). It was not chosen because the standing architecture mandate was explicit and the deviation was recent (same-day), not long-standing approved design.
+- **From today, keeping the conversion IS the least-change path.** Rollback would require a new migration re-adding 3 columns, a reverse data migration, admin/template/test rewrites — more change, more risk, zero functional gain. No rollback.
+
+**Verification of this record:** `bio_en`/`bio_de` appear only in DECISIONS.md historical entries (#39, #40) — category (c) intact. Live path is `display_bio` → `get_translation()`. 60/60 migrations applied, 0 unapplied (recounted via `showmigrations`).
+
+**Also fixed in this commit (docs-only):** DECISIONS.md header "Last Updated" Aug 17 → Aug 21 (missed in #40's sweep); README decision range #1–#40 → #1–#41.
+
+**Impact:** `specs/DECISIONS.md`, `README.md`. **No code, no migrations, no template changes.**

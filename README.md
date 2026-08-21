@@ -264,7 +264,7 @@ Full guide: **`specs/DEPLOYMENT.md`** (env vars, `.mo` compilation, `collectstat
 |---|---|
 | `specs/MASTER_CONTEXT_AND_SPECS.md` | Source of truth: philosophy, models, business rules, journeys, URLs |
 | `specs/ARCHITECTURAL_PRINCIPLES.md` | Business-managed content architecture (Phases 7A–7E), content categories, snapshots, emails, SEO |
-| `specs/DECISIONS.md` | Decision log with rationale (#1–#40) |
+| `specs/DECISIONS.md` | Decision log with rationale (#1–#41) |
 | `specs/PROGRESS_HISTORY.md` | Phase-by-phase build history and verification results |
 | `specs/EXECUTION_RULES.md` | Guardrails for builder agents |
 | `specs/DEPLOYMENT.md` | Production deployment guide |
